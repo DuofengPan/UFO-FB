@@ -6,9 +6,6 @@ from typing import Any
 
 from humanoidverse.agents.presets.fb import TRAIN_RUNTIME as FB_TRAIN_RUNTIME
 from humanoidverse.agents.presets.fb import build_fb_agent
-from humanoidverse.agents.presets.tldr import TRAIN_RUNTIME as TECH_TRAIN_RUNTIME
-from humanoidverse.agents.presets.tldr import build_tldr_agent
-from humanoidverse.agents.presets.tldr import build_tldr_agent as build_tech_agent
 
 
 def build_agent_preset(
@@ -36,18 +33,7 @@ def build_agent_preset(
             "wandb_project": wandb_project,
             "train_runtime": dict(FB_TRAIN_RUNTIME),
         }
-    if agent in {"tech", "tldr"}:
-        return {
-            "agent_cfg": build_tech_agent(
-                device=device,
-                compile=compile,
-                update_z_every_step=update_z_every_step,
-            ),
-            "wandb_group": "ufo_tech",
-            "wandb_project": wandb_project,
-            "train_runtime": dict(TECH_TRAIN_RUNTIME),
-        }
-    raise ValueError(f"Unsupported agent preset: {agent}")
+    raise ValueError(f"Unsupported agent preset: {agent}. Supported presets: fb")
 
 
-__all__ = ["build_agent_preset", "build_fb_agent", "build_tech_agent", "build_tldr_agent"]
+__all__ = ["build_agent_preset", "build_fb_agent"]

@@ -128,26 +128,9 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
   --buffer-size 5120000
 ```
 
-### 4. TeCH training on G1
-
-```bash
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
-./run_train.sh \
-  --agent tech \
-  --gpu-ids all \
-  --num-envs 1024 \
-  --num-env-steps 192000000 \
-  --work-dir runs/ufo_tech_g1 \
-  --data-path humanoidverse/data/lafan_29dof_10s-clipped.pkl \
-  --update-z-every-step 10 \
-  --buffer-size 5120000
-```
-
-TeCH was previously exposed as TLDR in early UFO versions. `--agent tldr` is kept as a deprecated compatibility alias for `--agent tech`.
-
 Core defaults live in `humanoidverse/train.py`. In particular, `--num-envs` and `--buffer-size` are per GPU, while `--num-env-steps` is the global sample budget.
 
-### 5. Tracking inference and ONNX export
+### 4. Tracking inference and ONNX export
 
 Use full motion sequences for inference, not clipped training data:
 

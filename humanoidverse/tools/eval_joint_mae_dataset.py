@@ -10,7 +10,6 @@ from __future__ import annotations
 import argparse
 import json
 import math
-import sys
 from pathlib import Path
 
 import numpy as np
@@ -33,9 +32,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--chunk-envs", type=int, default=600)
     parser.add_argument(
         "--agent",
-        choices=["auto", "fb", "tech", "tldr"],
-        default="auto",
-        help="auto infers from model methods. tldr is a deprecated alias for tech.",
+        choices=["fb"],
+        default="fb",
+        help="Kept for command compatibility. This tree only evaluates FB checkpoints.",
     )
     parser.add_argument("--headless", action="store_true", default=True)
     parser.add_argument(
@@ -60,27 +59,12 @@ def parse_args() -> argparse.Namespace:
         help="Defaults to <model-folder>/tracking_inference/joint_pos_mae_stats.json",
     )
     args = parser.parse_args()
-    if args.agent == "tldr":
-        print("WARNING: agent=tldr is deprecated; use agent=tech instead.", file=sys.stderr, flush=True)
-        args.agent = "tech"
     return args
 
 
-
-
 @torch.no_grad()
-def _tracking_z(model: torch.nn.Module, obs, agent: str) -> torch.Tensor:
-    if agent == "tech" and hasattr(model, "tracking_inference"):
-        return model.tracking_inference(obs)
-    z = model.backward_map(obs)
-    for step in range(z.shape[0]):
-        z[step] = z[step : step + 1].mean(dim=0)
-    return model.project_z(z)
-
-def _resolve_agent_flag(model: torch.nn.Module, arg_agent: str) -> str:
-    if arg_agent in ("fb", "tech"):
-        return arg_agent
-    return "tech" if hasattr(model, "tracking_inference") else "fb"
+def _tracking_z(model: torch.nn.Module, obs) -> torch.Tensor:
+    return model.tracking_inference(obs)
 
 
 def evaluate(args: argparse.Namespace) -> Path:
@@ -117,7 +101,6 @@ def evaluate(args: argparse.Namespace) -> Path:
     model = load_model_from_checkpoint_dir(checkpoint_dir, device=checkpoint_load_device(args.device))
     model.to(args.device)
     model.eval()
-    agent_flag = _resolve_agent_flag(model, args.agent)
 
     num_dof = int(prep_env.num_dof)
     prep_env._motion_lib.load_all_motions()
@@ -125,7 +108,7 @@ def evaluate(args: argparse.Namespace) -> Path:
     num_chunks = math.ceil(num_motions / args.chunk_envs)
     print(
         f"[EVAL] total_motions={num_motions}, chunk_envs={args.chunk_envs}, "
-        f"num_chunks={num_chunks}, agent={agent_flag}"
+        f"num_chunks={num_chunks}, agent=fb"
     )
 
     all_errs: list[float] = []
@@ -157,7 +140,6 @@ def evaluate(args: argparse.Namespace) -> Path:
                             else x,
                             backward_obs,
                         ),
-                        agent_flag,
                     )
                     target_states = _target_states_from_obs(obs_dict, device=args.device, num_dof=num_dof)
 

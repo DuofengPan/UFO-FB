@@ -116,24 +116,9 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
   --buffer-size 5120000
 ```
 
-### 5. TeCH 训练
+`--num-envs` 和 `--buffer-size` 是每张 GPU 的设置，`--num-env-steps` 是全局采样预算。
 
-```bash
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
-./run_train.sh \
-  --agent tech \
-  --gpu-ids all \
-  --num-envs 1024 \
-  --num-env-steps 192000000 \
-  --work-dir runs/ufo_tech_g1 \
-  --data-path humanoidverse/data/lafan_29dof_10s-clipped.pkl \
-  --update-z-every-step 10 \
-  --buffer-size 5120000
-```
-
-TeCH 在早期 UFO 版本中曾经叫 TLDR。`--agent tldr` 仍然保留为 `--agent tech` 的兼容 alias，但已经不推荐继续使用。
-
-### 6. Tracking inference
+### 5. Tracking inference
 
 推理时建议使用 full motion sequences，不要使用裁剪后的 training clips：
 
@@ -150,7 +135,7 @@ uv run python -m humanoidverse.tracking_inference \
 
 输出会写到 `<model-folder>/tracking_inference/`。
 
-### 7. ONNX 导出说明
+### 6. ONNX 导出说明
 
 在 tracking inference 命令中加入 `--export-onnx true` 可以导出 robot-config-aware ONNX policy 和 metadata JSON。导出的 ONNX 和当前 checkpoint 的机器人、动作维度、观测维度绑定，不能直接用于其他机器人。
 
@@ -219,7 +204,6 @@ uv run python -m humanoidverse.tools.data_build \
 - `deploy` 分支当前主要面向 G1 实机部署和遥操作。
 - 非 G1 的 goal inference 需要机器人专属 goal JSON。
 - 非 G1 的 reward inference 当前主要支持 root/locomotion 任务，除非额外补充机器人语义。
-- TeCH 曾经叫 TLDR，`--agent tldr` 仍是兼容 alias。
 - 不同机器人之间不能直接复用同一个 checkpoint。
 
 ## 多数据源技能注入
