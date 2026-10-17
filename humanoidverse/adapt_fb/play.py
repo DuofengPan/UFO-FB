@@ -3,18 +3,25 @@
 Does **not** overwrite UFO ``goal_inference`` artifacts. Goal ``z`` is read-only
 from the existing ``goal_reaching.pkl``.
 
+``--agent`` modes (A/B/C contrasts)::
+
+    base           original UFO-FB (ignore AdaptFb ckpt)
+    adapted-base   frozen stem from AdaptFb ckpt, LoRA off  (vs base)
+    adapted        full post-train policy (stem + LoRA)     (vs adapted-base)
+
 Examples (cwd = UFO repo root)::
 
     export PYTHONPATH="$PWD${PYTHONPATH:+:$PYTHONPATH}"
 
-    # Frozen base, no ball (UFO host only)
-    python -m humanoidverse.adapt_fb.play --agent initial --ball none --viewer native
+    python -m humanoidverse.adapt_fb.play --agent base --ball none --viewer native
+    python -m humanoidverse.adapt_fb.play --agent base --ball parked --viewer native
+    python -m humanoidverse.adapt_fb.play --agent base --ball throw --viewer native
 
-    # Ball present but parked / pinned overhead (inactive threat)
-    python -m humanoidverse.adapt_fb.play --agent initial --ball parked --viewer native
+    python -m humanoidverse.adapt_fb.play --agent adapted-base \\
+      --adapter-ckpt runs/adapt_fb_ufo_host_300/model_299.pt --ball throw --viewer native
 
-    # Ball thrown at the robot (cone threat)
-    python -m humanoidverse.adapt_fb.play --agent initial --ball throw --viewer native
+    python -m humanoidverse.adapt_fb.play --agent adapted \\
+      --adapter-ckpt runs/adapt_fb_ufo_host_300/model_299.pt --ball throw --viewer native
 
 Keys: ``n``/``b`` cycle goal (MuJoCo window or terminal); Space pause; Enter reset.
 """
@@ -42,22 +49,41 @@ from humanoidverse.adapt_fb.core.fb_adapter import FbWithAdapter
 from humanoidverse.adapt_fb.core.goal_bank import GoalBank
 from humanoidverse.adapt_fb.core.ufo_host import BallMode, UfoHostPlayEnv, build_ufo_vector_env
 
-AgentMode = Literal["trained", "initial"]
+AgentMode = Literal["base", "adapted-base", "adapted"]
+
+# Legacy CLI aliases → canonical modes.
+_AGENT_ALIASES: dict[str, AgentMode] = {
+    "initial": "base",
+    "trained": "adapted",
+}
 
 
-def _load_adapter(
-    adapted: FbWithAdapter, adapter_ckpt: Path | None, device: str
+def resolve_agent_mode(raw: str) -> AgentMode:
+    key = raw.strip().lower()
+    if key in _AGENT_ALIASES:
+        print(f"[INFO]: --agent {raw!r} → {_AGENT_ALIASES[key]!r} (legacy alias)", flush=True)
+        return _AGENT_ALIASES[key]
+    if key in ("base", "adapted-base", "adapted"):
+        return key  # type: ignore[return-value]
+    raise ValueError(
+        f"Unknown --agent {raw!r}. Expected base | adapted-base | adapted "
+        f"(aliases: initial→base, trained→adapted)."
+    )
+
+
+def _load_adapt_ckpt(
+    adapted: FbWithAdapter, adapter_ckpt: Path, device: str, *, need_normalizer: bool
 ) -> torch.nn.Module:
-    """Load LoRA (+ optional ``adapter_normalizer``) from an rsl_rl actor ckpt.
+    """Load ``adapted.*`` (frozen stem + adapters) from an rsl_rl actor ckpt.
 
-    Returns an eval-mode module that maps raw ``augmentation`` → LoRA condition
-    (Identity if the ckpt has no normalizer).
+    When ``need_normalizer`` is True, also load ``adapter_normalizer`` (or warn and
+    return Identity). Returns the aug→condition module for the LoRA path.
     """
     from rsl_rl.modules.normalization import EmpiricalNormalization
 
-    if adapter_ckpt is None or not adapter_ckpt.is_file():
-        print(f"[WARN]: --agent trained but adapter ckpt missing: {adapter_ckpt}", flush=True)
-        return torch.nn.Identity()
+    if not adapter_ckpt.is_file():
+        raise FileNotFoundError(f"AdaptFb checkpoint not found: {adapter_ckpt}")
+
     payload = torch.load(adapter_ckpt, map_location=device, weights_only=False)
     state = payload.get("actor_state_dict", payload)
     adapted_sd = {
@@ -66,13 +92,19 @@ def _load_adapter(
         if k.startswith("adapted.")
     }
     if not adapted_sd:
+        # Older / partial dumps may only store adapters.*
         adapted_sd = {
-            k.replace("adapters.", "adapters.", 1): v
-            for k, v in state.items()
-            if k.startswith("adapters.")
+            k: v for k, v in state.items() if k.startswith("adapters.")
         }
     missing, unexpected = adapted.load_state_dict(adapted_sd, strict=False)
-    print(f"loaded adapter ckpt missing={len(missing)} unexpected={len(unexpected)}", flush=True)
+    print(
+        f"loaded adapt ckpt {adapter_ckpt} "
+        f"adapted_keys={len(adapted_sd)} missing={len(missing)} unexpected={len(unexpected)}",
+        flush=True,
+    )
+
+    if not need_normalizer:
+        return torch.nn.Identity()
 
     norm_sd = {
         k.replace("adapter_normalizer.", "", 1): v
@@ -99,7 +131,7 @@ class _Policy:
         adapted: FbWithAdapter,
         *,
         mean: bool = True,
-        agent: AgentMode = "trained",
+        agent: AgentMode = "adapted",
         aug_normalizer: torch.nn.Module | None = None,
     ) -> None:
         self.adapted = adapted
@@ -116,7 +148,8 @@ class _Policy:
                 "history_actor": obs["history_actor"],  # type: ignore[index]
             }
             z = obs["goal_z"]  # type: ignore[index]
-            if self.agent == "initial":
+            # base / adapted-base: frozen stem only (no LoRA), different weight sources.
+            if self.agent in ("base", "adapted-base"):
                 return self.adapted.act_base(actor_obs, z, mean=self.mean)
             aug = self.aug_normalizer(obs["augmentation"])  # type: ignore[index]
             return self.adapted(actor_obs, z, aug, mean=self.mean)
@@ -213,25 +246,49 @@ def run_play(
     multi_z: bool,
     mean: bool = True,
     viewer: str = "none",
-    agent: AgentMode = "initial",
+    agent: AgentMode | str = "base",
     data_path: Path | None = None,
     ball: BallMode = "none",
 ) -> dict[str, float]:
     ensure_vendored_rsl_rl()
+    if agent not in ("base", "adapted-base", "adapted"):
+        agent = resolve_agent_mode(str(agent))
+
     arts = resolve_artifacts(checkpoint_dir, goal_pkl)
     model_folder = resolve_model_folder(arts.checkpoint_dir)
     bank = GoalBank.from_goal_pkl(arts.goal_pkl, device=device)
+
+    # Scaffold module graph from the original UFO run; adapted-* then overwrite
+    # ``adapted.*`` from the AdaptFb checkpoint (including frozen stem).
     frozen = load_frozen_ufo_fb_policy(arts.checkpoint_dir, device=device)
     adapted = FbWithAdapter(frozen, augmentation_dim=6, rank=16, alpha=1.0).to(device)
 
     aug_normalizer: torch.nn.Module = torch.nn.Identity()
-    if agent == "initial":
-        print(f"[INFO]: agent=initial ball={ball} — frozen UFO-FB on UFO host", flush=True)
+    if agent == "base":
+        print(
+            f"[INFO]: agent=base ball={ball} — original UFO-FB (ignore AdaptFb ckpt)",
+            flush=True,
+        )
         if adapter_ckpt is not None:
             print(f"[INFO]: ignoring --adapter-ckpt {adapter_ckpt}", flush=True)
     else:
-        aug_normalizer = _load_adapter(adapted, adapter_ckpt, device)
-        print(f"[INFO]: agent=trained ball={ball} — LoRA on UFO host", flush=True)
+        if adapter_ckpt is None:
+            raise ValueError(f"--agent {agent} requires --adapter-ckpt")
+        aug_normalizer = _load_adapt_ckpt(
+            adapted, adapter_ckpt, device, need_normalizer=(agent == "adapted")
+        )
+        if agent == "adapted-base":
+            print(
+                f"[INFO]: agent=adapted-base ball={ball} — "
+                "AdaptFb ckpt frozen stem, LoRA off (act_base)",
+                flush=True,
+            )
+        else:
+            print(
+                f"[INFO]: agent=adapted ball={ball} — "
+                "AdaptFb ckpt full policy (stem + LoRA)",
+                flush=True,
+            )
 
     print(f"[INFO]: UFO model_folder={model_folder}", flush=True)
     n_env = 1 if viewer != "none" else num_envs
@@ -304,12 +361,17 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--steps", type=int, default=200)
     p.add_argument("--num-envs", type=int, default=1)
     p.add_argument("--device", type=str, default="cuda:0")
-    p.add_argument("--adapter-ckpt", type=Path, default=None)
-    p.add_argument("--checkpoint-dir", type=Path, default=None)
+    p.add_argument("--adapter-ckpt", type=Path, default=None, help="AdaptFb rsl_rl model_*.pt (required for adapted*)")
+    p.add_argument("--checkpoint-dir", type=Path, default=None, help="Original UFO-FB checkpoint dir")
     p.add_argument("--goal-pkl", type=Path, default=None)
     p.add_argument("--data-path", type=Path, default=None)
     p.add_argument("--single-z", action="store_true")
-    p.add_argument("--agent", type=str, default="initial", choices=("trained", "initial"))
+    p.add_argument(
+        "--agent",
+        type=str,
+        default="base",
+        help="base | adapted-base | adapted  (aliases: initial→base, trained→adapted)",
+    )
     p.add_argument(
         "--ball",
         type=str,
@@ -319,6 +381,7 @@ def main(argv: list[str] | None = None) -> None:
     )
     p.add_argument("--viewer", type=str, default="none", choices=("none", "native", "viser"))
     args = p.parse_args(argv)
+    agent = resolve_agent_mode(args.agent)
     if args.device.startswith("cuda") and not torch.cuda.is_available():
         args.device = "cpu"
     if args.viewer != "none":
@@ -332,7 +395,7 @@ def main(argv: list[str] | None = None) -> None:
         goal_pkl=args.goal_pkl,
         multi_z=not args.single_z,
         viewer=args.viewer,
-        agent=args.agent,  # type: ignore[arg-type]
+        agent=agent,
         data_path=args.data_path,
         ball=args.ball,  # type: ignore[arg-type]
     )

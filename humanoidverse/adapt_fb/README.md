@@ -172,20 +172,33 @@ Old 7999 is not expected to recover; retrain with the rank/normalizer fixes.
 
 ## Play
 
+`--agent` modes (A/B/C contrasts):
+
+| Mode | Weights | Forward |
+|------|---------|---------|
+| `base` | original UFO-FB | `act_base` (no LoRA) |
+| `adapted-base` | AdaptFb ckpt frozen stem | `act_base` (vs `base`) |
+| `adapted` | AdaptFb ckpt stem + LoRA + normalizer | full (vs `adapted-base`) |
+
+Aliases: `initial`→`base`, `trained`→`adapted`.
+
 From the UFO repo root:
 
 ```bash
 export PYTHONPATH="$PWD${PYTHONPATH:+:$PYTHONPATH}"
 export DISPLAY=:1   # if using container VNC / noVNC
 
-# Frozen base
-python -m humanoidverse.adapt_fb.play --agent initial --ball none --viewer native --device cuda:0
-python -m humanoidverse.adapt_fb.play --agent initial --ball parked --viewer native --device cuda:0
-python -m humanoidverse.adapt_fb.play --agent initial --ball throw --viewer native --device cuda:0
+# Original UFO-FB
+python -m humanoidverse.adapt_fb.play --agent base --ball none --viewer native --device cuda:0
+python -m humanoidverse.adapt_fb.play --agent base --ball parked --viewer native --device cuda:0
+python -m humanoidverse.adapt_fb.play --agent base --ball throw --viewer native --device cuda:0
 
-# LoRA (needs --adapter-ckpt)
-python -m humanoidverse.adapt_fb.play --agent trained \
-  --adapter-ckpt runs/adapt_fb_dodge_8gpu/model_XXXX.pt \
+# Post-train ckpt stem only / full LoRA (needs --adapter-ckpt)
+python -m humanoidverse.adapt_fb.play --agent adapted-base \
+  --adapter-ckpt runs/adapt_fb_ufo_host_300/model_299.pt \
+  --ball throw --viewer native --device cuda:0
+python -m humanoidverse.adapt_fb.play --agent adapted \
+  --adapter-ckpt runs/adapt_fb_ufo_host_300/model_299.pt \
   --ball throw --viewer native --device cuda:0
 ```
 
@@ -215,8 +228,7 @@ python -m humanoidverse.adapt_fb.train ... --single-z
 ```
 
 Writes `runs/adapt_fb_dodge*/model_*.pt` (+ TensorBoard). Prefer these over legacy `UFO-FB-adapt/runs/...`.
-
-Note: current runner checkpoints embed the full frozen UFO-FB (~GB-scale). Prefer adapter-only saves before a long multi-GPU run.
+Checkpoints are full actor dumps (frozen UFO-FB + LoRA), aligned with ORCS post-train artifacts (~GB-scale).
 
 ---
 
