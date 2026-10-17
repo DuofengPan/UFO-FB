@@ -4,8 +4,9 @@ Adapted from ORCS ``orcs.tasks.dodge.env_cfg`` (BSD-3-Clause). Differences:
 
 - robot PD / action / defaults aligned to UFO ``g1_29dof_hard_waist`` (not stock mjlab G1);
 - observation streams are FB-oriented (``augmentation`` / ``critic`` = ball);
-- ORCS ``station`` (MultiClip stand tracking) not ported yet — standing comes from
-  the frozen base once the plant matches UFO training.
+- Goal behaviour is carried by frozen UFO-FB + per-episode ``goal_z`` (not a
+  stand-only station clip). Optional stand-surrogate rewards live in
+  ``mdp/rewards.py`` but are **not** wired by default — they fight non-stand goals.
 """
 
 from __future__ import annotations
@@ -139,8 +140,8 @@ def dodge_env_cfg(
         commands={},
         events=events,
         rewards={
-            # Same ORCS/SMP task signal. Posture is the frozen UFO-FB base's job
-            # once the sim plant matches UFO training (see assets/g1_ufo.py).
+            # Task: dodge. Between throws clearance saturates; recovery to the
+            # episode's goal_z is the frozen UFO-FB's job (not a stand station).
             "ball_clearance": RewardTermCfg(
                 func=mdp.ball_clearance,
                 weight=1.0,

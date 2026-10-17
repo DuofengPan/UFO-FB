@@ -4,7 +4,7 @@ Matches ``HumanoidVerseMjlabEnv.get_observation`` proprio layout
 (``bfm_zero_obs.yaml``):
 
 - ``state`` = cat(dof_pos_rel, dof_vel, projected_gravity, base_ang_vel)  # 64
-- ``last_action``  # 29 (policy-space; before ×5 normalize)
+- ``last_action``  # 29 (UFO-normalized action space, typically ×5)
 - ``history_actor`` = 4-step history of sorted keys
   ``[actions, base_ang_vel, dof_pos, dof_vel, projected_gravity]``  # 372
 

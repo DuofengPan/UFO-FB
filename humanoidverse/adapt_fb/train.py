@@ -109,7 +109,12 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--max-iterations", type=int, default=500)
     p.add_argument("--device", type=str, default="cuda:0", help="Ignored under torchrun (uses LOCAL_RANK)")
     p.add_argument("--log-dir", type=Path, default=None)
-    p.add_argument("--single-z", action="store_true", help="Fix z to first goal (no multi-z)")
+    p.add_argument(
+        "--single-z",
+        action="store_true",
+        help="Fix z to the first GoalBank entry for all envs (default: sample a "
+        "new goal each episode reset — multi-z dodge).",
+    )
     p.add_argument("--checkpoint-dir", type=Path, default=None)
     p.add_argument("--goal-pkl", type=Path, default=None)
     p.add_argument("--seed", type=int, default=42)

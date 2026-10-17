@@ -66,7 +66,8 @@ def test_env_cfg_builds() -> None:
     cfg = dodge_env_cfg(play=False)
     assert "augmentation" in cfg.observations
     assert "ball_clearance" in cfg.rewards
-    assert "stand_prior" not in cfg.rewards
+    assert "station_height" not in cfg.rewards
+    assert "station_default_pose" not in cfg.rewards
     robot = cfg.scene.entities["robot"]
     assert robot is not None
     waist = next(a for a in robot.articulation.actuators if a.target_names_expr == ("waist_yaw_joint",))

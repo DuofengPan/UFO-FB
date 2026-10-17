@@ -57,32 +57,31 @@ def _inject_ball(mjlab_cfg: Any, ball: BallMode) -> Any:
     from humanoidverse.adapt_fb.assets.ball import BALL_BODY_NAME, PARKED_BALL_POS, ball_entity_cfg
     from humanoidverse.adapt_fb.tasks.dodge.mdp.events import ThrowBall
 
+    entities = dict(mjlab_cfg.scene.entities)
+    events = dict(mjlab_cfg.events)
+
     if ball == "parked":
-        ball_cfg = ball_entity_cfg(spawn_pos=PARKED_BALL_POS)
-        stand_fraction = 1.0  # all envs anchors → pin forever, never throw
+        # Far lateral park only — no ThrowBall, so it never hops to overhead.
+        entities[BALL_BODY_NAME] = ball_entity_cfg(spawn_pos=PARKED_BALL_POS)
     else:
         # Overhead park between throws; ThrowBall teleports into the frontal cone.
-        ball_cfg = ball_entity_cfg(spawn_pos=(0.0, 0.0, 5.0))
-        stand_fraction = 0.0
+        entities[BALL_BODY_NAME] = ball_entity_cfg(spawn_pos=(0.0, 0.0, 5.0))
+        events["throw_ball"] = EventTermCfg(
+            func=ThrowBall,
+            mode="interval",
+            interval_range_s=(0.0, 0.0),  # tick every env step; ThrowBall has its own timer
+            params={
+                "ball_name": BALL_BODY_NAME,
+                "stand_fraction": 0.0,
+                # Play-friendly cadence (was 1.5–3.5s — easy to miss vs parked overhead).
+                "interval_range_s": (0.6, 1.2),
+                "dist_range": (2.0, 3.0),
+                "flight_time_range": (0.55, 0.70),
+                "flight_window_s": 1.5,
+            },
+        )
 
-    entities = dict(mjlab_cfg.scene.entities)
-    entities[BALL_BODY_NAME] = ball_cfg
     scene = replace(mjlab_cfg.scene, entities=entities)
-
-    events = dict(mjlab_cfg.events)
-    events["throw_ball"] = EventTermCfg(
-        func=ThrowBall,
-        mode="interval",
-        interval_range_s=(0.0, 0.0),
-        params={
-            "ball_name": BALL_BODY_NAME,
-            "stand_fraction": stand_fraction,
-            # Cone threat (no camera on UFO host scene).
-            "interval_range_s": (1.5, 3.5) if ball == "throw" else (1.0, 4.0),
-            "dist_range": (2.0, 3.0),
-            "flight_time_range": (0.55, 0.70),
-        },
-    )
     # Extra contacts for the freejoint sphere.
     sim = mjlab_cfg.sim
     sim = replace(sim, nconmax=max(int(sim.nconmax), 128), njmax=max(int(sim.njmax), 512))

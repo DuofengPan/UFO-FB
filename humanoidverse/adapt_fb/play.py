@@ -37,34 +37,57 @@ from humanoidverse.adapt_fb.core.base_policy import load_frozen_ufo_fb_policy
 from humanoidverse.adapt_fb.core.fb_adapter import FbWithAdapter
 from humanoidverse.adapt_fb.core.goal_bank import GoalBank
 from humanoidverse.adapt_fb.core.ufo_host import BallMode, UfoHostPlayEnv, build_ufo_vector_env
+from humanoidverse.adapt_fb.core.vendor_paths import ensure_vendored_rsl_rl
 
 AgentMode = Literal["trained", "initial"]
 
 
-def _load_adapter(adapted: FbWithAdapter, adapter_ckpt: Path | None, device: str) -> None:
+def _load_adapter(
+    adapted: FbWithAdapter, adapter_ckpt: Path | None, device: str
+) -> torch.nn.Module:
+    """Load LoRA (+ optional ``adapter_normalizer``) from an rsl_rl actor ckpt.
+
+    Returns an eval-mode module that maps raw ``augmentation`` → LoRA condition
+    (Identity if the ckpt has no normalizer).
+    """
+    from rsl_rl.modules.normalization import EmpiricalNormalization
+
     if adapter_ckpt is None or not adapter_ckpt.is_file():
-        return
+        print(f"[WARN]: --agent trained but adapter ckpt missing: {adapter_ckpt}", flush=True)
+        return torch.nn.Identity()
     payload = torch.load(adapter_ckpt, map_location=device, weights_only=False)
     state = payload.get("actor_state_dict", payload)
     adapted_sd = {
         k.replace("adapted.", "", 1): v
         for k, v in state.items()
-        if k.startswith("adapted.") or k.startswith("adapters.")
+        if k.startswith("adapted.")
     }
     if not adapted_sd:
-        adapted_sd = {k: v for k, v in state.items() if "adapter" in k.lower()}
+        adapted_sd = {
+            k.replace("adapters.", "adapters.", 1): v
+            for k, v in state.items()
+            if k.startswith("adapters.")
+        }
     missing, unexpected = adapted.load_state_dict(adapted_sd, strict=False)
-    print(f"loaded adapter ckpt missing={len(missing)} unexpected={len(unexpected)}")
+    print(f"loaded adapter ckpt missing={len(missing)} unexpected={len(unexpected)}", flush=True)
 
-
-def _actor_obs_from_td(obs: object) -> dict[str, torch.Tensor]:
-    skip = {"goal_z", "augmentation", "critic"}
-    out: dict[str, torch.Tensor] = {}
-    for key in obs.keys():  # type: ignore[union-attr]
-        if key in skip:
-            continue
-        out[key] = obs[key]
-    return out
+    norm_sd = {
+        k.replace("adapter_normalizer.", "", 1): v
+        for k, v in state.items()
+        if k.startswith("adapter_normalizer.")
+    }
+    if not norm_sd:
+        print("[WARN]: ckpt has no adapter_normalizer; feeding raw augmentation", flush=True)
+        return torch.nn.Identity()
+    normalizer = EmpiricalNormalization(adapted.augmentation_dim).to(device)
+    normalizer.load_state_dict(norm_sd)
+    normalizer.eval()
+    print(
+        f"loaded adapter_normalizer mean={normalizer._mean.flatten().tolist()} "
+        f"std={normalizer._std.flatten().tolist()}",
+        flush=True,
+    )
+    return normalizer
 
 
 class _Policy:
@@ -74,18 +97,26 @@ class _Policy:
         *,
         mean: bool = True,
         agent: AgentMode = "trained",
+        aug_normalizer: torch.nn.Module | None = None,
     ) -> None:
         self.adapted = adapted
         self.mean = mean
         self.agent = agent
+        self.aug_normalizer = aug_normalizer if aug_normalizer is not None else torch.nn.Identity()
 
     def __call__(self, obs: object) -> torch.Tensor:
         with torch.no_grad():
-            actor_obs = _actor_obs_from_td(obs)
+            # Match FbWithAdapterModel training obs groups (ignore host extras).
+            actor_obs = {
+                "state": obs["state"],  # type: ignore[index]
+                "last_action": obs["last_action"],  # type: ignore[index]
+                "history_actor": obs["history_actor"],  # type: ignore[index]
+            }
             z = obs["goal_z"]  # type: ignore[index]
             if self.agent == "initial":
                 return self.adapted.act_base(actor_obs, z, mean=self.mean)
-            return self.adapted(actor_obs, z, obs["augmentation"], mean=self.mean)  # type: ignore[index]
+            aug = self.aug_normalizer(obs["augmentation"])  # type: ignore[index]
+            return self.adapted(actor_obs, z, aug, mean=self.mean)
 
     def reset(self) -> None:
         pass
@@ -183,18 +214,20 @@ def run_play(
     data_path: Path | None = None,
     ball: BallMode = "none",
 ) -> dict[str, float]:
+    ensure_vendored_rsl_rl()
     arts = resolve_artifacts(checkpoint_dir, goal_pkl)
     model_folder = resolve_model_folder(arts.checkpoint_dir)
     bank = GoalBank.from_goal_pkl(arts.goal_pkl, device=device)
     frozen = load_frozen_ufo_fb_policy(arts.checkpoint_dir, device=device)
     adapted = FbWithAdapter(frozen, augmentation_dim=6, rank=16, alpha=1.0).to(device)
 
+    aug_normalizer: torch.nn.Module = torch.nn.Identity()
     if agent == "initial":
         print(f"[INFO]: agent=initial ball={ball} — frozen UFO-FB on UFO host", flush=True)
         if adapter_ckpt is not None:
             print(f"[INFO]: ignoring --adapter-ckpt {adapter_ckpt}", flush=True)
     else:
-        _load_adapter(adapted, adapter_ckpt, device)
+        aug_normalizer = _load_adapter(adapted, adapter_ckpt, device)
         print(f"[INFO]: agent=trained ball={ball} — LoRA on UFO host", flush=True)
 
     print(f"[INFO]: UFO model_folder={model_folder}", flush=True)
@@ -214,7 +247,7 @@ def run_play(
         multi_z=multi_z and viewer == "none",
         fixed_goal_name=None if multi_z else bank.names[0],
     )
-    policy = _Policy(adapted, mean=mean, agent=agent)
+    policy = _Policy(adapted, mean=mean, agent=agent, aug_normalizer=aug_normalizer)
 
     if viewer == "none":
         obs = env.get_observations()
@@ -240,9 +273,15 @@ def run_play(
             "done_events": float(done_events),
         }
 
+    hint = ""
+    if ball == "throw":
+        hint = "\n  throw: ball parks overhead, then flies at the robot every ~0.6–1.2s"
+    elif ball == "parked":
+        hint = "\n  parked: ball stays far away (no throws)"
     print(
         f"[play] ball={ball} agent={agent} goals={len(bank)} current={env._goal_names[0]!r}\n"
-        "  keys: n/b goal, Space pause, Enter reset, +/- speed",
+        "  keys: n/b goal, Space pause, Enter reset, +/- speed"
+        f"{hint}",
         flush=True,
     )
     if viewer == "native":
