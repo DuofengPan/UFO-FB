@@ -216,7 +216,8 @@ UFO 支持基于 manifest 的多数据源混合。每个数据源之间的采样
 
 ```bash
 export PYTHONPATH="$PWD${PYTHONPATH:+:$PYTHONPATH}"
-python -m humanoidverse.adapt_fb.play --agent initial --viewer native --device cuda:0
+# --ball none|parked|throw（parked=头顶固定；throw=朝机器人抛）
+python -m humanoidverse.adapt_fb.play --agent initial --ball none --viewer native --device cuda:0
 ```
 
 ## 文档链接

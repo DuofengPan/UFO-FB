@@ -6,30 +6,35 @@ ORCS-style LoRA dodge adaptation on a **frozen** UFO-FB policy.
 
 | Piece | Source |
 |-------|--------|
-| Frozen actor + goal `z` | UFO checkpoint / `goal_inference` pickle |
-| Proprio / action / history | UFO `HumanoidVerseMjlabVectorEnv` (default play host) |
-| LoRA + PPO | This package (`FbWithAdapter` + vendored `rsl_rl`) |
-| Ball | Planned on the UFO host; legacy Adapt dodge kept as `--backend dodge` |
+| Frozen actor + goal `z` | UFO checkpoint / existing `goal_inference` pickle (read-only) |
+| Proprio / action / history | UFO `HumanoidVerseMjlabVectorEnv` |
+| LoRA + PPO | This package |
+| Ball | Optional inject into the same mjlab scene (`--ball`) |
 
-UFO core train / eval / algorithms are **not** modified by this package.
+UFO core train / eval / `goal_inference` are **not** modified. Play does not rewrite `goal_reaching.pkl` or videos.
 
-## Run (from the UFO repo root)
+## Play (ORCS-style viewer)
+
+From the UFO repo root:
 
 ```bash
-# PYTHONPATH = UFO root (or: pip install -e .)
 export PYTHONPATH="$PWD${PYTHONPATH:+:$PYTHONPATH}"
 
-# Frozen base on UFO env (same obs/action as goal_inference)
-python -m humanoidverse.adapt_fb.play --agent initial --viewer native --device cuda:0
+# No ball — UFO host only
+python -m humanoidverse.adapt_fb.play --agent initial --ball none --viewer native --device cuda:0
 
-# Headless smoke
-python -m humanoidverse.adapt_fb.play --agent initial --steps 200 --device cuda:0
+# Ball pinned overhead (inactive threat; for A/B)
+python -m humanoidverse.adapt_fb.play --agent initial --ball parked --viewer native --device cuda:0
+
+# Ball thrown at the robot
+python -m humanoidverse.adapt_fb.play --agent initial --ball throw --viewer native --device cuda:0
 ```
 
+Keys: `n`/`b` cycle goal (MuJoCo window or terminal); Space pause; Enter reset; `+/-` speed.
+
 Needs `runs/ufo_fb_8gpu/checkpoint` and `runs/ufo_fb_8gpu/goal_inference/goal_reaching.pkl`
-(or set `UFO_FB_CHECKPOINT` / `UFO_FB_GOAL_PKL`).
+(or `UFO_FB_CHECKPOINT` / `UFO_FB_GOAL_PKL`).
 
 ## Attribution
 
-ORCS / rsl_rl / MimicKit notices: see `NOTICE`, `THIRD_PARTY_NOTICES.md`, `LICENSE`.
-Vendored `rsl_rl` lives at `_vendor/rsl_rl`.
+See `NOTICE`, `THIRD_PARTY_NOTICES.md`, `LICENSE`. Vendored `rsl_rl` at `_vendor/rsl_rl`.

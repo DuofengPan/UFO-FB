@@ -228,7 +228,8 @@ Frozen UFO-FB + LoRA adaptation lives in-tree as [`humanoidverse/adapt_fb`](huma
 
 ```bash
 export PYTHONPATH="$PWD${PYTHONPATH:+:$PYTHONPATH}"
-python -m humanoidverse.adapt_fb.play --agent initial --viewer native --device cuda:0
+# --ball none|parked|throw  (parked=overhead pin; throw=cone at robot)
+python -m humanoidverse.adapt_fb.play --agent initial --ball none --viewer native --device cuda:0
 ```
 
 ## Documentation

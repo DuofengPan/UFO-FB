@@ -1,41 +1,33 @@
-"""Play / rollout host built on UFO's own MJLab env (not the Adapt dodge bridge).
+"""ORCS-style play host on UFO's MJLab env + optional dodge ball.
 
-Uses the same construction path as ``humanoidverse.goal_inference``:
-
-  load_mjlab_env_cfg(model_folder) → HumanoidVerseMjlabConfig.build()
-  → HumanoidVerseMjlabVectorEnv.reset / step / get_observation
-
-Obs, history, ×5 action normalize, and PD targets all stay inside UFO — this
-module only wraps that VectorEnv for mjlab's ``NativeMujocoViewer`` and attaches
-an offline ``GoalBank`` ``z``.
-
-Part of ``humanoidverse.adapt_fb`` inside the UFO repo. Motion/mjcf paths are
-resolved from the UFO package root so cwd does not matter.
+Default construction matches ``humanoidverse.goal_inference`` (frozen UFO
+``HumanoidVerseMjlabVectorEnv``). Ball modes inject a freejoint sphere into that
+same mjlab scene — UFO train / goal_inference defaults are untouched.
 """
 
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import torch
 from tensordict import TensorDict
 
 from humanoidverse.adapt_fb.core.goal_bank import GoalBank
 
-# Default motion clip UFO goal_inference uses (resolved under the UFO package root).
+BallMode = Literal["none", "parked", "throw"]
+
 _DEFAULT_MOTION_REL = Path("humanoidverse/data/lafan_29dof_10s-clipped.pkl")
 
 
 def ufo_repo_root() -> Path:
-    """Absolute root of the UFO checkout that provides ``humanoidverse``."""
     import humanoidverse
 
     return Path(humanoidverse.__file__).resolve().parent.parent
 
 
 def resolve_ufo_motion_pkl(data_path: Path | None = None) -> Path:
-    """Motion library path independent of process cwd."""
     if data_path is not None:
         path = Path(data_path).expanduser().resolve()
         if not path.is_file():
@@ -50,9 +42,51 @@ def resolve_ufo_motion_pkl(data_path: Path | None = None) -> Path:
         if cand.is_file():
             return cand.resolve()
     raise FileNotFoundError(
-        "UFO motion pkl not found under the humanoidverse install. "
+        "UFO motion pkl not found. "
         f"Tried: {', '.join(str(c) for c in candidates)}. Pass --data-path."
     )
+
+
+def _inject_ball(mjlab_cfg: Any, ball: BallMode) -> Any:
+    """Add ball entity (+ ThrowBall event) onto a UFO ``ManagerBasedRlEnvCfg``."""
+    if ball == "none":
+        return mjlab_cfg
+
+    from mjlab.managers.event_manager import EventTermCfg
+
+    from humanoidverse.adapt_fb.assets.ball import BALL_BODY_NAME, PARKED_BALL_POS, ball_entity_cfg
+    from humanoidverse.adapt_fb.tasks.dodge.mdp.events import ThrowBall
+
+    if ball == "parked":
+        ball_cfg = ball_entity_cfg(spawn_pos=PARKED_BALL_POS)
+        stand_fraction = 1.0  # all envs anchors → pin forever, never throw
+    else:
+        # Overhead park between throws; ThrowBall teleports into the frontal cone.
+        ball_cfg = ball_entity_cfg(spawn_pos=(0.0, 0.0, 5.0))
+        stand_fraction = 0.0
+
+    entities = dict(mjlab_cfg.scene.entities)
+    entities[BALL_BODY_NAME] = ball_cfg
+    scene = replace(mjlab_cfg.scene, entities=entities)
+
+    events = dict(mjlab_cfg.events)
+    events["throw_ball"] = EventTermCfg(
+        func=ThrowBall,
+        mode="interval",
+        interval_range_s=(0.0, 0.0),
+        params={
+            "ball_name": BALL_BODY_NAME,
+            "stand_fraction": stand_fraction,
+            # Cone threat (no camera on UFO host scene).
+            "interval_range_s": (1.5, 3.5) if ball == "throw" else (1.0, 4.0),
+            "dist_range": (2.0, 3.0),
+            "flight_time_range": (0.55, 0.70),
+        },
+    )
+    # Extra contacts for the freejoint sphere.
+    sim = mjlab_cfg.sim
+    sim = replace(sim, nconmax=max(int(sim.nconmax), 128), njmax=max(int(sim.njmax), 512))
+    return replace(mjlab_cfg, scene=scene, events=events, sim=sim)
 
 
 def build_ufo_vector_env(
@@ -63,11 +97,17 @@ def build_ufo_vector_env(
     data_path: Path | None = None,
     max_episode_length_s: float = 20.0,
     headless: bool = True,
+    ball: BallMode = "none",
 ) -> Any:
-    """Build UFO ``HumanoidVerseMjlabVectorEnv`` (same as goal_inference).
+    """Build UFO VectorEnv; optionally inject AdaptFb ball into the mjlab scene."""
+    from mjlab.envs import ManagerBasedRlEnv
 
-    Always passes an **absolute** motion path so play works from any cwd.
-    """
+    from humanoidverse.agents.envs.humanoidverse_mjlab import (
+        HumanoidVerseMjlabCore,
+        HumanoidVerseMjlabVectorEnv,
+        make_mjlab_ufo_env_cfg,
+        _compose_humanoidverse_config,
+    )
     from humanoidverse.mjlab_inference_utils import load_mjlab_env_cfg
 
     model_folder = Path(model_folder).expanduser().resolve()
@@ -82,18 +122,60 @@ def build_ufo_vector_env(
         disable_obs_noise=True,
         max_episode_length_s=max_episode_length_s,
     )
-    # HumanoidVerseMjlabConfig is frozen — motion must be absolute via data_path above.
-    # Training config already sets include_history_actor / include_last_action.
-    wrapped, _meta = env_cfg.build(num_envs=num_envs)
+
+    hv_config, unresolved_conf = _compose_humanoidverse_config(
+        num_envs=num_envs,
+        relative_config_path=env_cfg.relative_config_path,
+        hydra_overrides=list(env_cfg.hydra_overrides),
+        lafan_tail_path=env_cfg.lafan_tail_path,
+        data_mix_weights=env_cfg.data_mix_weights,
+        disable_obs_noise=env_cfg.disable_obs_noise,
+        disable_domain_randomization=env_cfg.disable_domain_randomization,
+        max_episode_length_s=env_cfg.max_episode_length_s,
+        root_height_obs=env_cfg.root_height_obs,
+        robot_training=env_cfg.robot_training,
+    )
+    mjlab_cfg = make_mjlab_ufo_env_cfg(
+        hv_config,
+        num_envs=num_envs,
+        seed=env_cfg.seed,
+        mjcf_path=env_cfg.mjcf_path,
+        auto_reset=env_cfg.auto_reset,
+        robot_training=env_cfg.robot_training,
+    )
+    mjlab_cfg = _inject_ball(mjlab_cfg, ball)
+    mjlab_env = ManagerBasedRlEnv(mjlab_cfg, device=device)
+    core = HumanoidVerseMjlabCore(hv_config, mjlab_env, creation_config=env_cfg)
+    wrapped = HumanoidVerseMjlabVectorEnv(
+        core,
+        include_last_action=env_cfg.include_last_action,
+        context_length=env_cfg.context_length,
+        include_history_actor=env_cfg.include_history_actor,
+        include_history_noaction=env_cfg.include_history_noaction,
+    )
+    wrapped._creation_config = env_cfg
+    wrapped._adapt_fb_ball = ball  # type: ignore[attr-defined]
+    wrapped._adapt_fb_unresolved = unresolved_conf  # type: ignore[attr-defined]
     return wrapped
 
 
-class UfoHostPlayEnv:
-    """Viewer-compatible adapter: UFO VectorEnv + GoalBank ``z`` + zero ball aug.
+def _ball_augmentation(mjlab_env: Any, *, ball: BallMode, device: torch.device) -> torch.Tensor:
+    """Privileged (pos_b, vel_b) in robot yaw frame; zeros if no ball."""
+    n = int(mjlab_env.num_envs)
+    if ball == "none":
+        return torch.zeros(n, 6, device=device, dtype=torch.float32)
+    from humanoidverse.adapt_fb.assets.ball import BALL_BODY_NAME
+    from humanoidverse.adapt_fb.tasks.dodge.mdp.observations import ball_pos_b, ball_vel_b
 
-    ``unwrapped`` is the underlying mjlab ``ManagerBasedRlEnv`` so
-    ``NativeMujocoViewer`` can sync sim state. Policy obs come from UFO
-    ``get_observation`` (not Adapt ``obs_bridge``).
+    pos = ball_pos_b(mjlab_env, ball_name=BALL_BODY_NAME)
+    vel = ball_vel_b(mjlab_env, ball_name=BALL_BODY_NAME)
+    return torch.cat([pos, vel], dim=-1)
+
+
+class UfoHostPlayEnv:
+    """Viewer-compatible adapter: UFO VectorEnv + GoalBank ``z`` + ball aug.
+
+    Exposes ``cfg`` / ``num_envs`` / ``unwrapped`` for ``NativeMujocoViewer``.
     """
 
     def __init__(
@@ -101,6 +183,7 @@ class UfoHostPlayEnv:
         vector_env: Any,
         goal_bank: GoalBank,
         *,
+        ball: BallMode = "none",
         augmentation_dim: int = 6,
         multi_z: bool = False,
         fixed_goal_name: str | None = None,
@@ -108,7 +191,9 @@ class UfoHostPlayEnv:
         self.vector = vector_env
         self.core = vector_env._env
         self.unwrapped = self.core.mjlab_env
+        self.cfg = self.unwrapped.cfg  # required by mjlab BaseViewer
         self.goal_bank = goal_bank
+        self.ball: BallMode = ball
         self.augmentation_dim = int(augmentation_dim)
         self.multi_z = bool(multi_z)
         self.fixed_goal_name = fixed_goal_name
@@ -121,7 +206,11 @@ class UfoHostPlayEnv:
         self._cached_obs: TensorDict | None = None
         self.reset()
 
+    def _refresh_aug(self) -> None:
+        self._aug = _ball_augmentation(self.unwrapped, ball=self.ball, device=self.device)
+
     def _pack_obs(self, ufo_obs: dict[str, torch.Tensor]) -> TensorDict:
+        self._refresh_aug()
         payload: dict[str, torch.Tensor] = {}
         for key, value in ufo_obs.items():
             if torch.is_tensor(value):
@@ -185,7 +274,6 @@ class UfoHostPlayEnv:
         ufo_obs, rew, terminated, truncated, info = self.vector.step(actions, to_numpy=False)
         dones_bool = terminated.bool() | truncated.bool()
         dones = dones_bool.to(dtype=torch.long)
-        # Inference sets auto_reset=False; keep play continuous.
         if bool(dones_bool.any()):
             ufo_obs, _info = self.vector.reset(to_numpy=False)
             self._resample_goals(dones_bool.nonzero(as_tuple=False).flatten())

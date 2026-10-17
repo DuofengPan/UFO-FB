@@ -1,20 +1,22 @@
-"""Play AdaptFb: default host is UFO's MJLab env (goal_inference path).
+"""ORCS-style interactive play for AdaptFb (UFO MJLab host + optional ball).
 
-Run from the **UFO repo root** (this package is ``humanoidverse.adapt_fb``).
+Does **not** overwrite UFO ``goal_inference`` artifacts. Goal ``z`` is read-only
+from the existing ``goal_reaching.pkl``.
 
-Why UFO host (default)
-----------------------
-The former standalone Adapt ``dodge`` + ``obs_bridge`` rebuilt proprio by hand
-and drifted from UFO training. Play reuses ``load_mjlab_env_cfg`` +
-``HumanoidVerseMjlabVectorEnv`` so obs/action match the FB checkpoint.
-
-Legacy Adapt dodge remains as ``--backend dodge`` (A/B only).
-
-Examples (cwd = UFO repo)::
+Examples (cwd = UFO repo root)::
 
     export PYTHONPATH="$PWD${PYTHONPATH:+:$PYTHONPATH}"
-    python -m humanoidverse.adapt_fb.play --agent initial --viewer native --device cuda:0
-    python -m humanoidverse.adapt_fb.play --agent initial --steps 300 --device cuda:0
+
+    # Frozen base, no ball (UFO host only)
+    python -m humanoidverse.adapt_fb.play --agent initial --ball none --viewer native
+
+    # Ball present but parked / pinned overhead (inactive threat)
+    python -m humanoidverse.adapt_fb.play --agent initial --ball parked --viewer native
+
+    # Ball thrown at the robot (cone threat)
+    python -m humanoidverse.adapt_fb.play --agent initial --ball throw --viewer native
+
+Keys: ``n``/``b`` cycle goal (MuJoCo window or terminal); Space pause; Enter reset.
 """
 
 from __future__ import annotations
@@ -34,10 +36,9 @@ from humanoidverse.adapt_fb.core.artifacts import resolve_artifacts, resolve_mod
 from humanoidverse.adapt_fb.core.base_policy import load_frozen_ufo_fb_policy
 from humanoidverse.adapt_fb.core.fb_adapter import FbWithAdapter
 from humanoidverse.adapt_fb.core.goal_bank import GoalBank
-from humanoidverse.adapt_fb.core.vendor_paths import ensure_vendored_rsl_rl
+from humanoidverse.adapt_fb.core.ufo_host import BallMode, UfoHostPlayEnv, build_ufo_vector_env
 
 AgentMode = Literal["trained", "initial"]
-Backend = Literal["ufo", "dodge"]
 
 
 def _load_adapter(adapted: FbWithAdapter, adapter_ckpt: Path | None, device: str) -> None:
@@ -57,7 +58,6 @@ def _load_adapter(adapted: FbWithAdapter, adapter_ckpt: Path | None, device: str
 
 
 def _actor_obs_from_td(obs: object) -> dict[str, torch.Tensor]:
-    """Strip play-only keys; keep UFO actor / normalizer fields."""
     skip = {"goal_z", "augmentation", "critic"}
     out: dict[str, torch.Tensor] = {}
     for key in obs.keys():  # type: ignore[union-attr]
@@ -85,15 +85,14 @@ class _Policy:
             z = obs["goal_z"]  # type: ignore[index]
             if self.agent == "initial":
                 return self.adapted.act_base(actor_obs, z, mean=self.mean)
-            aug = obs["augmentation"]  # type: ignore[index]
-            return self.adapted(actor_obs, z, aug, mean=self.mean)
+            return self.adapted(actor_obs, z, obs["augmentation"], mean=self.mean)  # type: ignore[index]
 
     def reset(self) -> None:
         pass
 
 
 class _GoalCycleNativeViewer:
-    def __init__(self, env: object, policy: _Policy, *, cycle_fn) -> None:
+    def __init__(self, env: UfoHostPlayEnv, policy: _Policy, *, cycle_fn) -> None:
         from mjlab.viewer import NativeMujocoViewer
         from mjlab.viewer.base import ViewerAction
         from mjlab.viewer.native.keys import KEY_B, KEY_N
@@ -102,14 +101,13 @@ class _GoalCycleNativeViewer:
         self._stdin_stop = threading.Event()
         self._stdin_thread: threading.Thread | None = None
         self._old_termios: list | None = None
-        outer = self
 
         class _Viewer(NativeMujocoViewer):  # type: ignore[misc, valid-type]
             def _handle_custom_action(self, action: ViewerAction, payload: object | None) -> bool:
                 if action == ViewerAction.CUSTOM and isinstance(payload, dict):
                     delta = int(payload.get("goal_delta", 0))
                     if delta != 0:
-                        name = outer._cycle_fn(delta)
+                        name = cycle_fn(delta)
                         self.log(f"[INFO] goal → {name}")
                         print(f"[play] goal → {name}", flush=True)
                         return True
@@ -170,7 +168,7 @@ class _GoalCycleNativeViewer:
                 pass
 
 
-def _run_ufo_play(
+def run_play(
     *,
     steps: int,
     num_envs: int,
@@ -179,13 +177,12 @@ def _run_ufo_play(
     checkpoint_dir: Path | None,
     goal_pkl: Path | None,
     multi_z: bool,
-    mean: bool,
-    viewer: str,
-    agent: AgentMode,
-    data_path: Path | None,
+    mean: bool = True,
+    viewer: str = "none",
+    agent: AgentMode = "initial",
+    data_path: Path | None = None,
+    ball: BallMode = "none",
 ) -> dict[str, float]:
-    from humanoidverse.adapt_fb.core.ufo_host import UfoHostPlayEnv, build_ufo_vector_env
-
     arts = resolve_artifacts(checkpoint_dir, goal_pkl)
     model_folder = resolve_model_folder(arts.checkpoint_dir)
     bank = GoalBank.from_goal_pkl(arts.goal_pkl, device=device)
@@ -193,24 +190,27 @@ def _run_ufo_play(
     adapted = FbWithAdapter(frozen, augmentation_dim=6, rank=16, alpha=1.0).to(device)
 
     if agent == "initial":
-        print("[INFO]: agent=initial — frozen UFO-FB via UFO host env", flush=True)
+        print(f"[INFO]: agent=initial ball={ball} — frozen UFO-FB on UFO host", flush=True)
         if adapter_ckpt is not None:
             print(f"[INFO]: ignoring --adapter-ckpt {adapter_ckpt}", flush=True)
     else:
         _load_adapter(adapted, adapter_ckpt, device)
-        print("[INFO]: agent=trained — LoRA on UFO host (aug=zeros until ball port)", flush=True)
+        print(f"[INFO]: agent=trained ball={ball} — LoRA on UFO host", flush=True)
 
     print(f"[INFO]: UFO model_folder={model_folder}", flush=True)
+    n_env = 1 if viewer != "none" else num_envs
     vector = build_ufo_vector_env(
         model_folder,
         device=device,
-        num_envs=1 if viewer != "none" else num_envs,
+        num_envs=n_env,
         data_path=data_path,
         headless=(viewer == "none"),
+        ball=ball,
     )
     env = UfoHostPlayEnv(
         vector,
         bank,
+        ball=ball,
         multi_z=multi_z and viewer == "none",
         fixed_goal_name=None if multi_z else bank.names[0],
     )
@@ -221,12 +221,14 @@ def _run_ufo_play(
         reward_sum = 0.0
         height_sum = 0.0
         done_events = 0
+        aug_abs = 0.0
         robot = env.unwrapped.scene["robot"]
         for _ in range(steps):
             action = policy(obs)
             obs, rew, dones, _ = env.step(action)
             reward_sum += float(rew.mean().cpu())
             height_sum += float(robot.data.root_link_pos_w[:, 2].mean().cpu())
+            aug_abs += float(obs["augmentation"].abs().mean().cpu())
             if bool(dones.any()):
                 done_events += 1
         env.close()
@@ -234,12 +236,12 @@ def _run_ufo_play(
             "steps": float(steps),
             "reward_mean": reward_sum / max(steps, 1),
             "height_mean": height_sum / max(steps, 1),
+            "aug_abs_mean": aug_abs / max(steps, 1),
             "done_events": float(done_events),
         }
 
     print(
-        f"[play] backend=ufo agent={agent} goals={len(bank)} "
-        f"current={env._goal_names[0]!r}\n"
+        f"[play] ball={ball} agent={agent} goals={len(bank)} current={env._goal_names[0]!r}\n"
         "  keys: n/b goal, Space pause, Enter reset, +/- speed",
         flush=True,
     )
@@ -255,99 +257,24 @@ def _run_ufo_play(
     return {"steps": 0.0, "reward_mean": 0.0}
 
 
-def _run_dodge_play(
-    *,
-    steps: int,
-    num_envs: int,
-    device: str,
-    adapter_ckpt: Path | None,
-    checkpoint_dir: Path | None,
-    goal_pkl: Path | None,
-    multi_z: bool,
-    mean: bool,
-    viewer: str,
-    agent: AgentMode,
-    no_ball: bool,
-) -> dict[str, float]:
-    """Legacy Adapt dodge + obs_bridge (kept for A/B; known to diverge from UFO)."""
-    ensure_vendored_rsl_rl()
-    from mjlab.envs import ManagerBasedRlEnv
-
-    from humanoidverse.adapt_fb.core.dodge_vec_env import DodgeFbVecEnv
-    from humanoidverse.adapt_fb.tasks.dodge.env_cfg import dodge_env_cfg
-
-    print(
-        "[WARN]: --backend dodge uses Adapt obs_bridge (history / last_action may "
-        "diverge from UFO). Prefer --backend ufo.",
-        flush=True,
-    )
-    arts = resolve_artifacts(checkpoint_dir, goal_pkl)
-    bank = GoalBank.from_goal_pkl(arts.goal_pkl, device=device)
-    frozen = load_frozen_ufo_fb_policy(arts.checkpoint_dir, device=device)
-    adapted = FbWithAdapter(frozen, augmentation_dim=6, rank=16, alpha=1.0).to(device)
-    if agent == "initial":
-        print("[INFO]: agent=initial — frozen base on dodge bridge", flush=True)
-    else:
-        _load_adapter(adapted, adapter_ckpt, device)
-
-    cfg = dodge_env_cfg(play=True, throw_ball=not no_ball)
-    cfg.scene.num_envs = 1 if viewer != "none" else num_envs
-    mj_env = ManagerBasedRlEnv(cfg=cfg, device=device)
-    vec = DodgeFbVecEnv(mj_env, bank, multi_z=multi_z)
-    policy = _Policy(adapted, mean=mean, agent=agent)
-
-    if viewer == "none":
-        obs = vec.get_observations().to(device)
-        reward_sum = 0.0
-        for _ in range(steps):
-            action = policy(obs)
-            obs, rew, _d, _e = vec.step(action)
-            reward_sum += float(rew.mean().cpu())
-        vec.close()
-        return {"steps": float(steps), "reward_mean": reward_sum / max(steps, 1)}
-
-    print(
-        f"[play] backend=dodge agent={agent} no_ball={no_ball} "
-        f"goals={len(bank)} current={vec._goal_names[0]!r}",
-        flush=True,
-    )
-    if viewer == "native":
-        _GoalCycleNativeViewer(vec, policy, cycle_fn=lambda d: vec.cycle_goals(step=d)).run()
-    else:
-        from mjlab.viewer import ViserPlayViewer
-
-        ViserPlayViewer(vec, policy, checkpoint_manager=None).run()
-    vec.close()
-    return {"steps": 0.0, "reward_mean": 0.0}
-
-
-def run_play(**kwargs) -> dict[str, float]:
-    backend: Backend = kwargs.pop("backend", "ufo")
-    if backend == "ufo":
-        kwargs.pop("no_ball", None)
-        return _run_ufo_play(**kwargs)
-    return _run_dodge_play(**kwargs)
-
-
 def main(argv: list[str] | None = None) -> None:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument(
-        "--backend",
-        type=str,
-        default="ufo",
-        choices=("ufo", "dodge"),
-        help="ufo=UFO goal_inference env (default); dodge=legacy Adapt bridge",
-    )
     p.add_argument("--steps", type=int, default=200)
     p.add_argument("--num-envs", type=int, default=1)
     p.add_argument("--device", type=str, default="cuda:0")
     p.add_argument("--adapter-ckpt", type=Path, default=None)
     p.add_argument("--checkpoint-dir", type=Path, default=None)
     p.add_argument("--goal-pkl", type=Path, default=None)
-    p.add_argument("--data-path", type=Path, default=None, help="UFO motion pkl override")
+    p.add_argument("--data-path", type=Path, default=None)
     p.add_argument("--single-z", action="store_true")
     p.add_argument("--agent", type=str, default="initial", choices=("trained", "initial"))
-    p.add_argument("--no-ball", action="store_true", help="dodge backend only: park ball far away")
+    p.add_argument(
+        "--ball",
+        type=str,
+        default="none",
+        choices=("none", "parked", "throw"),
+        help="none=UFO host only; parked=ball pinned overhead; throw=cone throws at robot",
+    )
     p.add_argument("--viewer", type=str, default="none", choices=("none", "native", "viser"))
     args = p.parse_args(argv)
     if args.device.startswith("cuda") and not torch.cuda.is_available():
@@ -355,7 +282,6 @@ def main(argv: list[str] | None = None) -> None:
     if args.viewer != "none":
         args.num_envs = 1
     info = run_play(
-        backend=args.backend,  # type: ignore[arg-type]
         steps=args.steps,
         num_envs=args.num_envs,
         device=args.device,
@@ -363,11 +289,10 @@ def main(argv: list[str] | None = None) -> None:
         checkpoint_dir=args.checkpoint_dir,
         goal_pkl=args.goal_pkl,
         multi_z=not args.single_z,
-        mean=True,
         viewer=args.viewer,
         agent=args.agent,  # type: ignore[arg-type]
-        no_ball=args.no_ball,
         data_path=args.data_path,
+        ball=args.ball,  # type: ignore[arg-type]
     )
     for k, v in info.items():
         print(f"{k}: {v}")
