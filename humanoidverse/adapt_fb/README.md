@@ -7,11 +7,14 @@ ORCS-style LoRA dodge adaptation on a **frozen** UFO-FB policy.
 | Piece | Source |
 |-------|--------|
 | Frozen actor + goal `z` | UFO checkpoint / existing `goal_inference` pickle (read-only) |
-| Proprio / action / history | Train: `obs_bridge` on dodge plant · Play: UFO `HumanoidVerseMjlabVectorEnv` |
+| Proprio / action / history | **Shared UFO host** (`HumanoidVerseMjlabVectorEnv`) for train + play |
 | LoRA + PPO | This package (`FbWithAdapter` / vendored `rsl_rl`) |
-| Ball | Dodge env entity + `ThrowBall`; play can inject into UFO host (`--ball`) |
+| Ball | Injected into UFO mjlab scene (`ThrowBall`); play `--ball none\|parked\|throw` |
 
 UFO core train / eval / `goal_inference` are **not** modified. Play does not rewrite `goal_reaching.pkl` or videos.
+
+**Status (2026-10):** train/play share the UFO host; short smoke (~300 iters) ran without crash.
+**Formal multi-GPU training and play evaluation are not done yet** — planned next.
 
 ---
 
@@ -111,32 +114,36 @@ Trainable params: `adapters.*` + `adapter_normalizer` (+ optional dist std). Eve
 
 ---
 
-## Train vs play observation streams
+## Train vs play (unified UFO host)
 
 ```mermaid
 flowchart TB
-  subgraph train ["Train: DodgeFbVecEnv"]
-    MJ["mjlab dodge env<br/>standing G1 + ThrowBall"]
-    BR["obs_bridge<br/>proprio → state / last_action / history"]
-    AU["obs groups augmentation / critic"]
+  UFO["UFO HumanoidVerseMjlabVectorEnv<br/>motion tracking plant"]
+  BALL["optional ball inject<br/>ThrowBall / parked / none"]
+  UFO --> BALL
+
+  subgraph train ["Train: UfoHostTrainEnv"]
+    UOBS1["native UFO obs<br/>state / last_action / history_actor"]
+    AU["augmentation + critic"]
     GZ["GoalBank z (default: new z each episode)"]
-    MJ --> BR
-    MJ --> AU
-    BR --> PPO["FbWithAdapterModel + PPO"]
+    REW["wrapper rewards<br/>ball_clearance − rate − limits"]
+    UOBS1 --> PPO["FbWithAdapterModel + PPO"]
     AU --> PPO
     GZ --> PPO
+    REW --> PPO
   end
 
   subgraph play ["Play: UfoHostPlayEnv"]
-    UFO["UFO HumanoidVerseMjlabVectorEnv<br/>motion tracking + optional ball inject"]
-    UOBS["native UFO obs<br/>state / last_action / history_actor"]
-    BAUG["ball aug (or zeros)"]
-    UFO --> UOBS --> POL["play._Policy"]
-    UFO --> BAUG --> POL
+    UOBS2["same UFO obs + ball aug"]
+    UOBS2 --> POL["play._Policy"]
   end
+
+  BALL --> train
+  BALL --> play
 ```
 
-Action scaling (both paths): policy `tanh` ≈ `[-1,1]` → ×5 into JointPositionAction / UFO `normalize_action`.
+Action scaling (both paths): policy `tanh` ≈ `[-1,1]` → UFO `normalize_action` (×5).  
+Legacy `DodgeFbVecEnv` + `dodge_env_cfg` remain for unit tests / smoke; production train uses the UFO host.
 
 ---
 
@@ -191,7 +198,8 @@ Needs `runs/ufo_fb_8gpu/checkpoint` and `runs/ufo_fb_8gpu/goal_inference/goal_re
 
 ## Train
 
-From the UFO repo root (cwd matters — checkpoints under **`UFO/runs/`**):
+From the UFO repo root (cwd matters — checkpoints under **`UFO/runs/`**).
+Train builds the same UFO host as play, with `ball=throw` + contact terminations.
 
 ```bash
 # single GPU (default: new goal_z each episode reset)
@@ -207,6 +215,8 @@ python -m humanoidverse.adapt_fb.train ... --single-z
 ```
 
 Writes `runs/adapt_fb_dodge*/model_*.pt` (+ TensorBoard). Prefer these over legacy `UFO-FB-adapt/runs/...`.
+
+Note: current runner checkpoints embed the full frozen UFO-FB (~GB-scale). Prefer adapter-only saves before a long multi-GPU run.
 
 ---
 

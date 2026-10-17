@@ -1,5 +1,8 @@
 """Train AdaptFb dodge: frozen UFO-FB + LoRA via vendored rsl_rl PPO.
 
+Uses the **same UFO MJLab host** as play (``build_ufo_vector_env`` + ball inject),
+so train/play share proprio, action scaling, and motion-reset plant.
+
 Multi-GPU (rsl_rl DDP)::
 
     torchrun --standalone --nproc_per_node=8 -m humanoidverse.adapt_fb.train \\
@@ -18,11 +21,16 @@ from pathlib import Path
 
 import torch
 
-from humanoidverse.adapt_fb.core.artifacts import resolve_artifacts
-from humanoidverse.adapt_fb.core.dodge_vec_env import DodgeFbVecEnv
+from humanoidverse.adapt_fb.core.vendor_paths import ensure_vendored_rsl_rl
+
+# Bind vendored rsl_rl before any other AdaptFb import that may pull it in.
+ensure_vendored_rsl_rl()
+
+from humanoidverse.adapt_fb.core.artifacts import resolve_artifacts, resolve_model_folder
 from humanoidverse.adapt_fb.core.goal_bank import GoalBank
 from humanoidverse.adapt_fb.core.rl import adapt_fb_agent_cfg
-from humanoidverse.adapt_fb.core.vendor_paths import ensure_vendored_rsl_rl
+from humanoidverse.adapt_fb.core.ufo_host import UfoHostTrainEnv, build_ufo_vector_env
+from humanoidverse.adapt_fb.tasks.dodge.env_cfg import EPISODE_LENGTH_S
 
 
 def _resolve_device(cli_device: str) -> str:
@@ -49,6 +57,7 @@ def _resolve_device(cli_device: str) -> str:
         torch.cuda.set_device(int(cli_device.split(":")[1]))
     return cli_device
 
+
 def run_train(
     *,
     num_envs: int,
@@ -58,26 +67,43 @@ def run_train(
     multi_z: bool,
     checkpoint_dir: Path | None,
     goal_pkl: Path | None,
+    data_path: Path | None = None,
+    max_episode_length_s: float = EPISODE_LENGTH_S,
     seed: int = 42,
 ) -> Path:
     ensure_vendored_rsl_rl()
-    from mjlab.envs import ManagerBasedRlEnv
-    from rsl_rl.runners import OnPolicyRunner
+    import rsl_rl
 
-    from humanoidverse.adapt_fb.tasks.dodge.env_cfg import dodge_env_cfg
+    vendor_root = Path(ensure_vendored_rsl_rl()).resolve()
+    if not Path(rsl_rl.__file__).resolve().is_relative_to(vendor_root):
+        raise ImportError(
+            f"rsl_rl resolved to {rsl_rl.__file__}, expected under {vendor_root}. "
+            "Unload site-packages rsl_rl or check PYTHONPATH."
+        )
+    from rsl_rl.runners import OnPolicyRunner
 
     local_rank = int(os.environ.get("LOCAL_RANK", "0"))
     world_size = int(os.environ.get("WORLD_SIZE", "1"))
     rank_seed = seed + local_rank
 
     arts = resolve_artifacts(checkpoint_dir, goal_pkl)
+    model_folder = resolve_model_folder(arts.checkpoint_dir)
     bank = GoalBank.from_goal_pkl(arts.goal_pkl, device=device)
 
-    cfg = dodge_env_cfg(play=False)
-    cfg.scene.num_envs = num_envs
-    cfg.seed = rank_seed
-    env = ManagerBasedRlEnv(cfg=cfg, device=device)
-    vec = DodgeFbVecEnv(env, bank, multi_z=multi_z)
+    vector = build_ufo_vector_env(
+        model_folder,
+        device=device,
+        num_envs=num_envs,
+        data_path=data_path,
+        max_episode_length_s=max_episode_length_s,
+        headless=True,
+        ball="throw",
+        train=True,
+    )
+    # Seed the underlying mjlab env for rank diversity.
+    if hasattr(vector._env.mjlab_env, "seed"):
+        vector._env.mjlab_env.seed(rank_seed)
+    vec = UfoHostTrainEnv(vector, bank, ball="throw", multi_z=multi_z)
 
     train_cfg = adapt_fb_agent_cfg(
         "adapt_fb_dodge",
@@ -93,8 +119,16 @@ def run_train(
         log_dir.mkdir(parents=True, exist_ok=True)
 
     if world_size > 1 and local_rank == 0:
-        print(f"[INFO] multi-GPU world_size={world_size}, envs/rank={num_envs}, "
-              f"samples/iter≈{num_envs * 24 * world_size}")
+        print(
+            f"[INFO] multi-GPU world_size={world_size}, envs/rank={num_envs}, "
+            f"samples/iter≈{num_envs * 24 * world_size} (UFO host + ThrowBall)"
+        )
+    if local_rank == 0:
+        print(
+            f"[INFO] AdaptFb train plant=UFO host model_folder={model_folder} "
+            f"episode_length_s={max_episode_length_s} multi_z={multi_z}",
+            flush=True,
+        )
 
     runner = OnPolicyRunner(vec, train_cfg, log_dir=str(log_dir), device=device)
     runner.learn(num_learning_iterations=max_iterations, init_at_random_ep_len=True)
@@ -117,6 +151,13 @@ def main(argv: list[str] | None = None) -> None:
     )
     p.add_argument("--checkpoint-dir", type=Path, default=None)
     p.add_argument("--goal-pkl", type=Path, default=None)
+    p.add_argument("--data-path", type=Path, default=None, help="UFO motion pkl (default: lafan clip)")
+    p.add_argument(
+        "--max-episode-length-s",
+        type=float,
+        default=EPISODE_LENGTH_S,
+        help=f"Episode length in seconds (default {EPISODE_LENGTH_S}, same as legacy dodge)",
+    )
     p.add_argument("--seed", type=int, default=42)
     args = p.parse_args(argv)
 
@@ -129,6 +170,8 @@ def main(argv: list[str] | None = None) -> None:
         multi_z=not args.single_z,
         checkpoint_dir=args.checkpoint_dir,
         goal_pkl=args.goal_pkl,
+        data_path=args.data_path,
+        max_episode_length_s=args.max_episode_length_s,
         seed=args.seed,
     )
     if int(os.environ.get("LOCAL_RANK", "0")) == 0:

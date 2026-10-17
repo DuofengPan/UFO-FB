@@ -32,12 +32,15 @@ from typing import Literal
 
 import torch
 
+from humanoidverse.adapt_fb.core.vendor_paths import ensure_vendored_rsl_rl
+
+ensure_vendored_rsl_rl()
+
 from humanoidverse.adapt_fb.core.artifacts import resolve_artifacts, resolve_model_folder
 from humanoidverse.adapt_fb.core.base_policy import load_frozen_ufo_fb_policy
 from humanoidverse.adapt_fb.core.fb_adapter import FbWithAdapter
 from humanoidverse.adapt_fb.core.goal_bank import GoalBank
 from humanoidverse.adapt_fb.core.ufo_host import BallMode, UfoHostPlayEnv, build_ufo_vector_env
-from humanoidverse.adapt_fb.core.vendor_paths import ensure_vendored_rsl_rl
 
 AgentMode = Literal["trained", "initial"]
 
