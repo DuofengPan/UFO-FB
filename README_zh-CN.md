@@ -210,11 +210,21 @@ uv run python -m humanoidverse.tools.data_build \
 
 UFO 支持基于 manifest 的多数据源混合。每个数据源之间的采样比例保持固定，prioritized sampling 在每个数据源内部进行。这适合在保持基础动作分布的同时注入少量稀有高敏捷技能，例如 cartwheel。可以参考 `configs/data/example_mix.yaml`。
 
+## AdaptFb（可选 LoRA 躲球）
+
+冻结 UFO-FB + LoRA 适配在仓内包 [`humanoidverse/adapt_fb`](humanoidverse/adapt_fb/README.md)。复用 UFO 的 MJLab env 与 goal `z`；**不改动**默认训练 / goal_inference / tracking。
+
+```bash
+export PYTHONPATH="$PWD${PYTHONPATH:+:$PYTHONPATH}"
+python -m humanoidverse.adapt_fb.play --agent initial --viewer native --device cuda:0
+```
+
 ## 文档链接
 
 - [Import Wizard](docs/import_wizard.md)：RobotState schema、数据检查和数据构建。
 - [Robot-Config Training](docs/robot_config_training.md)：实验性的 robot-aware training 初始化说明。
 - [Training and Inference](docs/TRAIN_INFERENCE.md)：更多训练和推理命令。
+- [AdaptFb](humanoidverse/adapt_fb/README.md)：可选的冻结 FB + LoRA 躲球适配。
 - [Deploy branch](https://github.com/Roboparty/UFO/tree/deploy)：G1 实机部署和遥操作运行时。
 
 ## 引用 / 许可证

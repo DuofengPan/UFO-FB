@@ -1,0 +1,597 @@
+# Copyright (c) 2021-2026, ETH Zurich and NVIDIA CORPORATION
+# All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+
+from __future__ import annotations
+
+import torch
+import torch.nn as nn
+from itertools import chain
+from tensordict import TensorDict
+
+from rsl_rl.env import VecEnv
+from rsl_rl.extensions import RandomNetworkDistillation, Symmetry, resolve_rnd_config, resolve_symmetry_config
+from rsl_rl.models import MLPModel
+from rsl_rl.modules import resolve_amp_dtype, set_model_amp
+from rsl_rl.storage import RolloutStorage
+from rsl_rl.utils import compile_model, resolve_callable, resolve_obs_groups, resolve_optimizer
+
+
+class PPO:
+    """Proximal Policy Optimization algorithm.
+
+    Reference:
+        - Schulman et al. "Proximal policy optimization algorithms." arXiv preprint arXiv:1707.06347 (2017).
+    """
+
+    actor: MLPModel
+    """The actor model."""
+
+    critic: MLPModel
+    """The critic model."""
+
+    def __init__(
+        self,
+        actor: MLPModel,
+        critic: MLPModel,
+        storage: RolloutStorage,
+        num_learning_epochs: int = 5,
+        num_mini_batches: int = 4,
+        clip_param: float = 0.2,
+        gamma: float = 0.99,
+        lam: float = 0.95,
+        value_loss_coef: float = 1.0,
+        entropy_coef: float = 0.01,
+        learning_rate: float = 0.001,
+        max_grad_norm: float = 1.0,
+        optimizer: str = "adam",
+        use_clipped_value_loss: bool = True,
+        schedule: str = "adaptive",
+        desired_kl: float = 0.01,
+        normalize_advantage_per_mini_batch: bool = False,
+        device: str = "cpu",
+        # RND parameters
+        rnd_cfg: dict | None = None,
+        # Symmetry parameters
+        symmetry_cfg: dict | None = None,
+        # Distributed training parameters
+        multi_gpu_cfg: dict | None = None,
+    ) -> None:
+        """Initialize the algorithm with models, storage, and optimization settings."""
+        # Device-related parameters
+        self.device = device
+        self.is_multi_gpu = multi_gpu_cfg is not None
+
+        # Multi-GPU parameters
+        if multi_gpu_cfg is not None:
+            self.gpu_global_rank = multi_gpu_cfg["global_rank"]
+            self.gpu_world_size = multi_gpu_cfg["world_size"]
+        else:
+            self.gpu_global_rank = 0
+            self.gpu_world_size = 1
+
+        # RND extension
+        self.rnd = RandomNetworkDistillation(device=self.device, **rnd_cfg) if rnd_cfg else None
+
+        # Symmetry extension
+        if symmetry_cfg is not None and (actor.is_recurrent or critic.is_recurrent):
+            raise ValueError("Symmetry augmentation is not supported for recurrent policies.")
+        self.symmetry = Symmetry(**symmetry_cfg) if symmetry_cfg else None
+
+        # PPO components
+        self.actor = actor.to(self.device)
+        self.critic = critic.to(self.device)
+
+        # Handles to the uncompiled modules for state_dict operations and export. If compilation is disabled, these
+        # simply alias ``self.actor`` / ``self.critic``.
+        self._raw_actor = self.actor
+        self._raw_critic = self.critic
+
+        # Create the optimizer
+        self.optimizer = resolve_optimizer(optimizer)(
+            chain(self.actor.parameters(), self.critic.parameters()), lr=learning_rate
+        )  # type: ignore
+
+        # Add storage
+        self.storage = storage
+        self.transition = RolloutStorage.Transition()
+
+        # PPO parameters
+        self.clip_param = clip_param
+        self.num_learning_epochs = num_learning_epochs
+        self.num_mini_batches = num_mini_batches
+        self.value_loss_coef = value_loss_coef
+        self.entropy_coef = entropy_coef
+        self.gamma = gamma
+        self.lam = lam
+        self.max_grad_norm = max_grad_norm
+        self.use_clipped_value_loss = use_clipped_value_loss
+        self.desired_kl = desired_kl
+        self.schedule = schedule
+        self.learning_rate = learning_rate
+        self.normalize_advantage_per_mini_batch = normalize_advantage_per_mini_batch
+
+    def act(self, obs: TensorDict) -> torch.Tensor:
+        """Sample actions and store transition data."""
+        # Record the hidden states for recurrent policies
+        self.transition.hidden_states = (self.actor.get_hidden_state(), self.critic.get_hidden_state())
+        # Compute the actions and values
+        self.transition.actions = self.actor(obs, stochastic_output=True).detach()
+        self.transition.values = self.critic(obs).detach()
+        self.transition.actions_log_prob = self.actor.get_output_log_prob(self.transition.actions).detach()  # type: ignore
+        self.transition.distribution_params = tuple(p.detach() for p in self.actor.output_distribution_params)
+        # Record observations before env.step(), in the actor's storage layout: a model with a
+        # frozen prefix swaps the raw inputs for the values it just derived from them, so the
+        # update reads the cached result instead of recomputing a pure function (see
+        # SonicBaseModel.storage_obs). Identity for models without the hook.
+        self.transition.observations = self._cache_obs(obs)
+        return self.transition.actions  # type: ignore
+
+    def _cache_obs(self, obs: TensorDict) -> TensorDict:
+        """Storage layout carrying this step's cached derivations (identity without the hook)."""
+        hook = getattr(self._raw_actor, "cache_obs", None)
+        return hook(obs) if hook is not None else obs
+
+    def process_env_step(
+        self, obs: TensorDict, rewards: torch.Tensor, dones: torch.Tensor, extras: dict[str, torch.Tensor]
+    ) -> None:
+        """Record one environment step and update the normalizers."""
+        # Update the normalizers
+        self.actor.update_normalization(obs)
+        self.critic.update_normalization(obs)
+        if self.rnd:
+            self.rnd.update_normalization(obs)
+
+        # Record the rewards and dones
+        # Note: We clone here because later on we bootstrap the rewards based on timeouts
+        self.transition.rewards = rewards.clone()
+        self.transition.dones = dones
+
+        # Compute the intrinsic rewards and add to extrinsic rewards
+        if self.rnd:
+            # Compute the intrinsic rewards
+            self.intrinsic_rewards = self.rnd.get_intrinsic_reward(obs)
+            # Add intrinsic rewards to extrinsic rewards
+            self.transition.rewards += self.intrinsic_rewards
+
+        # Bootstrapping on time outs
+        if "time_outs" in extras:
+            self.transition.rewards += self.gamma * torch.squeeze(
+                self.transition.values * extras["time_outs"].unsqueeze(1).to(self.device),  # type: ignore
+                1,
+            )
+
+        # Record the transition
+        self.storage.add_transition(self.transition)
+        self.transition.clear()
+        self.actor.reset(dones)
+        self.critic.reset(dones)
+
+    def compute_returns(self, obs: TensorDict) -> None:
+        """Compute return and advantage targets from stored transitions."""
+        st = self.storage
+        # Compute values for the last step
+        critic_hidden_state = self.critic.get_hidden_state()
+        last_values = self.critic(obs).detach()
+        # Restore the critic's hidden state so the next rollout is not affected by the forward pass
+        self.critic.reset(hidden_state=critic_hidden_state)
+        # Compute returns and advantages
+        advantage = 0
+        for step in reversed(range(st.num_transitions_per_env)):
+            # If we are at the last step, bootstrap the return value
+            next_values = last_values if step == st.num_transitions_per_env - 1 else st.values[step + 1]
+            # 1 if we are not in a terminal state, 0 otherwise
+            next_is_not_terminal = 1.0 - st.dones[step].float()
+            # TD error: r_t + gamma * V(s_{t+1}) - V(s_t)
+            delta = st.rewards[step] + next_is_not_terminal * self.gamma * next_values - st.values[step]
+            # Advantage: A(s_t, a_t) = delta_t + gamma * lambda * A(s_{t+1}, a_{t+1})
+            advantage = delta + next_is_not_terminal * self.gamma * self.lam * advantage
+            # Return: R_t = A(s_t, a_t) + V(s_t)
+            st.returns[step] = advantage + st.values[step]
+        # Compute the advantages
+        st.advantages = st.returns - st.values
+        # Normalize the advantages if per minibatch normalization is not used
+        if not self.normalize_advantage_per_mini_batch:
+            st.advantages = (st.advantages - st.advantages.mean()) / (st.advantages.std() + 1e-8)
+
+    def set_amp(self, dtype: str | None) -> None:
+        """Set the mixed-precision body dtype — "bfloat16" | "float16" | None (off).
+
+        Delegates to the MODELS (:class:`~rsl_rl.modules.AmpMixin`) rather than wrapping
+        ``update()``, for two reasons that are the whole difference between bf16 working
+        and bf16 collapsing:
+
+        1. **The head stays fp32.** Autocasting all of ``update()`` computes ``logp``,
+           the ratio, the KL and the value loss in bf16. Measured on the SONIC actor,
+           the head alone accounts for a 1.9x reduction in log-prob error; the value
+           loss is worse still, since returns are O(10-100) where bf16 resolves ~0.8.
+        2. **Collection and update use the same kernels.** A dtype that applies only to
+           ``update()`` recomputes ``logp`` in bf16 against an fp32 ``logp_old``, so the
+           ratio is wrong at epoch 0 before any learning has happened.
+
+        Watch ``Diagnostics/logp_drift_mb0``. Measured on SONIC + 8k envs: ~4e-6 in fp32,
+        ~5e-2 in bf16. That floor is irreducible — bf16 reproduces the action mean only to
+        ~1.2e-3 across batch shapes, and log-prob amplifies that by ``sqrt(dim)/sigma``.
+        It costs ~0.25% of extra surrogate variance and ~1.4% of the KL target, both
+        benign; ~1e-1 or above means the head is leaking again.
+
+        bf16 needs no loss scaling; fp16 would (not wired) — but fp16's 10-bit mantissa
+        would cut the drift ~4x if the backward turns out not to underflow.
+        """
+        self.amp_dtype = resolve_amp_dtype(dtype)
+        for model in (self._raw_actor, self._raw_critic):
+            set_model_amp(model, self.amp_dtype)
+
+    def update(self) -> dict[str, float]:
+        """Run optimization epochs (the models carry their own autocast; see set_amp)."""
+        return self._update()
+
+    def _update(self) -> dict[str, float]:
+        """Run optimization epochs over stored batches and return mean losses."""
+        mean_value_loss = 0
+        mean_surrogate_loss = 0
+        mean_entropy = 0
+        # RND loss
+        mean_rnd_loss = 0 if self.rnd else None
+        # Symmetry loss
+        mean_symmetry_loss = 0 if self.symmetry else None
+        # Precision-seam probe, filled on the first minibatch only (see the surrogate below)
+        logp_drift: torch.Tensor | None = None
+
+        # Get mini-batch generator
+        if self.actor.is_recurrent or self.critic.is_recurrent:
+            generator = self.storage.recurrent_mini_batch_generator(self.num_mini_batches, self.num_learning_epochs)
+        else:
+            generator = self.storage.mini_batch_generator(self.num_mini_batches, self.num_learning_epochs)
+
+        # Iterate over mini-batches
+        for batch in generator:
+            original_batch_size = batch.observations.batch_size[0]
+
+            # Check if we should normalize advantages per mini-batch
+            if self.normalize_advantage_per_mini_batch:
+                with torch.no_grad():
+                    batch.advantages = (batch.advantages - batch.advantages.mean()) / (batch.advantages.std() + 1e-8)  # type: ignore
+
+            # Perform symmetric augmentation if enabled
+            if self.symmetry:
+                self.symmetry.augment_batch(batch, original_batch_size)
+
+            # Recompute actions log prob and entropy for current batch of transitions
+            # Note: We need to do this because we updated the policy with new parameters
+            self.actor(
+                batch.observations,
+                masks=batch.masks,
+                hidden_state=batch.hidden_states[0],
+                stochastic_output=True,
+            )
+            actions_log_prob = self.actor.get_output_log_prob(batch.actions)  # type: ignore
+            values = self.critic(batch.observations, masks=batch.masks, hidden_state=batch.hidden_states[1])
+            # Note: We only keep the following tensors for the original samples in case of symmetry augmentation
+            distribution_params = tuple(p[:original_batch_size] for p in self.actor.output_distribution_params)
+            entropy = self.actor.output_entropy[:original_batch_size]
+
+            # Compute KL divergence and adapt the learning rate
+            if self.desired_kl is not None and self.schedule == "adaptive":
+                with torch.inference_mode():
+                    kl = self.actor.get_kl_divergence(batch.old_distribution_params, distribution_params)  # type: ignore
+                    kl_mean = torch.mean(kl)
+
+                    # Reduce the KL divergence across all GPUs
+                    if self.is_multi_gpu:
+                        torch.distributed.all_reduce(kl_mean, op=torch.distributed.ReduceOp.SUM)
+                        kl_mean /= self.gpu_world_size
+
+                    # Update the learning rate only on the main process
+                    if self.gpu_global_rank == 0:
+                        if kl_mean > self.desired_kl * 2.0:
+                            self.learning_rate = max(1e-5, self.learning_rate / 1.5)
+                        elif kl_mean < self.desired_kl / 2.0 and kl_mean > 0.0:
+                            self.learning_rate = min(1e-2, self.learning_rate * 1.5)
+
+                    # Update the learning rate for all GPUs
+                    if self.is_multi_gpu:
+                        lr_tensor = torch.tensor(self.learning_rate, device=self.device)
+                        torch.distributed.broadcast(lr_tensor, src=0)
+                        self.learning_rate = lr_tensor.item()
+
+                    # Update the learning rate for all parameter groups (fixed-LR groups keep theirs)
+                    for param_group in self.optimizer.param_groups:
+                        if not param_group.get("fixed_lr", False):
+                            param_group["lr"] = self.learning_rate
+
+            # Surrogate loss
+            log_ratio = actions_log_prob - torch.squeeze(batch.old_actions_log_prob)  # type: ignore
+            if logp_drift is None:
+                # First minibatch of the first epoch: the weights have not moved yet, so this
+                # SHOULD be ~0. Anything else is a precision seam between collection and the
+                # update (see PPO.set_amp) putting noise straight onto the clipped ratio.
+                logp_drift = log_ratio.detach().abs().mean()
+            ratio = torch.exp(log_ratio)
+            surrogate = -torch.squeeze(batch.advantages) * ratio  # type: ignore
+            surrogate_clipped = -torch.squeeze(batch.advantages) * torch.clamp(  # type: ignore
+                ratio, 1.0 - self.clip_param, 1.0 + self.clip_param
+            )
+            surrogate_loss = torch.max(surrogate, surrogate_clipped).mean()
+
+            # Value function loss
+            if self.use_clipped_value_loss:
+                value_clipped = batch.values + (values - batch.values).clamp(-self.clip_param, self.clip_param)
+                value_losses = (values - batch.returns).pow(2)
+                value_losses_clipped = (value_clipped - batch.returns).pow(2)
+                value_loss = torch.max(value_losses, value_losses_clipped).mean()
+            else:
+                value_loss = (batch.returns - values).pow(2).mean()
+
+            loss = surrogate_loss + self.value_loss_coef * value_loss - self.entropy_coef * entropy.mean()
+
+            # RND loss
+            rnd_loss = self.rnd.compute_loss(batch.observations[:original_batch_size]) if self.rnd else None  # type: ignore
+
+            # Symmetry loss
+            if self.symmetry:
+                symmetry_loss = self.symmetry.compute_loss(self.actor, batch, original_batch_size)
+                if self.symmetry.use_mirror_loss:
+                    loss = loss + self.symmetry.mirror_loss_coeff * symmetry_loss
+
+            # Compute the gradients for PPO
+            self.optimizer.zero_grad()
+            loss.backward()
+            # Extension seam: subclasses may accumulate extra gradients into the same step
+            # (e.g. PPOAux joint mode — equivalent to loss += extra, but separately tagged).
+            self._extra_backward()
+            # Compute the gradients for RND
+            if self.rnd:
+                self.rnd.optimizer.zero_grad()
+                rnd_loss.backward()
+
+            # Collect gradients from all GPUs
+            if self.is_multi_gpu:
+                self.reduce_parameters()
+
+            # Apply the gradients for PPO
+            # Note: Modular-norm models dualize their gradients instead of clipping them and project their weights
+            # back onto the constraint manifold after the optimizer step.
+            for model in (self.actor, self.critic):
+                if hasattr(model, "dualize_gradients"):
+                    model.dualize_gradients()
+                else:
+                    nn.utils.clip_grad_norm_(model.parameters(), self.max_grad_norm)
+            self.optimizer.step()
+            for model in (self.actor, self.critic):
+                if hasattr(model, "project_weights"):
+                    model.project_weights()
+            # Extension seam: subclasses may inspect the REALIZED parameter delta of this
+            # minibatch (post-clip, post-Adam, post-projection) — e.g. PPOAux attributing
+            # the step to its gradient sources.
+            self._post_optimizer_step()
+            # Apply the gradients for RND
+            if self.rnd:
+                self.rnd.optimizer.step()
+
+            # Store the losses
+            mean_value_loss += value_loss.item()
+            mean_surrogate_loss += surrogate_loss.item()
+            mean_entropy += entropy.mean().item()
+            # RND loss
+            if mean_rnd_loss is not None:
+                mean_rnd_loss += rnd_loss.item()
+            # Symmetry loss
+            if mean_symmetry_loss is not None:
+                mean_symmetry_loss += symmetry_loss.item()
+
+        # Divide the losses by the number of updates
+        num_updates = self.num_learning_epochs * self.num_mini_batches
+        mean_value_loss /= num_updates
+        mean_surrogate_loss /= num_updates
+        mean_entropy /= num_updates
+        if mean_rnd_loss is not None:
+            mean_rnd_loss /= num_updates
+        if mean_symmetry_loss is not None:
+            mean_symmetry_loss /= num_updates
+
+        # Construct the loss dictionary
+        loss_dict = {
+            "value": mean_value_loss,
+            "surrogate": mean_surrogate_loss,
+            "entropy": mean_entropy,
+        }
+        if self.rnd:
+            loss_dict["rnd"] = mean_rnd_loss
+        if self.symmetry:
+            loss_dict["symmetry"] = mean_symmetry_loss
+
+        # Adapter diagnostics: per-layer norms (separate from losses)
+        info_dict = {}
+        if hasattr(self.actor, "adapter_diagnostics"):
+            info_dict.update(self.actor.adapter_diagnostics())
+        if logp_drift is not None:
+            info_dict["Diagnostics/logp_drift_mb0"] = logp_drift.item()
+
+        # Extractor-owned diagnostics (ZAttention/*, ZCapacity/*). Drained here in the
+        # BASE algorithm, not in PPOAux, so the extractor-only row (plain PPO, no
+        # auxiliary objective) reports them as well — it is the baseline the aux rows
+        # are compared against, and it is why these two sections are the ONLY ones
+        # comparable across -Ext / -Sfd / -Lfd. The extractor emits fully-qualified
+        # keys; the group name is folded in only when several extractors are registered
+        # (one, the common case, keeps the keys short).
+        extractors = getattr(self._raw_actor, "extractors", {})
+        for name, extractor in extractors.items():
+            if hasattr(extractor, "metrics"):
+                for key, value in extractor.metrics().items():
+                    if len(extractors) > 1:
+                        section, _, leaf = key.partition("/")
+                        key = f"{section}/{name}.{leaf}"
+                    info_dict[key] = value
+
+        # Clear the storage
+        self.storage.clear()
+
+        return loss_dict, info_dict
+
+    def _extra_backward(self) -> None:
+        """Accumulate extra per-minibatch gradients before the optimizer step. No-op for PPO."""
+        pass
+
+    def _post_optimizer_step(self) -> None:
+        """Inspect the realized parameter delta after the optimizer step. No-op for PPO."""
+        pass
+
+    def train_mode(self) -> None:
+        """Set train mode for learnable models."""
+        self.actor.train()
+        self.critic.train()
+        if self.rnd:
+            self.rnd.train()
+
+    def eval_mode(self) -> None:
+        """Set evaluation mode for learnable models."""
+        self.actor.eval()
+        self.critic.eval()
+        if self.rnd:
+            self.rnd.eval()
+
+    def save(self) -> dict:
+        """Return a dict of all models for saving."""
+        saved_dict = {
+            "actor_state_dict": self._raw_actor.state_dict(),
+            "critic_state_dict": self._raw_critic.state_dict(),
+            "optimizer_state_dict": self.optimizer.state_dict(),
+        }
+        if self.rnd:
+            saved_dict["rnd_state_dict"] = self.rnd.state_dict()
+            saved_dict["rnd_optimizer_state_dict"] = self.rnd.optimizer.state_dict()
+        return saved_dict
+
+    def load(self, loaded_dict: dict, load_cfg: dict | None, strict: bool) -> bool:
+        """Load specified models from a saved dict."""
+        # If no load_cfg is provided, load all models and states
+        if load_cfg is None:
+            load_cfg = {
+                "actor": True,
+                "critic": True,
+                "optimizer": True,
+                "iteration": True,
+                "rnd": True,
+            }
+
+        # Load the specified models
+        if load_cfg.get("actor"):
+            self._raw_actor.load_state_dict(loaded_dict["actor_state_dict"], strict=strict)
+        if load_cfg.get("critic"):
+            self._raw_critic.load_state_dict(loaded_dict["critic_state_dict"], strict=strict)
+        if load_cfg.get("optimizer"):
+            self.optimizer.load_state_dict(loaded_dict["optimizer_state_dict"])
+        if load_cfg.get("rnd") and self.rnd:
+            self.rnd.load_state_dict(loaded_dict["rnd_state_dict"], strict=strict)
+            self.rnd.optimizer.load_state_dict(loaded_dict["rnd_optimizer_state_dict"])
+        return load_cfg.get("iteration", False)
+
+    def get_policy(self) -> MLPModel:
+        """Get the policy model."""
+        return self._raw_actor
+
+    def compile(self, mode: str | None = None) -> None:
+        """Compile actor and critic with ``torch.compile``.
+
+        See :func:`~rsl_rl.utils.compile_model` for the set of accepted modes.
+
+        Args:
+            mode: ``torch.compile`` mode. Defaults to ``None``, in which case compilation is disabled.
+        """
+        self.actor = compile_model(self._raw_actor, mode)  # type: ignore
+        self.critic = compile_model(self._raw_critic, mode)  # type: ignore
+
+    @staticmethod
+    def construct_algorithm(obs: TensorDict, env: VecEnv, cfg: dict, device: str) -> PPO:
+        """Construct the PPO algorithm."""
+        # Resolve class callables
+        alg_class: type[PPO] = resolve_callable(cfg["algorithm"].pop("class_name"))  # type: ignore
+        actor_class: type[MLPModel] = resolve_callable(cfg["actor"].pop("class_name"))  # type: ignore
+        critic_class: type[MLPModel] = resolve_callable(cfg["critic"].pop("class_name"))  # type: ignore
+
+        # Resolve observation groups
+        default_sets = ["actor", "critic"]
+        if "rnd_cfg" in cfg["algorithm"] and cfg["algorithm"]["rnd_cfg"] is not None:
+            default_sets.append("rnd_state")
+        cfg["obs_groups"] = resolve_obs_groups(obs, cfg["obs_groups"], default_sets)
+
+        # Resolve RND config if used
+        cfg["algorithm"] = resolve_rnd_config(cfg["algorithm"], obs, cfg["obs_groups"], env)
+
+        # Resolve symmetry config if used
+        cfg["algorithm"] = resolve_symmetry_config(cfg["algorithm"], env)
+
+        # Initialize the policy
+        actor: MLPModel = actor_class(obs, cfg["obs_groups"], "actor", env.num_actions, **cfg["actor"]).to(device)
+        print(f"Actor Model: {actor}")
+        if cfg["algorithm"].pop("share_cnn_encoders", None):  # Share CNN encoders between actor and critic
+            cfg["critic"]["cnns"] = actor.cnns  # type: ignore
+        critic: MLPModel = critic_class(obs, cfg["obs_groups"], "critic", 1, **cfg["critic"]).to(device)
+        print(f"Critic Model: {critic}")
+
+        # Initialize the storage, in the actor's layout (a frozen-prefix model may swap raw
+        # inputs for cached derivations). Guard: never drop a group another stream still reads
+        # — the actor cannot see the critic's or the aux objective's groups.
+        storage_obs = getattr(actor, "storage_obs", lambda o: o)(obs)
+        dropped = set(obs.keys()) - set(storage_obs.keys())
+        if dropped:
+            claimed = {g for groups in cfg["obs_groups"].values() for g in groups}
+            conflict = dropped & claimed
+            if conflict:
+                raise ValueError(
+                    f"{type(actor).__name__}.storage_obs drops {sorted(conflict)}, but "
+                    f"obs_groups still routes them to a model. Set cache_tokens=False."
+                )
+            print(f"[storage] {type(actor).__name__} cached prefix: dropped {sorted(dropped)}")
+        storage = RolloutStorage("rl", env.num_envs, cfg["num_steps_per_env"], storage_obs, [env.num_actions], device)
+
+        # Initialize the algorithm
+        alg: PPO = alg_class(actor, critic, storage, device=device, **cfg["algorithm"], multi_gpu_cfg=cfg["multi_gpu"])
+
+        # Compile the algorithm's models if requested
+        alg.compile(cfg.get("torch_compile_mode"))
+        alg.set_amp(cfg.get("amp_dtype"))
+
+        return alg
+
+    def broadcast_parameters(self) -> None:
+        """Broadcast model parameters to all GPUs."""
+        # Obtain the model parameters on current GPU
+        model_params = [self._raw_actor.state_dict(), self._raw_critic.state_dict()]
+        if self.rnd:
+            model_params.append(self.rnd.predictor.state_dict())
+        # Broadcast the model parameters
+        torch.distributed.broadcast_object_list(model_params, src=0)
+        # Load the model parameters on all GPUs from source GPU
+        self._raw_actor.load_state_dict(model_params[0])
+        self._raw_critic.load_state_dict(model_params[1])
+        if self.rnd:
+            self.rnd.predictor.load_state_dict(model_params[2])
+
+    def reduce_parameters(self) -> None:
+        """Collect gradients from all GPUs and average them.
+
+        This function is called after the backward pass to synchronize the gradients across all GPUs.
+        """
+        # Create a tensor to store the gradients
+        all_params = chain(self.actor.parameters(), self.critic.parameters())
+        if self.rnd:
+            all_params = chain(all_params, self.rnd.parameters())
+        all_params = list(all_params)
+        grads = [param.grad.view(-1) for param in all_params if param.grad is not None]
+        all_grads = torch.cat(grads)
+        # Average the gradients across all GPUs
+        torch.distributed.all_reduce(all_grads, op=torch.distributed.ReduceOp.SUM)
+        all_grads /= self.gpu_world_size
+        # Update the gradients for all parameters with the reduced gradients
+        offset = 0
+        for param in all_params:
+            if param.grad is not None:
+                numel = param.numel()
+                # Copy data back from shared buffer
+                param.grad.data.copy_(all_grads[offset : offset + numel].view_as(param.grad.data))
+                # Update the offset for the next parameter
+                offset += numel

@@ -222,11 +222,21 @@ See [Import Wizard](docs/import_wizard.md) for data schemas and import commands,
 
 UFO supports manifest-based, source-weighted multi-source data mixing. This is useful for injecting rare agile skills, such as cartwheel motions, while preserving the base motion distribution. The dataset identity is sampled from a fixed source ratio, and prioritized sampling is applied within each source. See `configs/data/example_mix.yaml` for a compact manifest example.
 
+## AdaptFb (LoRA dodge, optional)
+
+Frozen UFO-FB + LoRA adaptation lives in-tree as [`humanoidverse/adapt_fb`](humanoidverse/adapt_fb/README.md). It reuses UFO's MJLab env and goal `z` pickle; it does **not** change default train / goal_inference / tracking.
+
+```bash
+export PYTHONPATH="$PWD${PYTHONPATH:+:$PYTHONPATH}"
+python -m humanoidverse.adapt_fb.play --agent initial --viewer native --device cuda:0
+```
+
 ## Documentation
 
 - [Import Wizard](docs/import_wizard.md): RobotState schemas, inspection, and data building.
 - [Robot-Config Training](docs/robot_config_training.md): experimental robot-aware training initialization.
 - [Training and Inference](docs/TRAIN_INFERENCE.md): additional commands and runtime notes.
+- [AdaptFb](humanoidverse/adapt_fb/README.md): optional LoRA dodge adaptation on frozen FB.
 - [Deploy branch](https://github.com/Roboparty/UFO/tree/deploy): G1 real-robot deployment and teleoperation runtime.
 
 ## Citation / License

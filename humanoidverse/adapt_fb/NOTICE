@@ -1,0 +1,20 @@
+UFO-FB-adapt
+Copyright (c) 2026 UFO-FB-adapt contributors
+
+This repository is derived from ORCS (Oracle Robot Control Synthesis /
+Optimize, Retarget, Control Suite) by Lokesh Krishna.
+
+ORCS — Oracle Robot Control Synthesis
+Copyright 2026 Lokesh Krishna <lkrajan@usc.edu>
+
+ORCS's original code and documentation are licensed under BSD-3-Clause.
+Adapted code and externally obtained models, datasets, and body-model files are
+not relicensed by ORCS. Their attribution and terms are recorded in
+THIRD_PARTY_NOTICES.md and LICENSES/.
+
+UFO-FB-adapt replaces the frozen SONIC base with a frozen UFO-FB (BFM) policy
+and retains the ORCS adaptation pattern (frozen base + LoRA on the action
+decoder path; task conditioning via an augmentation / adapter stream only).
+Original ORCS copyright notices are preserved. Modifications and new modules
+are attributed to UFO-FB-adapt contributors under the same BSD-3-Clause terms
+unless otherwise noted in THIRD_PARTY_NOTICES.md.
