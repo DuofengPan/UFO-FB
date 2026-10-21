@@ -1,0 +1,57 @@
+[
+  {
+    "id": "6e4eekpk",
+    "name": "ufo_fb_8gpu",
+    "state": "finished",
+    "group": "ufo_fb",
+    "tags": [],
+    "created_at": "2026-10-12T08:18:23Z",
+    "heartbeatAt": "2026-10-12T08:18:35Z",
+    "url": "https://wandb.ai/1914708967-harbin-institute-of-technology/ufo-humanoid/runs/6e4eekpk",
+    "world_size": null,
+    "global_env_steps": null,
+    "FPS": null,
+    "duration_min": null,
+    "runtime_s": 9,
+    "gpu_count_meta": 8,
+    "gpu_meta": "NVIDIA GeForce RTX 5090"
+  },
+  {
+    "id": "1ci2ojfy",
+    "name": "ufo_fb_8gpu",
+    "state": "finished",
+    "group": "ufo_fb",
+    "tags": [
+      "4090*8"
+    ],
+    "created_at": "2026-10-13T01:42:05Z",
+    "heartbeatAt": "2026-10-15T03:40:40Z",
+    "url": "https://wandb.ai/1914708967-harbin-institute-of-technology/ufo-humanoid/runs/1ci2ojfy",
+    "world_size": 8,
+    "global_env_steps": 191741952,
+    "FPS": 1077.3288500183323,
+    "duration_min": 2994.60210643212,
+    "runtime_s": 179910.413366181,
+    "gpu_count_meta": 8,
+    "gpu_meta": "NVIDIA GeForce RTX 5090"
+  },
+  {
+    "id": "u1igc4kn",
+    "name": "ufo_fb_2gpu",
+    "state": "finished",
+    "group": "ufo_fb",
+    "tags": [
+      "H200*2"
+    ],
+    "created_at": "2026-10-14T01:12:37Z",
+    "heartbeatAt": "2026-10-17T00:27:50Z",
+    "url": "https://wandb.ai/1914708967-harbin-institute-of-technology/ufo-humanoid/runs/u1igc4kn",
+    "world_size": 2,
+    "global_env_steps": 191864832,
+    "FPS": 1215.09123045718,
+    "duration_min": 476.6365156849226,
+    "runtime_s": 231965.083064926,
+    "gpu_count_meta": 2,
+    "gpu_meta": "NVIDIA H200"
+  }
+]

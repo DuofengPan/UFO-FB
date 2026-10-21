@@ -15,6 +15,7 @@ cache/
 checkpoint/
 tea_debug.log
 *.log
+.train_analysis/
 
 # OS/editor
 .DS_Store

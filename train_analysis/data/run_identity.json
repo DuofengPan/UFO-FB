@@ -1,0 +1,32 @@
+{
+  "run_id": "1ci2ojfy",
+  "name": "ufo_fb_8gpu",
+  "state": "finished",
+  "url": "https://wandb.ai/1914708967-harbin-institute-of-technology/ufo-humanoid/runs/1ci2ojfy",
+  "group": "ufo_fb",
+  "tags": [
+    "4090*8"
+  ],
+  "created_at_utc": "2026-10-13T01:42:05Z",
+  "created_at_sgt": "2026-10-13T09:42:05+08:00",
+  "heartbeat_at_utc": "2026-10-15T03:40:40Z",
+  "heartbeat_at_sgt": "2026-10-15T11:40:40+08:00",
+  "runtime_s_wandb": 179910.413366181,
+  "duration_min_train_metric": 2994.60210643212,
+  "final_global_env_steps": 191741952,
+  "gpu_meta": "NVIDIA GeForce RTX 5090",
+  "gpu_count_meta": 8,
+  "cudaVersion": "13.3",
+  "python": "CPython 3.10.22",
+  "os": "Linux-5.15.0-198-generic-x86_64-with-glibc2.35",
+  "cpu_count": 192,
+  "cpu_count_logical": 384,
+  "memory_total_bytes": "1081555980288",
+  "git": {
+    "remote": "https://github.com/Roboparty/UFO.git",
+    "commit": "18693b13839c1295964306635c18c83c71dcc929"
+  },
+  "host": "cf2aab823c85",
+  "executable": "/root/miniforge3/envs/ufo/bin/python",
+  "note_tag_vs_hardware": "W&B tag is 4090*8 but metadata and Warp logs show NVIDIA GeForce RTX 5090 x8"
+}

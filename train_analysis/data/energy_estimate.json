@@ -1,0 +1,6 @@
+{
+  "method": "trapezoidal integration of system.gpu.{i}.powerWatts over W&B system stream; gaps>120s skipped",
+  "total_joules": 290847627.6665213,
+  "total_kwh": 80.7910076851448,
+  "note": "Approximate; not a calibrated power meter reading"
+}
