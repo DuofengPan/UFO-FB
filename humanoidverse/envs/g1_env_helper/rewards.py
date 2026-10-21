@@ -439,6 +439,67 @@ class JumpReward(RewardFunction):
 
 
 @dataclasses.dataclass
+class SingleLegHopReward(RewardFunction):
+    side: str = "left"          # 抬起的那条腿
+    swing_height: float = 0.2   # 摆动脚踝目标高度，米
+    min_clearance: float = 0.08 # 摆动脚至少比支撑脚高出这么多
+
+    def compute(self, model: mujoco.MjModel, data: mujoco.MjData) -> float:
+        swing = "left_ankle_roll_link" if self.side == "left" else "right_ankle_roll_link"
+        stance = "right_ankle_roll_link" if self.side == "left" else "left_ankle_roll_link"
+        swing_z = get_xpos(model, data, swing)[-1]
+        stance_z = get_xpos(model, data, stance)[-1]
+        pelvis_z = get_xpos(model, data, "pelvis")[-1]
+        com_vel = get_center_of_mass_linvel(model, data)
+        upright_vec = get_sensor_data(model, data, "upvector_torso")
+
+        upright = rewards.tolerance(
+            np.sum(np.square(upright_vec - np.array([0.073, 0.0, 1.0]))),
+            bounds=(0, 0.1),
+            margin=3,
+            value_at_margin=0,
+            sigmoid="linear",
+        )
+        pelvis_up = rewards.tolerance(
+            pelvis_z,
+            bounds=(0.85, float("inf")),  # 默认站立骨盆高度约 0.79 m
+            margin=0.4,
+            value_at_margin=0.01,
+            sigmoid="linear",
+        )
+        foot_up = rewards.tolerance(
+            swing_z,
+            bounds=(self.swing_height, self.swing_height + 0.15),
+            margin=self.swing_height,
+            value_at_margin=0.01,
+            sigmoid="linear",
+        )
+        one_foot = rewards.tolerance(
+            swing_z - stance_z,
+            bounds=(self.min_clearance, float("inf")),
+            margin=self.min_clearance,
+            value_at_margin=0.01,
+            sigmoid="linear",
+        )
+        rising = rewards.tolerance(
+            com_vel[-1],
+            bounds=(0.4, float("inf")),
+            margin=0.8,
+            value_at_margin=0.01,
+            sigmoid="linear",
+        )
+        stay_put = rewards.tolerance(com_vel[:2], margin=0.4).mean()
+        return upright * pelvis_up * foot_up * one_foot * rising * stay_put
+
+    @staticmethod
+    def reward_from_name(name: str) -> Optional["RewardFunction"]:
+        match = re.search(r"^hop-(left|right)-(\d+\.*\d*)$", name)
+        if match:
+            return SingleLegHopReward(side=match.group(1), swing_height=float(match.group(2)))
+        return None
+
+
+@dataclasses.dataclass
 class RotationReward(RewardFunction):
     axis: str = "x"
     target_ang_velocity: float = 5.0

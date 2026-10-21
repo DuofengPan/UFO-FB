@@ -70,6 +70,7 @@ def run_train(
     data_path: Path | None = None,
     max_episode_length_s: float = EPISODE_LENGTH_S,
     seed: int = 42,
+    resume: Path | None = None,
 ) -> Path:
     ensure_vendored_rsl_rl()
     import rsl_rl
@@ -131,6 +132,18 @@ def run_train(
         )
 
     runner = OnPolicyRunner(vec, train_cfg, log_dir=str(log_dir), device=device)
+    if resume is not None:
+        resume = Path(resume).expanduser().resolve()
+        if not resume.is_file():
+            raise FileNotFoundError(f"--resume not found: {resume}")
+        runner.load(str(resume), map_location=device)
+        if local_rank == 0:
+            print(
+                f"[INFO] resumed from {resume} at iter={runner.current_learning_iteration}; "
+                f"will run +{max_iterations} iters "
+                f"(→ {runner.current_learning_iteration + max_iterations})",
+                flush=True,
+            )
     runner.learn(num_learning_iterations=max_iterations, init_at_random_ep_len=True)
     out = log_dir / f"model_{runner.current_learning_iteration}.pt"
     vec.close()
@@ -159,6 +172,13 @@ def main(argv: list[str] | None = None) -> None:
         help=f"Episode length in seconds (default {EPISODE_LENGTH_S}, same as legacy dodge)",
     )
     p.add_argument("--seed", type=int, default=42)
+    p.add_argument(
+        "--resume",
+        type=Path,
+        default=None,
+        help="rsl_rl model_*.pt to resume (loads actor/critic/optimizer + iter). "
+        "--max-iterations is ADDITIONAL iters after the resumed iter.",
+    )
     args = p.parse_args(argv)
 
     device = _resolve_device(args.device)
@@ -173,6 +193,7 @@ def main(argv: list[str] | None = None) -> None:
         data_path=args.data_path,
         max_episode_length_s=args.max_episode_length_s,
         seed=args.seed,
+        resume=args.resume,
     )
     if int(os.environ.get("LOCAL_RANK", "0")) == 0:
         print(f"saved: {out}")

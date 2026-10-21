@@ -359,6 +359,10 @@ class UfoHostPlayEnv(_UfoHostBase):
     """Viewer-compatible adapter: UFO VectorEnv + GoalBank ``z`` + ball aug.
 
     Exposes ``cfg`` / ``num_envs`` / ``unwrapped`` for ``NativeMujocoViewer``.
+
+    ``sticky_goals`` (default True for interactive play): after hit / fell / timeout
+    (or Enter reset), keep the currently selected ``goal_z`` (e.g. from ``n``/``b``)
+    instead of snapping back to ``goal_bank.names[0]``.
     """
 
     def __init__(
@@ -370,6 +374,7 @@ class UfoHostPlayEnv(_UfoHostBase):
         augmentation_dim: int = 6,
         multi_z: bool = False,
         fixed_goal_name: str | None = None,
+        sticky_goals: bool = True,
     ) -> None:
         super().__init__(
             vector_env,
@@ -379,11 +384,14 @@ class UfoHostPlayEnv(_UfoHostBase):
             multi_z=multi_z,
             fixed_goal_name=fixed_goal_name,
         )
+        self.sticky_goals = bool(sticky_goals)
         self.reset()
 
     def reset(self) -> TensorDict:
         ufo_obs, _info = self.vector.reset(to_numpy=False)
-        self._resample_goals()
+        # First boot: assign a goal. Later Enter / full reset: keep n/b selection.
+        if not (self.sticky_goals and self._goal_names and self._goal_names[0]):
+            self._resample_goals()
         self._cached_obs = self._pack_obs(ufo_obs, with_critic=False)
         return self._cached_obs
 
@@ -392,8 +400,9 @@ class UfoHostPlayEnv(_UfoHostBase):
         ufo_obs, rew, terminated, truncated, info = self.vector.step(actions, to_numpy=False)
         dones_bool = terminated.bool() | truncated.bool()
         dones = dones_bool.to(dtype=torch.long)
-        # HumanoidVerseMjlabCore already reset done envs inside step — only resample z.
-        if bool(dones_bool.any()):
+        # UFO core already reset physics on done. Interactive play keeps sticky goal_z
+        # (hit/fell/timeout must not jump back to names[0] after user pressed n/b).
+        if bool(dones_bool.any()) and not self.sticky_goals:
             self._resample_goals(dones_bool.nonzero(as_tuple=False).flatten())
         self._cached_obs = self._pack_obs(ufo_obs, with_critic=False)
         return self._cached_obs, rew, dones, dict(info) if info is not None else {}

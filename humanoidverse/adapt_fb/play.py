@@ -300,12 +300,16 @@ def run_play(
         headless=(viewer == "none"),
         ball=ball,
     )
+    # Interactive viewer: sticky goal across hit/fell/timeout (keep n/b selection).
+    # Headless: optional multi_z resample each episode for smoke stats.
+    interactive = viewer != "none"
     env = UfoHostPlayEnv(
         vector,
         bank,
         ball=ball,
-        multi_z=multi_z and viewer == "none",
-        fixed_goal_name=None if multi_z else bank.names[0],
+        multi_z=multi_z and not interactive,
+        fixed_goal_name=None if (multi_z and not interactive) else bank.names[0],
+        sticky_goals=interactive,
     )
     policy = _Policy(adapted, mean=mean, agent=agent, aug_normalizer=aug_normalizer)
 

@@ -202,7 +202,8 @@ python -m humanoidverse.adapt_fb.play --agent adapted \
   --ball throw --viewer native --device cuda:0
 ```
 
-Keys: `n`/`b` cycle goal; Space pause; Enter reset; `+/-` speed.
+Keys: `n`/`b` cycle goal; Space pause; Enter reset; `+/-` speed.  
+Interactive play keeps the **current** `goal_z` across hit / fell / timeout / Enter (does not snap back to `names[0]`).
 
 Needs `runs/ufo_fb_8gpu/checkpoint` and `runs/ufo_fb_8gpu/goal_inference/goal_reaching.pkl`
 (or `UFO_FB_CHECKPOINT` / `UFO_FB_GOAL_PKL`).

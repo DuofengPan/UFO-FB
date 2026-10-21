@@ -26,3 +26,6 @@ model/
 # Downloaded public motion data
 humanoidverse/data/lafan_29dof_10s-clipped.pkl
 humanoidverse/data/lafan_29dof.pkl
+
+# Local training analysis notes
+train_analysis/

@@ -219,6 +219,10 @@ def run_goal_inference(
 
         goals_to_evaluate = load_and_validate_goal_json(goal_json_path, num_dof=num_dof)
         first_goal = goals_to_evaluate[0]
+        # Keep every clip resident so JSON motion_id stays an index into the full library.
+        # set_is_evaluating otherwise reloads only num_envs clips and the original id no longer fits.
+        env._motion_lib.load_all_motions()
+        env.is_evaluating = True
 
         z_dict: dict[str, object] = {}
         with torch.no_grad():
@@ -280,25 +284,40 @@ def run_goal_inference(
                 f"[INFO] Reset goal rollout to demo start: "
                 f"motion_id={first_motion_id}, motion_name={first_motion_name}, frame=0"
             )
-            frames = []
+            frames: list = []
+            per_goal_frames: list = []
             goal_idx = -1
             goal_names = list(z_dict.keys())
             z = None
             use_env_render = True
+            current_goal_name = None
             for step in tqdm(range(int(episode_len)), desc="steps", leave=False):
                 if step % int(goal_switch_interval) == 0:
+                    # Flush previous per-goal clip
+                    if current_goal_name is not None and per_goal_frames:
+                        per_path = video_dir / f"{current_goal_name}.mp4"
+                        media.write_video(str(per_path), per_goal_frames, fps=fps)
+                        print(f"[INFO] Saved per-goal video: {per_path} ({len(per_goal_frames)} frames)")
+                        per_goal_frames = []
                     goal_idx = (goal_idx + 1) % len(goal_names)
-                    print(f"[INFO] Switching to goal {goal_names[goal_idx]} at step {step}")
-                    z = torch.as_tensor(z_dict[goal_names[goal_idx]], device=device, dtype=torch.float32)
+                    current_goal_name = goal_names[goal_idx]
+                    print(f"[INFO] Switching to goal {current_goal_name} at step {step}")
+                    z = torch.as_tensor(z_dict[current_goal_name], device=device, dtype=torch.float32)
 
                 action = model.act(observation, z.repeat(1, 1), mean=True)
                 observation, _reward, terminated, truncated, _info = wrapped_env.step(action, to_numpy=False)
                 frame, use_env_render = render_policy_frame(wrapped_env, renderer, use_env_render=use_env_render)
                 frames.append(frame)
+                per_goal_frames.append(frame)
 
                 if bool(torch.as_tensor(terminated).any()) or bool(torch.as_tensor(truncated).any()):
                     print(f"[INFO] Episode ended at step={step}; stopping goal rollout video.")
                     break
+
+            if current_goal_name is not None and per_goal_frames:
+                per_path = video_dir / f"{current_goal_name}.mp4"
+                media.write_video(str(per_path), per_goal_frames, fps=fps)
+                print(f"[INFO] Saved per-goal video: {per_path} ({len(per_goal_frames)} frames)")
 
             video_path = video_dir / "goal.mp4"
             media.write_video(str(video_path), frames, fps=fps)
