@@ -49,7 +49,8 @@ def expand_motion_paths(
             if glob.has_magic(candidate_str):
                 found_for_raw = [Path(item) for item in sorted(glob.glob(candidate_str))]
             elif candidate.is_dir():
-                found_for_raw = sorted(candidate.glob(f"*{suffix}"))
+                # Recursive: Astro SuperMimic and similar packs nest motions under category folders.
+                found_for_raw = sorted(candidate.rglob(f"*{suffix}"))
             elif candidate.exists():
                 found_for_raw = [candidate]
             if found_for_raw:

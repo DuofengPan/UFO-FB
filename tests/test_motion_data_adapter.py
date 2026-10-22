@@ -355,6 +355,49 @@ class MotionDataAdapterTest(unittest.TestCase):
             self.assertEqual(data["state"].joint_names, ["joint1", "joint2"])
             self.assertAlmostEqual(float(data["state"].dof_pos[1, 0]), 0.2)
 
+    def test_body_link_npz_reader_extracts_root_and_reorders_dof(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            _, robot_config = _write_tiny_robot(root)
+            spec = load_robot_spec(robot_config)
+            frames = 5
+            # Nested path ensures motion_key keeps relative folders.
+            path = root / "pack" / "clip_a" / "motion_actor.npz"
+            path.parent.mkdir(parents=True, exist_ok=True)
+            # dof_names intentionally swapped vs RobotSpec order.
+            dof_names = np.asarray(["joint2", "joint1"])
+            body_names = np.asarray(["base", "link1", "link2"])
+            body_pos = np.zeros((frames, 3, 3), dtype=np.float32)
+            body_pos[:, 0, 2] = 1.0
+            # wxyz near-identity for base
+            body_quat = np.zeros((frames, 3, 4), dtype=np.float32)
+            body_quat[:, :, 0] = 1.0
+            dof = np.stack([np.arange(frames, dtype=np.float32) + 10.0, np.arange(frames, dtype=np.float32) + 0.1], axis=1)
+            np.savez(
+                path,
+                fps=np.asarray(50),
+                schema_version=np.asarray(2),
+                body_pose_frame=np.asarray("body_link"),
+                robot_model_key=np.asarray("tiny"),
+                dof_names=dof_names,
+                dof_positions=dof,
+                body_names=body_names,
+                body_positions=body_pos,
+                body_rotations=body_quat,
+            )
+            data = read_robot_state_npz(str(path), source_name="body_link", robot_spec=spec, base_dir=root)
+            self.assertEqual(list(data), ["pack/clip_a/motion_actor"])
+            motion = data["pack/clip_a/motion_actor"]
+            self.assertEqual(motion.metadata["reader"], "robot_state_npz_body_link")
+            self.assertAlmostEqual(float(motion.root_pos[0, 2]), 1.0)
+            # Converted to xyzw for RobotSpec.root_quat_order
+            self.assertAlmostEqual(float(motion.root_quat[0, 3]), 1.0)
+            converted = load_robot_state_npz(str(path), source_name="body_link", robot_spec=spec, base_dir=root)
+            ufo = converted["pack/clip_a/motion_actor"]
+            # After reorder: joint1 is second source column (0.1, 1.1, ...)
+            self.assertAlmostEqual(float(ufo["dof_pos"][1, 0]), 1.1)
+            self.assertAlmostEqual(float(ufo["dof_pos"][1, 1]), 11.0)
+
     def test_robot_state_converter_outputs_ufo_motion_dict(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             _, robot_config = _write_tiny_robot(Path(tmpdir))

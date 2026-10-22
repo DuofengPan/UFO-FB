@@ -188,7 +188,19 @@ uv run python -m humanoidverse.tools.data_build \
 
 无表头 CSV 支持两种格式：`root_pos` xyz、`root_quat` xyzw、随后是 XML/control-joint order 的 DOF position；也可以在最前面增加可选的 `time` 列。
 
-如只想检查 CSV schema，可以先运行 `humanoidverse.tools.data_inspect`。
+`robot_state_npz` 除了标准 `root_pos/root_quat/dof_pos` 外，也支持 Astro SuperMimic 的 body-link NPZ（`dof_positions` + `body_*`，自动取 `pelvis` 为 root，并按 `dof_names` 重排）。大批量 selection 可走：
+
+```bash
+PYTHONPATH=. python scripts/convert_astro_npz_to_ufo_pkl.py \
+  --robot configs/robots/astro_p2_29dof.yaml \
+  --motion-root /data/share/astro_supermimic_88883_20261022/motions \
+  --selection /data/share/astro_supermimic_88883_20261022/training_selection_88724.yaml \
+  --out-dir humanoidverse/data/astro_supermimic_ufo \
+  --manifest-out configs/data/astro_supermimic_near10s.yaml \
+  --prefer-diversity --force
+```
+
+如只想检查 CSV/NPZ schema，可以先运行 `humanoidverse.tools.data_inspect`。
 
 ### 4. Smoke training
 

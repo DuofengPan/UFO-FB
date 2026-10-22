@@ -309,36 +309,66 @@ def _inspect_npz_file(
     missing: list[str] = []
     notes: list[str] = []
     with np.load(path, allow_pickle=True) as npz:
-        for field_name in ("root_pos", "root_quat", "dof_pos"):
-            if field_name not in npz:
-                missing.append(field_name)
-        if missing:
-            raise ValueError(f"robot_state_npz file={path} missing fields: {missing}")
-        root_pos = np.asarray(npz["root_pos"])
-        root_quat = np.asarray(npz["root_quat"])
-        dof_pos = np.asarray(npz["dof_pos"])
-        if root_pos.ndim != 2 or root_pos.shape[1] != 3:
-            missing.append(f"root_pos shape [T,3], got {root_pos.shape}")
-        if root_quat.ndim != 2 or root_quat.shape[1] != 4:
-            missing.append(f"root_quat shape [T,4], got {root_quat.shape}")
-        if dof_pos.ndim != 2:
-            missing.append(f"dof_pos shape [T,N], got {dof_pos.shape}")
-        if root_pos.shape[0] != root_quat.shape[0] or root_pos.shape[0] != dof_pos.shape[0]:
-            missing.append("root_pos/root_quat/dof_pos must share T")
-        if "joint_names" in npz:
-            joint_names = _string_list_from_npz(npz["joint_names"])
-            absent = [joint for joint in robot_spec.control_joint_names if joint not in set(joint_names)]
+        body_link = all(
+            key in npz for key in ("dof_positions", "body_positions", "body_rotations", "body_names", "dof_names")
+        )
+        if body_link:
+            body_names = _string_list_from_npz(npz["body_names"])
+            dof_names = _string_list_from_npz(npz["dof_names"])
+            body_positions = np.asarray(npz["body_positions"])
+            dof_pos = np.asarray(npz["dof_positions"])
+            if body_positions.ndim != 3 or body_positions.shape[2] != 3:
+                missing.append(f"body_positions shape [T,B,3], got {body_positions.shape}")
+            if dof_pos.ndim != 2:
+                missing.append(f"dof_positions shape [T,N], got {dof_pos.shape}")
+            absent = [joint for joint in robot_spec.control_joint_names if joint not in set(dof_names)]
             if absent:
-                missing.append("missing joint_names entries: " + ", ".join(absent))
+                missing.append("missing dof_names entries: " + ", ".join(absent))
             else:
-                notes.append("joint_names found; dof_pos will be reordered into RobotSpec.control_joint_names.")
+                notes.append(
+                    "body-link Astro/SuperMimic NPZ detected; root from "
+                    f"{robot_spec.base_body if robot_spec.base_body in body_names else body_names[0]}, "
+                    "dof_pos reordered via dof_names."
+                )
+            if missing:
+                raise ValueError(f"robot_state_npz file={path} invalid body-link schema: {missing}")
+            motion_fps = _fps_from_npz(npz, path, fps)
+            frames = int(dof_pos.shape[0])
+            dof_pos_mode = "body_link_npz"
         else:
-            expected = len(robot_spec.control_joint_names)
-            if dof_pos.ndim == 2 and dof_pos.shape[1] != expected:
-                missing.append(f"dof_pos width must be {expected} without joint_names, got {dof_pos.shape[1]}")
-            notes.append("No joint_names found; assuming dof_pos already follows RobotSpec.control_joint_names.")
-        motion_fps = _fps_from_npz(npz, path, fps)
-        frames = int(root_pos.shape[0])
+            for field_name in ("root_pos", "root_quat", "dof_pos"):
+                if field_name not in npz:
+                    missing.append(field_name)
+            if missing:
+                raise ValueError(f"robot_state_npz file={path} missing fields: {missing}")
+            root_pos = np.asarray(npz["root_pos"])
+            root_quat = np.asarray(npz["root_quat"])
+            dof_pos = np.asarray(npz["dof_pos"])
+            if root_pos.ndim != 2 or root_pos.shape[1] != 3:
+                missing.append(f"root_pos shape [T,3], got {root_pos.shape}")
+            if root_quat.ndim != 2 or root_quat.shape[1] != 4:
+                missing.append(f"root_quat shape [T,4], got {root_quat.shape}")
+            if dof_pos.ndim != 2:
+                missing.append(f"dof_pos shape [T,N], got {dof_pos.shape}")
+            if root_pos.shape[0] != root_quat.shape[0] or root_pos.shape[0] != dof_pos.shape[0]:
+                missing.append("root_pos/root_quat/dof_pos must share T")
+            if "joint_names" in npz:
+                joint_names = _string_list_from_npz(npz["joint_names"])
+                absent = [joint for joint in robot_spec.control_joint_names if joint not in set(joint_names)]
+                if absent:
+                    missing.append("missing joint_names entries: " + ", ".join(absent))
+                else:
+                    notes.append("joint_names found; dof_pos will be reordered into RobotSpec.control_joint_names.")
+            else:
+                expected = len(robot_spec.control_joint_names)
+                if dof_pos.ndim == 2 and dof_pos.shape[1] != expected:
+                    missing.append(f"dof_pos width must be {expected} without joint_names, got {dof_pos.shape[1]}")
+                notes.append("No joint_names found; assuming dof_pos already follows RobotSpec.control_joint_names.")
+            if missing:
+                raise ValueError(f"robot_state_npz file={path} invalid fields: {missing}")
+            motion_fps = _fps_from_npz(npz, path, fps)
+            frames = int(root_pos.shape[0])
+            dof_pos_mode = "npz"
     return FileInspection(
         path=path,
         frames=frames,
@@ -352,7 +382,7 @@ def _inspect_npz_file(
             keep_short=keep_short,
             min_clip_seconds=min_clip_seconds,
         ),
-        dof_pos_mode="npz",
+        dof_pos_mode=dof_pos_mode,
         missing_columns=missing,
         notes=notes,
     )

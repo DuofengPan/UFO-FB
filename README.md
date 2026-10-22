@@ -199,7 +199,19 @@ uv run python -m humanoidverse.tools.data_build \
 
 Headerless RobotState CSV files are accepted. Without a header, columns are interpreted as `root_pos` xyz, `root_quat` xyzw, then DOF positions in the robot XML/control-joint order; an optional leading `time` column is also accepted.
 
-Optional: run `humanoidverse.tools.data_inspect` first if you want to validate the CSV schema without building cache files.
+`robot_state_npz` also accepts Astro SuperMimic body-link packs (`dof_positions` + `body_*`). For a YAML selection of many NPZs, shard-convert with:
+
+```bash
+PYTHONPATH=. python scripts/convert_astro_npz_to_ufo_pkl.py \
+  --robot configs/robots/astro_p2_29dof.yaml \
+  --motion-root /data/share/astro_supermimic_88883_20261022/motions \
+  --selection /data/share/astro_supermimic_88883_20261022/training_selection_88724.yaml \
+  --out-dir humanoidverse/data/astro_supermimic_ufo \
+  --manifest-out configs/data/astro_supermimic_near10s.yaml \
+  --prefer-diversity --force
+```
+
+Optional: run `humanoidverse.tools.data_inspect` first if you want to validate the CSV/NPZ schema without building cache files.
 
 ### 4. Run smoke training
 

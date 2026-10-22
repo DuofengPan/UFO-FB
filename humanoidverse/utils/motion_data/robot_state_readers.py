@@ -219,6 +219,112 @@ def _string_list_from_npz(value: Any) -> list[str]:
     return values
 
 
+def _is_body_link_npz(npz: Any) -> bool:
+    """Astro SuperMimic schema_v2: body poses + dof_positions (not root_pos/dof_pos)."""
+
+    required = ("dof_positions", "body_positions", "body_rotations", "body_names", "dof_names")
+    return all(key in npz for key in required)
+
+
+def _quat_wxyz_to_xyzw(quat: np.ndarray) -> np.ndarray:
+    q = np.asarray(quat, dtype=np.float32)
+    if q.ndim != 2 or q.shape[1] != 4:
+        raise ValueError(f"quat must have shape [T, 4], got {q.shape}")
+    return q[:, [1, 2, 3, 0]].copy()
+
+
+def _infer_body_link_quat_order(quat: np.ndarray) -> str:
+    """Heuristic: near-identity poses store ~1 on the w channel."""
+
+    q = np.asarray(quat, dtype=np.float64)
+    if q.ndim != 2 or q.shape[1] != 4 or q.shape[0] == 0:
+        return "wxyz"
+    # Compare |mean| of first vs last component over the clip.
+    if float(np.mean(np.abs(q[:, 0]))) >= float(np.mean(np.abs(q[:, 3]))):
+        return "wxyz"
+    return "xyzw"
+
+
+def _motion_key_for_path(path: Path, *, base_dir: Path | None) -> str:
+    if base_dir is not None:
+        try:
+            rel = path.resolve().relative_to(base_dir.resolve())
+            return str(rel.with_suffix("")).replace("\\", "/")
+        except ValueError:
+            pass
+    return path.stem
+
+
+def _robot_state_from_body_link_npz(
+    npz: Any,
+    *,
+    path: Path,
+    source_name: str,
+    robot_spec: RobotSpec,
+    fps: float | int | None,
+    motion_key: str,
+) -> RobotStateMotion:
+    body_names = _string_list_from_npz(npz["body_names"])
+    dof_names = _string_list_from_npz(npz["dof_names"])
+    body_positions = np.asarray(npz["body_positions"], dtype=np.float32)
+    body_rotations = np.asarray(npz["body_rotations"], dtype=np.float32)
+    dof_positions = np.asarray(npz["dof_positions"], dtype=np.float32)
+
+    if body_positions.ndim != 3 or body_positions.shape[2] != 3:
+        raise ValueError(f"body_link npz file={path} body_positions must be [T,B,3], got {body_positions.shape}")
+    if body_rotations.ndim != 3 or body_rotations.shape[2] != 4:
+        raise ValueError(f"body_link npz file={path} body_rotations must be [T,B,4], got {body_rotations.shape}")
+    if dof_positions.ndim != 2:
+        raise ValueError(f"body_link npz file={path} dof_positions must be [T,N], got {dof_positions.shape}")
+    if len(body_names) != body_positions.shape[1] or len(body_names) != body_rotations.shape[1]:
+        raise ValueError(f"body_link npz file={path} body_names length mismatches body tensors")
+    if len(dof_names) != dof_positions.shape[1]:
+        raise ValueError(f"body_link npz file={path} dof_names length mismatches dof_positions")
+
+    if robot_spec.base_body in body_names:
+        root_idx = body_names.index(robot_spec.base_body)
+    elif "pelvis" in body_names:
+        root_idx = body_names.index("pelvis")
+    else:
+        root_idx = 0
+        logger.warning(
+            f"body_link npz file={path} missing base_body={robot_spec.base_body!r}; using body[{root_idx}]={body_names[0]!r}"
+        )
+
+    root_pos = body_positions[:, root_idx, :].copy()
+    root_quat_raw = body_rotations[:, root_idx, :].copy()
+    detected_order = _infer_body_link_quat_order(root_quat_raw)
+    if detected_order == "wxyz" and robot_spec.root_quat_order == "xyzw":
+        root_quat = _quat_wxyz_to_xyzw(root_quat_raw)
+        quat_note = "wxyz->xyzw"
+    elif detected_order == "xyzw" and robot_spec.root_quat_order == "wxyz":
+        # xyzw -> wxyz
+        root_quat = root_quat_raw[:, [3, 0, 1, 2]].copy()
+        quat_note = "xyzw->wxyz"
+    else:
+        root_quat = root_quat_raw
+        quat_note = f"keep-{detected_order}"
+
+    motion_fps = _fps_from_npz(npz, path, fps)
+    return RobotStateMotion(
+        motion_key=motion_key,
+        root_pos=root_pos,
+        root_quat=root_quat,
+        dof_pos=dof_positions,
+        fps=motion_fps,
+        joint_names=dof_names,
+        source=source_name,
+        metadata={
+            "path": str(path),
+            "reader": "robot_state_npz_body_link",
+            "schema_version": int(_scalar_from_npz(npz["schema_version"])) if "schema_version" in npz else None,
+            "robot_model_key": _motion_key_from_npz(npz["robot_model_key"]) if "robot_model_key" in npz else None,
+            "root_body": body_names[root_idx],
+            "root_quat_convert": quat_note,
+        },
+    )
+
+
 def _fps_from_npz(npz: Any, path: Path, fps: float | int | None) -> float:
     if fps is not None:
         motion_fps = float(fps)
@@ -250,6 +356,23 @@ def read_robot_state_npz(
     data: dict[str, RobotStateMotion] = {}
     for path in expand_motion_paths(path_spec, base_dir=base_dir, suffix=".npz"):
         with np.load(path, allow_pickle=True) as npz:
+            motion_key = (
+                _motion_key_from_npz(npz["motion_key"])
+                if "motion_key" in npz
+                else _motion_key_for_path(path, base_dir=base_dir)
+            )
+            if motion_key in data:
+                raise ValueError(f"Duplicate motion_key={motion_key} while reading robot_state_npz source={source_name}")
+            if _is_body_link_npz(npz):
+                data[motion_key] = _robot_state_from_body_link_npz(
+                    npz,
+                    path=path,
+                    source_name=source_name,
+                    robot_spec=robot_spec,
+                    fps=fps,
+                    motion_key=motion_key,
+                )
+                continue
             missing = [field for field in ("root_pos", "root_quat", "dof_pos") if field not in npz]
             if missing:
                 raise ValueError(f"robot_state_npz source={source_name}, file={path}: missing fields {missing}")
@@ -258,9 +381,6 @@ def read_robot_state_npz(
                 logger.warning(
                     f"robot_state_npz file={path} has no joint_names; assuming dof_pos is ordered as RobotSpec.control_joint_names"
                 )
-            motion_key = _motion_key_from_npz(npz["motion_key"]) if "motion_key" in npz else path.stem
-            if motion_key in data:
-                raise ValueError(f"Duplicate motion_key={motion_key} while reading robot_state_npz source={source_name}")
             data[motion_key] = RobotStateMotion(
                 motion_key=motion_key,
                 root_pos=np.asarray(npz["root_pos"], dtype=np.float32),
