@@ -32,7 +32,7 @@ dependencies = [
     "termcolor>=3.0.1",
     "torch>=2.7.0,<2.8.0",
     "torchrunx>=0.3.4",
-    "wandb>=0.26.0",
+    "swanlab>=0.6.0",
 ]
 
 [[tool.uv.index]]
@@ -63,12 +63,12 @@ dev = [
 index-strategy = "unsafe-best-match"
 override-dependencies = [
     "dm-control>=1.0.20",
-    "wandb>=0.26.0",
+    "swanlab>=0.6.0",
 ]
 
 [tool.ruff]
 line-length = 140
-extend-exclude = ["wandb"]
+extend-exclude = ["swanlog"]
 
 [tool.ruff.lint]
 # E402: imports at the top of the files (but lazy import is useful to reduce memory use)

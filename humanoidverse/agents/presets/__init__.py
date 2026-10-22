@@ -17,7 +17,7 @@ def build_agent_preset(
     lr_scale: float,
     clip_grad_norm: float,
     cartwheel_aux_safe: bool,
-    wandb_project: str,
+    swanlab_project: str,
 ) -> dict[str, Any]:
     if agent == "fb":
         return {
@@ -29,8 +29,8 @@ def build_agent_preset(
                 clip_grad_norm=clip_grad_norm,
                 cartwheel_aux_safe=cartwheel_aux_safe,
             ),
-            "wandb_group": "ufo_fb",
-            "wandb_project": wandb_project,
+            "swanlab_group": "ufo_fb",
+            "swanlab_project": swanlab_project,
             "train_runtime": dict(FB_TRAIN_RUNTIME),
         }
     raise ValueError(f"Unsupported agent preset: {agent}. Supported presets: fb")

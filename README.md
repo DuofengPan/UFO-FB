@@ -75,15 +75,21 @@ Install the environment:
 uv sync
 ```
 
-### Optional: W&B logging
+### Optional: SwanLab logging
 
-W&B logging is optional. To enable it, authenticate first, optionally set your own entity, then add `--use-wandb --wandb-run-name ...` to a training command:
+SwanLab logging is optional. Create an account at [swanlab.cn](https://swanlab.cn), then authenticate and enable logging on a training command:
 
 ```bash
-uv run wandb login
-export WANDB_ENTITY=your_entity   # optional
-# then add --use-wandb --wandb-run-name ufo_fb_g1
+# Interactive login (stores API key locally), or set SWANLAB_API_KEY
+uv run swanlab login
+# export SWANLAB_API_KEY=your_api_key
+# Optional: upload under an org workspace instead of your personal space
+# export SWANLAB_WORKSPACE=your_org_username
+
+# then add --use-swanlab --swanlab-run-name ufo_fb_g1
 ```
+
+Default project is `ufo-humanoid`. Metrics appear under [swanlab.cn](https://swanlab.cn) after you log in.
 
 ## Path A: Unitree G1 Quick Start
 

@@ -30,7 +30,7 @@ class UpdateZCliTest(unittest.TestCase):
             lr_scale=1.0,
             clip_grad_norm=0.0,
             cartwheel_aux_safe=False,
-            wandb_project="test",
+            swanlab_project="test",
         )
         self.assertEqual(selected["agent_cfg"].train.update_z_every_step, 37)
 
@@ -41,8 +41,8 @@ class UpdateZCliTest(unittest.TestCase):
             num_envs=1,
             num_env_steps=1,
             seed=1,
-            use_wandb=False,
-            wandb_run_name=None,
+            use_swanlab=False,
+            swanlab_run_name=None,
             smoke=True,
             agent="fb",
         )
@@ -57,7 +57,7 @@ class UpdateZCliTest(unittest.TestCase):
             lr_scale=1.0,
             clip_grad_norm=0.0,
             cartwheel_aux_safe=False,
-            wandb_project="test",
+            swanlab_project="test",
         )
         self.assertIn("aux_rewards", _trajectory_output_keys(selected["agent_cfg"]))
 

@@ -8,12 +8,14 @@ This document mirrors the repository quick start with a little more context for 
 uv sync
 ```
 
-For W&B logging, authenticate before launching multi-process training:
+For SwanLab logging, authenticate before launching multi-process training:
 
 ```bash
-uv run wandb login
+uv run swanlab login
 # or
-export WANDB_API_KEY=your_wandb_api_key
+export SWANLAB_API_KEY=your_swanlab_api_key
+# optional org workspace:
+# export SWANLAB_WORKSPACE=your_org_username
 ```
 
 ## Defaults
@@ -37,8 +39,8 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
 ./run_train.sh \
   --agent fb \
   --gpu-ids all \
-  --use-wandb \
-  --wandb-run-name ufo_fb_8gpu
+  --use-swanlab \
+  --swanlab-run-name ufo_fb_8gpu
 ```
 
 ## Tracking Inference

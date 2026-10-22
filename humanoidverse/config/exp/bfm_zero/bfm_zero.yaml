@@ -8,7 +8,7 @@ defaults:
   - /robot: g1/g1_29dof_hard_waist
   - /terrain: terrain_locomotion_plane
   - /obs: bfm_zero_obs
-  # - /opt: wandb
+  # - /opt: swanlab
   - /callbacks: im_eval
 
 exp_base: ${hydra:runtime.choices.exp}

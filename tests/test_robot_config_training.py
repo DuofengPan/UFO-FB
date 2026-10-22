@@ -121,8 +121,8 @@ class RobotConfigTrainingTest(unittest.TestCase):
             num_envs=1,
             num_env_steps=1,
             seed=1,
-            use_wandb=False,
-            wandb_run_name=None,
+            use_swanlab=False,
+            swanlab_run_name=None,
             smoke=True,
         )
         self.assertTrue(str(cfg.env.robot_config_path).endswith("configs/robots/g1_29dof.yaml"))
@@ -135,8 +135,8 @@ class RobotConfigTrainingTest(unittest.TestCase):
             num_envs=1,
             num_env_steps=1,
             seed=1,
-            use_wandb=False,
-            wandb_run_name=None,
+            use_swanlab=False,
+            swanlab_run_name=None,
             smoke=True,
             robot_config="configs/robots/g1_29dof.yaml",
         )

@@ -30,7 +30,7 @@ import gymnasium
 import numpy as np
 import pydantic
 import torch  # better to use scoped import if we use processes
-import wandb
+import swanlab
 from packaging.version import Version
 from tqdm import tqdm
 
@@ -129,12 +129,12 @@ class TrainConfig(BaseConfig):
     use_trajectory_buffer: bool = False
     buffer_size: int = 5_000_000
 
-    # WANDB
-    use_wandb: bool = False
-    wandb_ename: str | None = None
-    wandb_gname: str | None = None
-    wandb_pname: str | None = None
-    wandb_run_name: str | None = None
+    # SwanLab
+    use_swanlab: bool = False
+    swanlab_workspace: str | None = None
+    swanlab_group: str | None = None
+    swanlab_project: str | None = None
+    swanlab_run_name: str | None = None
 
     # misc
     load_expert_data_from_motion_lib: bool = True
@@ -402,11 +402,16 @@ def _make_train_status(cfg: TrainConfig, *, local_time: int, global_time: int, o
     }
 
 
-def init_wandb(cfg: TrainConfig):
-    from pathlib import Path
-    exp_name = cfg.wandb_run_name if cfg.wandb_run_name else Path(cfg.work_dir).name
-    wandb_config = cfg.model_dump()
-    wandb.init(entity=cfg.wandb_ename, project=cfg.wandb_pname, group=cfg.wandb_gname, name=exp_name, config=wandb_config, dir="./_wandb")
+def init_swanlab(cfg: TrainConfig) -> None:
+    exp_name = cfg.swanlab_run_name if cfg.swanlab_run_name else Path(cfg.work_dir).name
+    swanlab.init(
+        project=cfg.swanlab_project,
+        workspace=cfg.swanlab_workspace,
+        group=cfg.swanlab_group,
+        experiment_name=exp_name,
+        config=cfg.model_dump(),
+        logdir="./swanlog",
+    )
 
 
 class Workspace:
@@ -468,8 +473,8 @@ class Workspace:
             name: CSVLogger(filename=self.work_dir / f"{name}.csv") for name in self.evaluations.keys()
         } if self._write_shared_artifacts else {}
 
-        if self._write_shared_artifacts and self.cfg.use_wandb:
-            init_wandb(self.cfg)
+        if self._write_shared_artifacts and self.cfg.use_swanlab:
+            init_swanlab(self.cfg)
 
         if self._write_shared_artifacts:
             with (self.work_dir / "config.json").open("w") as f:
@@ -976,8 +981,8 @@ class Workspace:
                 m_dict["distributed/local_env_steps"] = int(local_time)
                 m_dict["distributed/global_env_steps"] = int(global_time)
                 m_dict["distributed/optimizer_steps"] = int(self._optimizer_steps)
-                if self._write_shared_artifacts and self.cfg.use_wandb:
-                    wandb.log(
+                if self._write_shared_artifacts and self.cfg.use_swanlab:
+                    swanlab.log(
                         {f"train/{k}": v for k, v in m_dict.items()},
                         step=global_time,
                     )
@@ -1026,9 +1031,9 @@ class Workspace:
                     replay_buffer=replay_buffer,
                     logger=logger,
                 )
-            # For wandb dict, put it on wandb
-            if self._write_shared_artifacts and self.cfg.use_wandb and wandb_dict is not None:
-                wandb.log(
+            # Push eval metrics to SwanLab when enabled
+            if self._write_shared_artifacts and self.cfg.use_swanlab and wandb_dict is not None:
+                swanlab.log(
                     {f"eval/{evaluation_name}/{k}": v for k, v in wandb_dict.items()},
                     step=t,
                 )

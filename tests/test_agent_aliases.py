@@ -34,7 +34,7 @@ class AgentAliasesTest(unittest.TestCase):
     def test_fb_default_update_z_every_step(self) -> None:
         self.assertEqual(_default_update_z_every_step("fb"), 100)
 
-    def test_fb_preset_uses_fb_wandb_group(self) -> None:
+    def test_fb_preset_uses_fb_swanlab_group(self) -> None:
         selected = build_agent_preset(
             agent="fb",
             device="cpu",
@@ -43,9 +43,9 @@ class AgentAliasesTest(unittest.TestCase):
             lr_scale=1.0,
             clip_grad_norm=0.0,
             cartwheel_aux_safe=False,
-            wandb_project="test",
+            swanlab_project="test",
         )
-        self.assertEqual(selected["wandb_group"], "ufo_fb")
+        self.assertEqual(selected["swanlab_group"], "ufo_fb")
         self.assertEqual(selected["agent_cfg"].name, "FBcprAuxAgent")
         self.assertEqual(selected["agent_cfg"].train.update_z_every_step, 100)
 
@@ -56,13 +56,13 @@ class AgentAliasesTest(unittest.TestCase):
             num_envs=1,
             num_env_steps=1,
             seed=1,
-            use_wandb=False,
-            wandb_run_name=None,
+            use_swanlab=False,
+            swanlab_run_name=None,
             smoke=True,
             agent="fb",
         )
-        self.assertEqual(cfg.wandb_gname, "ufo_fb")
-        self.assertEqual(cfg.wandb_run_name, "ufo_fb")
+        self.assertEqual(cfg.swanlab_group, "ufo_fb")
+        self.assertEqual(cfg.swanlab_run_name, "ufo_fb")
         self.assertEqual(cfg.tags["agent"], "fb")
 
 

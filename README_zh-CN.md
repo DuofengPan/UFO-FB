@@ -71,15 +71,21 @@ export PATH="$HOME/.local/bin:$PATH"
 uv sync
 ```
 
-### 可选：W&B logging
+### 可选：SwanLab logging
 
-W&B logging 是可选功能。如需启用，请先登录，按需设置自己的 entity，然后在训练命令中加入 `--use-wandb --wandb-run-name ...`：
+SwanLab 日志是可选功能。先在 [swanlab.cn](https://swanlab.cn) 注册账号，再登录，并在训练命令中加上 `--use-swanlab`：
 
 ```bash
-uv run wandb login
-export WANDB_ENTITY=your_entity   # optional
-# 然后加入 --use-wandb --wandb-run-name ufo_fb_g1
+# 交互式登录（本地保存 API Key），或直接设置环境变量
+uv run swanlab login
+# export SWANLAB_API_KEY=你的_api_key
+# 可选：上传到组织 workspace（默认是个人空间）
+# export SWANLAB_WORKSPACE=组织用户名
+
+# 然后加入 --use-swanlab --swanlab-run-name ufo_fb_g1
 ```
+
+默认项目名为 `ufo-humanoid`。登录后可在 [swanlab.cn](https://swanlab.cn) 查看曲线。
 
 ### 2. 下载 G1 LaFAN 数据
 

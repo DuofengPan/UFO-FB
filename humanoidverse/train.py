@@ -42,7 +42,7 @@ DEFAULT_WORK_DIR = "runs/ufo"
 DEFAULT_BUFFER_SIZE = 5120000
 DEFAULT_FB_UPDATE_Z_EVERY_STEP = 100
 DEFAULT_UPDATE_Z_EVERY_STEP = DEFAULT_FB_UPDATE_Z_EVERY_STEP
-DEFAULT_WANDB_PROJECT = "ufo-humanoid"
+DEFAULT_SWANLAB_PROJECT = "ufo-humanoid"
 DEFAULT_ROBOT_CONFIG = "configs/robots/g1_29dof.yaml"
 
 AGENT_ALIASES = {
@@ -90,8 +90,8 @@ def build_ufo_mjlab_config(
     num_envs: int,
     num_env_steps: int,
     seed: int,
-    use_wandb: bool,
-    wandb_run_name: str | None,
+    use_swanlab: bool,
+    swanlab_run_name: str | None,
     checkpoint_every_steps: int = 9600000,
     distributed_rank: int = 0,
     distributed_world_size: int = 1,
@@ -151,11 +151,11 @@ def build_ufo_mjlab_config(
         lr_scale=lr_scale,
         clip_grad_norm=clip_grad_norm,
         cartwheel_aux_safe=cartwheel_aux_safe,
-        wandb_project=DEFAULT_WANDB_PROJECT,
+        swanlab_project=DEFAULT_SWANLAB_PROJECT,
     )
     agent_cfg = selected["agent_cfg"]
-    wandb_group = selected["wandb_group"]
-    wandb_project = selected["wandb_project"]
+    swanlab_group = selected["swanlab_group"]
+    swanlab_project = selected["swanlab_project"]
     train_runtime = dict(selected["train_runtime"])
     if num_agent_updates is not None:
         if num_agent_updates <= 0:
@@ -223,11 +223,11 @@ def build_ufo_mjlab_config(
         prioritization_mode="exp",
         use_trajectory_buffer=train_runtime["use_trajectory_buffer"],
         buffer_size=int(buffer_size),
-        use_wandb=use_wandb,
-        wandb_ename=os.environ.get("WANDB_ENTITY"),
-        wandb_gname=wandb_group,
-        wandb_pname=wandb_project,
-        wandb_run_name=wandb_run_name or f"ufo_{agent}",
+        use_swanlab=use_swanlab,
+        swanlab_workspace=os.environ.get("SWANLAB_WORKSPACE"),
+        swanlab_group=swanlab_group,
+        swanlab_project=swanlab_project,
+        swanlab_run_name=swanlab_run_name or f"ufo_{agent}",
         load_expert_data_from_motion_lib=True,
         buffer_device="cuda" if device.startswith("cuda") else "cpu",
         disable_tqdm=True,
@@ -296,8 +296,8 @@ def run_train(args: argparse.Namespace, log_dir: Path) -> None:
         num_envs=args.num_envs,
         num_env_steps=args.num_env_steps,
         seed=seed,
-        use_wandb=bool(args.use_wandb and rank == 0),
-        wandb_run_name=args.wandb_run_name,
+        use_swanlab=bool(args.use_swanlab and rank == 0),
+        swanlab_run_name=args.swanlab_run_name,
         checkpoint_every_steps=args.checkpoint_every_steps,
         distributed_rank=rank,
         distributed_world_size=world_size,
@@ -468,14 +468,14 @@ def parse_args() -> argparse.Namespace:
         help="Use a cartwheel-safe FB auxiliary reward set: remove locomotion contact/foot-shape penalties and reduce action-rate penalty.",
     )
     parser.add_argument("--seed", type=int, default=4728)
-    parser.add_argument("--use-wandb", action="store_true")
-    parser.add_argument("--wandb-run-name", default=None)
+    parser.add_argument("--use-swanlab", action="store_true")
+    parser.add_argument("--swanlab-run-name", default=None)
     parser.add_argument(
         "--disable-eval-prioritization",
         action="store_true",
         help="Validation/debug only: skip tracking eval and expert prioritization without changing default training behavior.",
     )
-    parser.add_argument("--smoke", action="store_true", help="Short local smoke settings: 16 envs, 2048 env steps, no W&B.")
+    parser.add_argument("--smoke", action="store_true", help="Short local smoke settings: 16 envs, 2048 env steps, no SwanLab.")
     args = parser.parse_args()
     args.agent = canonical_agent_name(args.agent)
     if args.update_z_every_step is None:
@@ -483,7 +483,7 @@ def parse_args() -> argparse.Namespace:
     if args.smoke:
         args.num_envs = min(args.num_envs, 16)
         args.num_env_steps = min(args.num_env_steps, 2048)
-        args.use_wandb = False
+        args.use_swanlab = False
     manifest_robot_config = None
     if args.data_manifest is not None:
         if args.data_path is not None:
