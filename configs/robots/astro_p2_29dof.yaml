@@ -1,5 +1,5 @@
 name: astro_p2_29dof
-xml_path: humanoidverse/data/robots/astro_p2/mjcf/astro_p2_29dof_simplify_primitive_collision.xml
+xml_path: humanoidverse/data/robots/astro_p2/mjcf/astro_p2_29dof_capsulefeet_lite.xml
 base_body: pelvis
 root_quat_order: xyzw
 coordinate_system: z_up
@@ -367,9 +367,10 @@ training:
         armature: 0.002387232
         friction: 0.1
 metadata:
-  source_mjcf: rl_deploy astro_p2_29dof_simplify_primitive_collision (fixed-head from 30dof_simplify_primitive)
+  source_mjcf: UFO lite collision from 29dof_simplify_primitive + deploy Astro foot extents (capsulefeet_lite)
   review_status: curated
   notes:
   - Limits/effort from MJCF actuatorfrcrange; velocity/PD/default pose from Isaac ASTRO_P2_DELAY_CFG.
   - No torso_link body in Astro MJCF; torso_name=waist_roll_link. head_link is welded (29 DoF).
   - Ankle and waist pitch/roll armature/PD use dual-motor (2x 5016) approximation.
+  - Collision: capsulefeet_lite (7 prims/foot, ~29 coll geoms); dense simplify_primitive kept as reference XML.

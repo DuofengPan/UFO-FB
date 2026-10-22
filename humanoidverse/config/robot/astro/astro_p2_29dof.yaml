@@ -236,7 +236,7 @@ robot:
     linear_damping: 0.0
     urdf_file: null
     usd_file: null
-    xml_file: humanoidverse/data/robots/astro_p2/mjcf/astro_p2_29dof_simplify_primitive_collision.xml
+    xml_file: humanoidverse/data/robots/astro_p2/mjcf/astro_p2_29dof_capsulefeet_lite.xml
     robot_type: astro_p2_29dof
     self_collisions: 0
     default_dof_drive_mode: 3
@@ -244,7 +244,7 @@ robot:
   motion:
     asset:
       assetRoot: humanoidverse/data/robots/astro_p2/mjcf
-      assetFileName: astro_p2_29dof_simplify_primitive_collision.xml
+      assetFileName: astro_p2_29dof_capsulefeet_lite.xml
       urdfFileName: null
     humanoid_type: astro_p2_29dof
     bias_offset: false
@@ -294,4 +294,4 @@ robot:
     base_link: waist_roll_link
   metadata:
     review_status: curated
-    source: astro_p2_29dof_simplify_primitive_collision.xml
+    source: astro_p2_29dof_capsulefeet_lite.xml
