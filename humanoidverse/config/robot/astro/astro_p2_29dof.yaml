@@ -1,0 +1,297 @@
+# Curated from MJCF + Isaac ASTRO_P2_DELAY_CFG. Fixed-head 29 DoF.
+# @package _global_
+defaults:
+  - robot_base
+robot:
+  num_bodies: 31
+  dof_obs_size: 29
+  actions_dim: 29
+  lower_body_actions_dim: 12
+  upper_body_actions_dim: 17
+  body_keys: ["lower_body", "upper_body"]
+  key_bodies:
+    - pelvis
+    - waist_roll_link
+    - left_ankle_roll_link
+    - right_ankle_roll_link
+    - left_wrist_yaw_link
+    - right_wrist_yaw_link
+    - head_link
+  contact_bodies:
+    - left_ankle_roll_link
+    - right_ankle_roll_link
+  num_feet: 2
+  right_foot_name: right_ankle_roll_link
+  left_foot_name: left_ankle_roll_link
+  foot_name: ankle_roll_link
+  knee_name: knee_link
+  has_torso: true
+  torso_name: waist_roll_link
+  has_upper_body_dof: true
+  dof_names:
+    - left_hip_pitch_joint
+    - left_hip_roll_joint
+    - left_hip_yaw_joint
+    - left_knee_joint
+    - left_ankle_pitch_joint
+    - left_ankle_roll_joint
+    - right_hip_pitch_joint
+    - right_hip_roll_joint
+    - right_hip_yaw_joint
+    - right_knee_joint
+    - right_ankle_pitch_joint
+    - right_ankle_roll_joint
+    - waist_yaw_joint
+    - waist_pitch_joint
+    - waist_roll_joint
+    - left_shoulder_pitch_joint
+    - left_shoulder_roll_joint
+    - left_shoulder_yaw_joint
+    - left_elbow_joint
+    - left_wrist_roll_joint
+    - left_wrist_pitch_joint
+    - left_wrist_yaw_joint
+    - right_shoulder_pitch_joint
+    - right_shoulder_roll_joint
+    - right_shoulder_yaw_joint
+    - right_elbow_joint
+    - right_wrist_roll_joint
+    - right_wrist_pitch_joint
+    - right_wrist_yaw_joint
+  upper_dof_names:
+    - waist_yaw_joint
+    - waist_pitch_joint
+    - waist_roll_joint
+    - left_shoulder_pitch_joint
+    - left_shoulder_roll_joint
+    - left_shoulder_yaw_joint
+    - left_elbow_joint
+    - left_wrist_roll_joint
+    - left_wrist_pitch_joint
+    - left_wrist_yaw_joint
+    - right_shoulder_pitch_joint
+    - right_shoulder_roll_joint
+    - right_shoulder_yaw_joint
+    - right_elbow_joint
+    - right_wrist_roll_joint
+    - right_wrist_pitch_joint
+    - right_wrist_yaw_joint
+  lower_dof_names:
+    - left_hip_pitch_joint
+    - left_hip_roll_joint
+    - left_hip_yaw_joint
+    - left_knee_joint
+    - left_ankle_pitch_joint
+    - left_ankle_roll_joint
+    - right_hip_pitch_joint
+    - right_hip_roll_joint
+    - right_hip_yaw_joint
+    - right_knee_joint
+    - right_ankle_pitch_joint
+    - right_ankle_roll_joint
+    - waist_yaw_joint
+    - waist_pitch_joint
+    - waist_roll_joint
+  waist_dof_names: [waist_yaw_joint, waist_pitch_joint, waist_roll_joint]
+  left_ankle_dof_names: [left_ankle_pitch_joint, left_ankle_roll_joint]
+  right_ankle_dof_names: [right_ankle_pitch_joint, right_ankle_roll_joint]
+  knee_dof_names: [left_knee_joint, right_knee_joint]
+  dof_pos_lower_limit_list: [-2.6, -0.24, -1.55, -0.07, -0.77, -0.33, -2.6, -2.78, -3.65, -0.07, -0.77, -0.33, -1.55, -0.35, -0.26, -2.78, -0.24, -1.9, -0.51, -1.9, -1.29, -1.29, -2.78, -2.6, -1.9, -0.51, -1.9, -1.29, -1.29]
+  dof_pos_upper_limit_list: [2.6, 2.78, 3.65, 2.43, 0.51, 0.33, 2.6, 0.24, 1.55, 2.43, 0.51, 0.33, 3.65, 0.42, 0.26, 2.78, 2.6, 1.9, 1.64, 1.9, 1.29, 1.29, 2.78, 0.24, 1.9, 1.64, 1.9, 1.29, 1.29]
+  dof_vel_limit_list: [23.04, 23.04, 23.04, 23.04, 26.18, 26.18, 23.04, 23.04, 23.04, 23.04, 26.18, 26.18, 13.04, 26.18, 26.18, 26.18, 26.18, 26.18, 26.18, 26.18, 20.94, 20.94, 26.18, 26.18, 26.18, 26.18, 26.18, 20.94, 20.94]
+  dof_effort_limit_list: [130.0, 130.0, 130.0, 130.0, 60.0, 45.0, 130.0, 130.0, 130.0, 130.0, 60.0, 45.0, 130.0, 60.0, 50.0, 30.0, 30.0, 30.0, 30.0, 30.0, 10.0, 10.0, 30.0, 30.0, 30.0, 30.0, 30.0, 10.0, 10.0]
+  dof_effort_limit_scale: 0.8
+  body_names:
+    - pelvis
+    - left_hip_pitch_link
+    - left_hip_roll_link
+    - left_hip_yaw_link
+    - left_knee_link
+    - left_ankle_pitch_link
+    - left_ankle_roll_link
+    - right_hip_pitch_link
+    - right_hip_roll_link
+    - right_hip_yaw_link
+    - right_knee_link
+    - right_ankle_pitch_link
+    - right_ankle_roll_link
+    - waist_yaw_link
+    - waist_pitch_link
+    - waist_roll_link
+    - left_shoulder_pitch_link
+    - left_shoulder_roll_link
+    - left_shoulder_yaw_link
+    - left_elbow_link
+    - left_wrist_roll_link
+    - left_wrist_pitch_link
+    - left_wrist_yaw_link
+    - right_shoulder_pitch_link
+    - right_shoulder_roll_link
+    - right_shoulder_yaw_link
+    - right_elbow_link
+    - right_wrist_roll_link
+    - right_wrist_pitch_link
+    - right_wrist_yaw_link
+    - head_link
+  terminate_after_contacts_on: [pelvis, shoulder, hip]
+  penalize_contacts_on: [pelvis, shoulder, hip]
+  init_state:
+    pos: [0.0, 0.0, 0.645]
+    rot: [0.0, 0.0, 0.0, 1.0]
+    lin_vel: [0.0, 0.0, 0.0]
+    ang_vel: [0.0, 0.0, 0.0]
+    default_joint_angles:
+      left_hip_pitch_joint: -0.312
+      left_hip_roll_joint: 0.0
+      left_hip_yaw_joint: 0.0
+      left_knee_joint: 0.669
+      left_ankle_pitch_joint: -0.363
+      left_ankle_roll_joint: 0.0
+      right_hip_pitch_joint: -0.312
+      right_hip_roll_joint: 0.0
+      right_hip_yaw_joint: 0.0
+      right_knee_joint: 0.669
+      right_ankle_pitch_joint: -0.363
+      right_ankle_roll_joint: 0.0
+      waist_yaw_joint: 0.0
+      waist_pitch_joint: 0.0
+      waist_roll_joint: 0.0
+      left_shoulder_pitch_joint: 0.2
+      left_shoulder_roll_joint: 0.2
+      left_shoulder_yaw_joint: 0.0
+      left_elbow_joint: 0.6
+      left_wrist_roll_joint: 0.0
+      left_wrist_pitch_joint: 0.0
+      left_wrist_yaw_joint: 0.0
+      right_shoulder_pitch_joint: 0.2
+      right_shoulder_roll_joint: -0.2
+      right_shoulder_yaw_joint: 0.0
+      right_elbow_joint: 0.6
+      right_wrist_roll_joint: 0.0
+      right_wrist_pitch_joint: 0.0
+      right_wrist_yaw_joint: 0.0
+  randomize_link_body_names:
+    - pelvis
+    - left_hip_yaw_link
+    - left_hip_roll_link
+    - left_hip_pitch_link
+    - left_knee_link
+    - right_hip_yaw_link
+    - right_hip_roll_link
+    - right_hip_pitch_link
+    - right_knee_link
+  control:
+    control_type: P
+    stiffness:
+      hip_yaw: 174.3502207607689
+      hip_roll: 174.3502207607689
+      hip_pitch: 174.3502207607689
+      knee: 174.3502207607689
+      ankle_pitch: 68.97888530429275
+      ankle_roll: 68.97888530429275
+      waist_yaw: 174.3502207607689
+      waist_pitch: 68.97888530429275
+      waist_roll: 68.97888530429275
+      shoulder_pitch: 34.48944265214637
+      shoulder_roll: 34.48944265214637
+      shoulder_yaw: 34.48944265214637
+      elbow: 34.48944265214637
+      wrist_roll: 34.48944265214637
+      wrist_pitch: 13.571156421285899
+      wrist_yaw: 13.571156421285899
+    damping:
+      hip_yaw: 11.099479785295827
+      hip_roll: 11.099479785295827
+      hip_pitch: 11.099479785295827
+      knee: 11.099479785295827
+      ankle_pitch: 4.391332226058835
+      ankle_roll: 4.391332226058835
+      waist_yaw: 11.099479785295827
+      waist_pitch: 4.391332226058835
+      waist_roll: 4.391332226058835
+      shoulder_pitch: 2.1956661130294175
+      shoulder_roll: 2.1956661130294175
+      shoulder_yaw: 2.1956661130294175
+      elbow: 2.1956661130294175
+      wrist_roll: 2.1956661130294175
+      wrist_pitch: 0.719972209306989
+      wrist_yaw: 0.719972209306989
+    action_scale: 0.25
+    action_clip_value: 5.0
+    action_rescale: true
+    clip_torques: true
+    normalize_action: true
+    normalize_action_from: 1.0
+    normalize_action_to: 5.0
+  asset:
+    collapse_fixed_joints: true
+    replace_cylinder_with_capsule: true
+    flip_visual_attachments: false
+    armature: 0.001
+    thickness: 0.01
+    max_angular_velocity: 1000.0
+    max_linear_velocity: 1000.0
+    density: 0.001
+    angular_damping: 0.0
+    linear_damping: 0.0
+    urdf_file: null
+    usd_file: null
+    xml_file: humanoidverse/data/robots/astro_p2/mjcf/astro_p2_29dof_simplify_primitive_collision.xml
+    robot_type: astro_p2_29dof
+    self_collisions: 0
+    default_dof_drive_mode: 3
+    fix_base_link: false
+  motion:
+    asset:
+      assetRoot: humanoidverse/data/robots/astro_p2/mjcf
+      assetFileName: astro_p2_29dof_simplify_primitive_collision.xml
+      urdfFileName: null
+    humanoid_type: astro_p2_29dof
+    bias_offset: false
+    has_self_collision: true
+    has_mesh: false
+    has_jt_limit: false
+    has_dof_subset: true
+    has_upright_start: true
+    standardize_motion_length: true
+    standardize_motion_length_value: 10
+    body_names:
+      - pelvis
+      - left_hip_pitch_link
+      - left_hip_roll_link
+      - left_hip_yaw_link
+      - left_knee_link
+      - left_ankle_pitch_link
+      - left_ankle_roll_link
+      - right_hip_pitch_link
+      - right_hip_roll_link
+      - right_hip_yaw_link
+      - right_knee_link
+      - right_ankle_pitch_link
+      - right_ankle_roll_link
+      - waist_yaw_link
+      - waist_pitch_link
+      - waist_roll_link
+      - left_shoulder_pitch_link
+      - left_shoulder_roll_link
+      - left_shoulder_yaw_link
+      - left_elbow_link
+      - left_wrist_roll_link
+      - left_wrist_pitch_link
+      - left_wrist_yaw_link
+      - right_shoulder_pitch_link
+      - right_shoulder_roll_link
+      - right_shoulder_yaw_link
+      - right_elbow_link
+      - right_wrist_roll_link
+      - right_wrist_pitch_link
+      - right_wrist_yaw_link
+      - head_link
+    nums_extend_bodies: 0
+    extend_config: []
+    motion_tracking_link: [head_link]
+    pelvis_link: pelvis
+    base_link: waist_roll_link
+  metadata:
+    review_status: curated
+    source: astro_p2_29dof_simplify_primitive_collision.xml
