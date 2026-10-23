@@ -414,6 +414,12 @@ def init_swanlab(cfg: TrainConfig) -> None:
     )
 
 
+def _swanlab_scalar_metrics(metrics: dict[str, tp.Any]) -> dict[str, tp.Any]:
+    """Keep non-numeric metadata out of SwanLab's scalar metric payloads."""
+    scalar_types = (int, float, np.integer, np.floating)
+    return {key: value for key, value in metrics.items() if isinstance(value, scalar_types)}
+
+
 class Workspace:
     def __init__(self, cfg: TrainConfig) -> None:
         self.cfg = cfg
@@ -983,7 +989,7 @@ class Workspace:
                 m_dict["distributed/optimizer_steps"] = int(self._optimizer_steps)
                 if self._write_shared_artifacts and self.cfg.use_swanlab:
                     swanlab.log(
-                        {f"train/{k}": v for k, v in m_dict.items()},
+                        {f"train/{k}": v for k, v in _swanlab_scalar_metrics(m_dict).items()},
                         step=global_time,
                     )
                 if self._write_shared_artifacts:
@@ -1034,7 +1040,10 @@ class Workspace:
             # Push eval metrics to SwanLab when enabled
             if self._write_shared_artifacts and self.cfg.use_swanlab and wandb_dict is not None:
                 swanlab.log(
-                    {f"eval/{evaluation_name}/{k}": v for k, v in wandb_dict.items()},
+                    {
+                        f"eval/{evaluation_name}/{k}": v
+                        for k, v in _swanlab_scalar_metrics(wandb_dict).items()
+                    },
                     step=t,
                 )
 
