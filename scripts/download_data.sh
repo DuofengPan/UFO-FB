@@ -2,44 +2,64 @@
 set -euo pipefail
 
 DATASET_REPO="${UFO_DATASET_REPO:-xuewang/UFO-MotionData}"
+ASTRO_DATASET_REPO="${UFO_ASTRO_DATASET_REPO:-Duofeng/astro-lafan-29dof}"
 DATASET_REVISION="${UFO_DATASET_REVISION:-main}"
-DATASET_FILES=(
-  "g1/lafan_29dof_10s-clipped.pkl"
-  "g1/lafan_29dof.pkl"
-)
-DESTS=(
-  "humanoidverse/data/lafan_29dof_10s-clipped.pkl"
-  "humanoidverse/data/lafan_29dof.pkl"
-)
-EXPECTED_SHA256S=(
-  "7f5aa36957808ee2e972472b18add8510533742710ba312d8b8c6e6014f1c010"
-  "f3a0c2810363f5c50bf4146fa2db33c1ff5b90d00cb7c0bc2aa4622696375e11"
-)
+DATASET_NAME="${1:-g1_lafan}"
 
 usage() {
   cat <<USAGE
-Usage: bash scripts/download_data.sh [g1_lafan]
+Usage: bash scripts/download_data.sh [g1_lafan|astro_lafan]
 
-Downloads the default G1 LaFAN training motion data from Hugging Face:
-  https://huggingface.co/datasets/${DATASET_REPO}
-  ${DATASET_FILES[0]}
-  ${DATASET_FILES[1]}
+Downloads processed motion data from Hugging Face.
+
+  g1_lafan     G1 LaFAN full + 10s-clipped
+               https://huggingface.co/datasets/${DATASET_REPO}
+  astro_lafan  Astro P2 GMR LaFAN1 (G1's 40 takes + 14 curated extras)
+               https://huggingface.co/datasets/${ASTRO_DATASET_REPO}
 
 Environment overrides:
   UFO_DATASET_REPO=${DATASET_REPO}
+  UFO_ASTRO_DATASET_REPO=${ASTRO_DATASET_REPO}
   UFO_DATASET_REVISION=${DATASET_REVISION}
 USAGE
 }
 
-case "${1:-g1_lafan}" in
+case "${DATASET_NAME}" in
   g1_lafan|lafan|g1)
+    DATASET_FILES=(
+      "g1/lafan_29dof_10s-clipped.pkl"
+      "g1/lafan_29dof.pkl"
+    )
+    DESTS=(
+      "humanoidverse/data/lafan_29dof_10s-clipped.pkl"
+      "humanoidverse/data/lafan_29dof.pkl"
+    )
+    EXPECTED_SHA256S=(
+      "7f5aa36957808ee2e972472b18add8510533742710ba312d8b8c6e6014f1c010"
+      "f3a0c2810363f5c50bf4146fa2db33c1ff5b90d00cb7c0bc2aa4622696375e11"
+    )
+    ;;
+  astro_lafan|astro)
+    DATASET_REPO="${ASTRO_DATASET_REPO}"
+    DATASET_FILES=(
+      "astro/lafan_29dof_10s-clipped.pkl"
+      "astro/lafan_29dof.pkl"
+    )
+    DESTS=(
+      "humanoidverse/data/astro_lafan_29dof_10s-clipped.pkl"
+      "humanoidverse/data/astro_lafan_29dof.pkl"
+    )
+    EXPECTED_SHA256S=(
+      "4e727221206c0e86dd9e01c53bafac2a743ba74c5866710134c07dad8ea2e5b3"
+      "c832ad890de4ba766378e3e6843d1b089e398cef77b8656f81df4796bdf6e1a7"
+    )
     ;;
   -h|--help|help)
     usage
     exit 0
     ;;
   *)
-    echo "Unknown dataset: $1" >&2
+    echo "Unknown dataset: ${DATASET_NAME}" >&2
     usage >&2
     exit 2
     ;;

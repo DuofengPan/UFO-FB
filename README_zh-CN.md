@@ -122,6 +122,23 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
   --buffer-size 5120000
 ```
 
+Astro P2 的 GMR LaFAN1（与 G1 同结构：full + 10s-clipped；40 条 G1 长动作再加 14 条精选额外动作）放在自己的仓库 `Duofeng/astro-lafan-29dof`，不进 Git：
+
+```bash
+bash scripts/download_data.sh astro_lafan
+ls -lh humanoidverse/data/astro_lafan_29dof_10s-clipped.pkl
+
+# 或从 code/lafan1_gmr.zip 本地生成
+PYTHONPATH=. python scripts/convert_astro_gmr_lafan_to_ufo_pkl.py --force
+
+./run_train.sh \
+  --agent fb \
+  --robot-config configs/robots/astro_p2_29dof.yaml \
+  --data-manifest configs/data/astro_lafan.yaml \
+  --gpu-ids single \
+  --work-dir runs/ufo_fb_astro_lafan
+```
+
 `--num-envs` 和 `--buffer-size` 是每张 GPU 的设置，`--num-env-steps` 是全局采样预算。
 
 ### 5. Tracking inference

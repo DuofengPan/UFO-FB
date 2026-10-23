@@ -136,6 +136,15 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
 
 Core defaults live in `humanoidverse/train.py`. In particular, `--num-envs` and `--buffer-size` are per GPU, while `--num-env-steps` is the global sample budget.
 
+Astro P2 GMR LaFAN1 uses the same full + 10s-clipped layout (G1's 40 long takes plus 14 curated extras). Those files live in `Duofeng/astro-lafan-29dof`:
+
+```bash
+bash scripts/download_data.sh astro_lafan
+ls -lh humanoidverse/data/astro_lafan_29dof_10s-clipped.pkl
+```
+
+To rebuild locally from `../lafan1_gmr.zip`, run `scripts/convert_astro_gmr_lafan_to_ufo_pkl.py`, then train via `configs/data/astro_lafan.yaml`.
+
 ### 4. Tracking inference and ONNX export
 
 Use full motion sequences for inference, not clipped training data:
