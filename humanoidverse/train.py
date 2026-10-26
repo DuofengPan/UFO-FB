@@ -333,6 +333,15 @@ def run_train(args: argparse.Namespace, log_dir: Path) -> None:
         workspace = cfg.build()
         workspace.train()
     finally:
+        # Best-effort SwanLab close if Workspace.train did not finish cleanly
+        # (e.g. failure during cfg.build / init before train() starts).
+        if bool(getattr(cfg, "use_swanlab", False)):
+            try:
+                from humanoidverse.training.workspace import finish_swanlab
+
+                finish_swanlab(state="aborted", error="run_train exited before swanlab.finish")
+            except Exception:
+                pass
         if world_size > 1:
             import torch.distributed as dist
 

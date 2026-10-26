@@ -402,7 +402,27 @@ def _make_train_status(cfg: TrainConfig, *, local_time: int, global_time: int, o
     }
 
 
+def finish_swanlab(
+    *,
+    state: tp.Literal["success", "crashed", "aborted"] = "success",
+    error: str | None = None,
+) -> None:
+    """Close the active SwanLab run so the cloud UI leaves RUNNING."""
+    try:
+        if not swanlab.has_run():
+            return
+        run = swanlab.get_run()
+        if run is None or not getattr(run, "alive", True):
+            return
+        swanlab.finish(state=state, error=error)
+    except Exception as exc:
+        print(f"WARNING: swanlab.finish failed: {exc}", flush=True)
+
+
 def init_swanlab(cfg: TrainConfig) -> None:
+    import atexit
+    import signal
+
     exp_name = cfg.swanlab_run_name if cfg.swanlab_run_name else Path(cfg.work_dir).name
     swanlab.init(
         project=cfg.swanlab_project,
@@ -412,6 +432,17 @@ def init_swanlab(cfg: TrainConfig) -> None:
         config=cfg.model_dump(),
         logdir="./swanlog",
     )
+
+    # Normal interpreter exit / Ctrl-C / SIGTERM should flip cloud status off.
+    # SIGKILL still cannot run cleanup; resume+finish those runs offline.
+    atexit.register(lambda: finish_swanlab(state="aborted", error="process exit without explicit swanlab.finish"))
+
+    def _abort_on_signal(signum, _frame):
+        finish_swanlab(state="aborted", error=f"received signal {signum}")
+        raise SystemExit(128 + int(signum))
+
+    signal.signal(signal.SIGTERM, _abort_on_signal)
+    signal.signal(signal.SIGINT, _abort_on_signal)
 
 
 def _swanlab_scalar_metrics(metrics: dict[str, tp.Any]) -> dict[str, tp.Any]:
@@ -506,7 +537,15 @@ class Workspace:
 
     def train(self):
         self.start_time = time.time()
-        self.train_online()
+        try:
+            self.train_online()
+        except Exception as exc:
+            if self._write_shared_artifacts and self.cfg.use_swanlab:
+                finish_swanlab(state="crashed", error=str(exc))
+            raise
+        else:
+            if self._write_shared_artifacts and self.cfg.use_swanlab:
+                finish_swanlab(state="success")
 
     def _get_torso_contact_force_metrics(self, train_env) -> dict[str, float]:
         if not self.cfg.log_torso_contact_forces:
