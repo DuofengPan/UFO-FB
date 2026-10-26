@@ -1,5 +1,5 @@
 name: astro_p2_29dof
-xml_path: humanoidverse/data/robots/astro_p2/mjcf/astro_p2_29dof_capsulefeet_lite.xml
+xml_path: humanoidverse/data/robots/astro_p2/mjcf/astro_p2_29dof_simplify_primitive_collision.xml
 base_body: pelvis
 root_quat_order: xyzw
 coordinate_system: z_up
@@ -185,13 +185,13 @@ training:
     - 20.94
     - 20.94
     stiffness:
-      hip_yaw: 174.3502207607689
-      hip_roll: 174.3502207607689
-      hip_pitch: 174.3502207607689
-      knee: 174.3502207607689
+      hip_yaw: 111.584
+      hip_roll: 111.584
+      hip_pitch: 111.584
+      knee: 111.584
       ankle_pitch: 68.97888530429275
       ankle_roll: 68.97888530429275
-      waist_yaw: 174.3502207607689
+      waist_yaw: 111.584
       waist_pitch: 68.97888530429275
       waist_roll: 68.97888530429275
       shoulder_pitch: 34.48944265214637
@@ -202,13 +202,13 @@ training:
       wrist_pitch: 13.571156421285899
       wrist_yaw: 13.571156421285899
     damping:
-      hip_yaw: 11.099479785295827
-      hip_roll: 11.099479785295827
-      hip_pitch: 11.099479785295827
-      knee: 11.099479785295827
+      hip_yaw: 8.88
+      hip_roll: 8.88
+      hip_pitch: 8.88
+      knee: 8.88
       ankle_pitch: 4.391332226058835
       ankle_roll: 4.391332226058835
-      waist_yaw: 11.099479785295827
+      waist_yaw: 8.88
       waist_pitch: 4.391332226058835
       waist_roll: 4.391332226058835
       shoulder_pitch: 2.1956661130294175
