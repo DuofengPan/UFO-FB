@@ -101,7 +101,7 @@ Large motion datasets are hosted separately so that the Git repository only cont
 
 ```bash
 bash scripts/download_data.sh g1_lafan
-ls -lh humanoidverse/data/lafan_29dof_10s-clipped.pkl
+ls -lh humanoidverse/data/robots/g1/motions/lafan/lafan_29dof_10s-clipped.pkl
 ```
 
 The download script verifies the SHA256 checksum and places the default processed training file under `humanoidverse/data/`.
@@ -113,7 +113,7 @@ Run this first to verify the environment, motion data, and short training loop:
 ```bash
 ./run_train.sh \
   --agent fb \
-  --data-manifest configs/data/example_mix.yaml \
+  --data-manifest humanoidverse/data/robots/g1/config/lafan.yaml \
   --gpu-ids single \
   --smoke \
   --work-dir /tmp/ufo_smoke_g1
@@ -129,7 +129,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
   --num-envs 1024 \
   --num-env-steps 192000000 \
   --work-dir runs/ufo_fb_g1 \
-  --data-path humanoidverse/data/lafan_29dof_10s-clipped.pkl \
+  --data-path humanoidverse/data/robots/g1/motions/lafan/lafan_29dof_10s-clipped.pkl \
   --update-z-every-step 100 \
   --buffer-size 5120000
 ```
@@ -140,10 +140,10 @@ Astro P2 GMR LaFAN1 uses the same full + 10s-clipped layout (G1's 40 long takes 
 
 ```bash
 bash scripts/download_data.sh astro_lafan
-ls -lh humanoidverse/data/astro_lafan_29dof_10s-clipped.pkl
+ls -lh humanoidverse/data/robots/astro_p2/motions/lafan/astro_lafan_29dof_10s-clipped.pkl
 ```
 
-To rebuild locally from `../lafan1_gmr.zip`, run `scripts/convert_astro_gmr_lafan_to_ufo_pkl.py`, then train via `configs/data/astro_lafan.yaml`.
+To rebuild locally from `../lafan1_gmr.zip`, run `scripts/convert_astro_gmr_lafan_to_ufo_pkl.py`, then train via `humanoidverse/data/robots/astro_p2/config/lafan.yaml`.
 
 ### 4. Tracking inference and ONNX export
 
@@ -212,11 +212,11 @@ Headerless RobotState CSV files are accepted. Without a header, columns are inte
 
 ```bash
 PYTHONPATH=. python scripts/convert_astro_npz_to_ufo_pkl.py \
-  --robot configs/robots/astro_p2_29dof.yaml \
+  --robot humanoidverse/data/robots/astro_p2/config/robot.yaml \
   --motion-root /data/share/astro_supermimic_88883_20261022/motions \
   --selection /data/share/astro_supermimic_88883_20261022/training_selection_88724.yaml \
   --out-dir humanoidverse/data/astro_supermimic_ufo \
-  --manifest-out configs/data/astro_supermimic_near10s.yaml \
+  --manifest-out humanoidverse/data/robots/astro_p2/config/supermimic_near10s.yaml \
   --prefer-diversity --force
 ```
 
@@ -247,7 +247,7 @@ See [Import Wizard](docs/import_wizard.md) for data schemas and import commands,
 
 ## Multi-source skill injection
 
-UFO supports manifest-based, source-weighted multi-source data mixing. This is useful for injecting rare agile skills, such as cartwheel motions, while preserving the base motion distribution. The dataset identity is sampled from a fixed source ratio, and prioritized sampling is applied within each source. See `configs/data/example_mix.yaml` for a compact manifest example.
+UFO supports manifest-based, source-weighted multi-source data mixing. This is useful for injecting rare agile skills, such as cartwheel motions, while preserving the base motion distribution. The dataset identity is sampled from a fixed source ratio, and prioritized sampling is applied within each source. See `humanoidverse/data/robots/g1/config/lafan.yaml` for a compact manifest example.
 
 ## Documentation
 

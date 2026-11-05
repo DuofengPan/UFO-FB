@@ -42,8 +42,8 @@ else:
     HUMANOIDVERSE_DIR = Path(__file__).resolve().parent
 
 PROJECT_ROOT = HUMANOIDVERSE_DIR.parent
-DEFAULT_ROBOT_CONFIG = "configs/robots/g1_29dof.yaml"
-DEFAULT_INFERENCE_DATA_PATH = Path("humanoidverse/data/lafan_29dof_10s-clipped.pkl")
+DEFAULT_ROBOT_CONFIG = "humanoidverse/data/robots/g1/config/robot.yaml"
+DEFAULT_INFERENCE_DATA_PATH = Path("humanoidverse/data/robots/g1/motions/lafan/lafan_29dof_10s-clipped.pkl")
 G1_MJLAB_DOF_NAMES = (
     "left_hip_pitch_joint",
     "left_hip_roll_joint",

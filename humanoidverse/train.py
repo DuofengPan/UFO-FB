@@ -37,13 +37,13 @@ DEFAULT_AGENT = "fb"
 DEFAULT_NUM_ENVS = 1024
 DEFAULT_NUM_ENV_STEPS = 192000000
 DEFAULT_CHECKPOINT_EVERY_STEPS = 3200000
-DEFAULT_DATA_PATH = "humanoidverse/data/lafan_29dof_10s-clipped.pkl"
+DEFAULT_DATA_PATH = "humanoidverse/data/robots/g1/motions/lafan/lafan_29dof_10s-clipped.pkl"
 DEFAULT_WORK_DIR = "runs/ufo"
 DEFAULT_BUFFER_SIZE = 5120000
 DEFAULT_FB_UPDATE_Z_EVERY_STEP = 100
 DEFAULT_UPDATE_Z_EVERY_STEP = DEFAULT_FB_UPDATE_Z_EVERY_STEP
 DEFAULT_SWANLAB_PROJECT = "ufo-humanoid"
-DEFAULT_ROBOT_CONFIG = "configs/robots/g1_29dof.yaml"
+DEFAULT_ROBOT_CONFIG = "humanoidverse/data/robots/g1/config/robot.yaml"
 
 AGENT_ALIASES = {
     "fb": "fb",
@@ -420,7 +420,7 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=None,
         help=(
-            "Robot YAML used for training metadata. Defaults to configs/robots/g1_29dof.yaml. "
+            "Robot YAML used for training metadata. Defaults to humanoidverse/data/robots/g1/config/robot.yaml. "
             "If omitted and --data-manifest declares robot_config, the manifest robot config is used."
         ),
     )

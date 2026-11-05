@@ -108,6 +108,6 @@ Remove `--smoke` and set the desired GPU and training options only after the imp
 - `hands`
 - `key_bodies`
 
-For robots that already have curated configs, such as G1, formal experiments should continue to use reference configs like `configs/robots/g1_29dof.yaml`.
+For robots that already have curated configs, such as G1, formal experiments should continue to use reference configs like `humanoidverse/data/robots/g1/config/robot.yaml`.
 
 The import wizard currently solves the robot-aware motion data import workflow and can emit XML-derived training drafts. It does not mean the UFO training environment is fully robot-agnostic, and it does not enable cross-robot shared-policy training by itself.

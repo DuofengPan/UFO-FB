@@ -7,11 +7,11 @@ to near-10s windows and writes shard PKLs + a train manifest.
 
 Example:
   python -m scripts.convert_astro_npz_to_ufo_pkl \\
-    --robot configs/robots/astro_p2_29dof.yaml \\
+    --robot humanoidverse/data/robots/astro_p2/config/robot.yaml \\
     --motion-root /data/share/astro_supermimic_88883_20261022/motions \\
     --selection /data/share/astro_supermimic_88883_20261022/training_selection_88724.yaml \\
     --out-dir humanoidverse/data/astro_supermimic_ufo \\
-    --manifest-out configs/data/astro_supermimic_near10s.yaml
+    --manifest-out humanoidverse/data/robots/astro_p2/config/supermimic_near10s.yaml
 """
 
 from __future__ import annotations
@@ -113,7 +113,7 @@ def _write_manifest(
 
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--robot", default="configs/robots/astro_p2_29dof.yaml")
+    parser.add_argument("--robot", default="humanoidverse/data/robots/astro_p2/config/robot.yaml")
     parser.add_argument("--motion-root", required=True, type=Path)
     parser.add_argument("--selection", required=True, type=Path)
     parser.add_argument("--out-dir", required=True, type=Path)

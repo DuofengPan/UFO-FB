@@ -1,5 +1,5 @@
 name: g1_29dof
-xml_path: humanoidverse/data/robots/g1_mjlab/g1_29dof.xml
+xml_path: humanoidverse/data/robots/g1/mjcf/g1_29dof.xml
 
 base_body: pelvis
 root_quat_order: xyzw

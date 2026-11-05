@@ -25,13 +25,13 @@ tea_debug.log
 # Generated inference media
 model/
 
-# Downloaded public motion data
-humanoidverse/data/lafan_29dof_10s-clipped.pkl
-humanoidverse/data/lafan_29dof.pkl
-humanoidverse/data/astro_lafan_29dof.pkl
-humanoidverse/data/astro_lafan_29dof_10s-clipped.pkl
-humanoidverse/data/astro_lafan_29dof_all77.pkl
-humanoidverse/data/astro_lafan_29dof_all77_10s-clipped.pkl
-humanoidverse/data/astro_supermimic_ufo/
+# Downloaded public motion data (fetch with scripts/download_data.sh)
+humanoidverse/data/robots/g1/motions/lafan/*.pkl
+humanoidverse/data/robots/astro_p2/motions/lafan/*.pkl
+humanoidverse/data/robots/astro_p2/motions/supermimic/
 .lafan1_gmr_extracted/
 _astro_src/
+
+# Local caches and machine-specific resolver lock
+.cache/
+uv.lock

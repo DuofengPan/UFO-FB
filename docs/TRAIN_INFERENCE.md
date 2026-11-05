@@ -24,7 +24,7 @@ The default training configuration is defined in `humanoidverse/train.py`:
 
 - `--num-envs`: `1024` environments per GPU.
 - `--num-env-steps`: `192000000` global environment steps.
-- `--data-path`: `humanoidverse/data/lafan_29dof_10s-clipped.pkl`.
+- `--data-path`: `humanoidverse/data/robots/g1/motions/lafan/lafan_29dof_10s-clipped.pkl`.
 - `--work-dir`: `runs/ufo`.
 - `--checkpoint-every-steps`: `3200000` global environment steps.
 - `--buffer-size`: `5120000` transitions per GPU.
@@ -84,7 +84,7 @@ uv run python -m humanoidverse.goal_inference \
 
 `goal_inference` accepts `--robot-config`, `--data-manifest`, `--dataset`, and
 `--rebuild-motion-cache` with the same manifest behavior as tracking inference.
-If no robot config is provided, it defaults to `configs/robots/g1_29dof.yaml`.
+If no robot config is provided, it defaults to `humanoidverse/data/robots/g1/config/robot.yaml`.
 For G1, omitting `--goal-json` keeps the existing
 `goal_frames_lafan29dof.json` fallback. For non-G1 robots, pass a goal JSON
 generated for the selected robot; the G1 goal JSON is not shared across robot

@@ -1,6 +1,6 @@
 # Astro high dynamic motion group
 
-`configs/data/astro_lafan_high_dynamic.yaml` samples the original Astro LaFAN
+`humanoidverse/data/robots/astro_p2/config/lafan_high_dynamic.yaml` samples the original Astro LaFAN
 source with mass 0.9 and this single high dynamic source with mass 0.1.
 These are source sampling weights, not ten percent of stored frames and not a
 separate ten percent for each subcategory. Existing within-source expert
@@ -43,7 +43,7 @@ bash scripts/start_astro_high_dynamic_8gpu.sh
 The launcher creates a new timestamped run, records the commit/data manifest,
 refuses an existing directory, and never copies a checkpoint or replay buffer.
 Original baseline and flip-only runs are preserved. The original
-`configs/data/astro_lafan.yaml` stays available for baseline reproduction.
+`humanoidverse/data/robots/astro_p2/config/lafan.yaml` stays available for baseline reproduction.
 
 GPU startup requires at least 32 GiB free on each of GPUs 0-7 (a conservative
 startup margin, not a measured peak allocation). The first attempt with about

@@ -31,8 +31,8 @@ case "${DATASET_NAME}" in
       "g1/lafan_29dof.pkl"
     )
     DESTS=(
-      "humanoidverse/data/lafan_29dof_10s-clipped.pkl"
-      "humanoidverse/data/lafan_29dof.pkl"
+      "humanoidverse/data/robots/g1/motions/lafan/lafan_29dof_10s-clipped.pkl"
+      "humanoidverse/data/robots/g1/motions/lafan/lafan_29dof.pkl"
     )
     EXPECTED_SHA256S=(
       "7f5aa36957808ee2e972472b18add8510533742710ba312d8b8c6e6014f1c010"
@@ -46,8 +46,8 @@ case "${DATASET_NAME}" in
       "astro/lafan_29dof.pkl"
     )
     DESTS=(
-      "humanoidverse/data/astro_lafan_29dof_10s-clipped.pkl"
-      "humanoidverse/data/astro_lafan_29dof.pkl"
+      "humanoidverse/data/robots/astro_p2/motions/lafan/astro_lafan_29dof_10s-clipped.pkl"
+      "humanoidverse/data/robots/astro_p2/motions/lafan/astro_lafan_29dof.pkl"
     )
     EXPECTED_SHA256S=(
       "4e727221206c0e86dd9e01c53bafac2a743ba74c5866710134c07dad8ea2e5b3"

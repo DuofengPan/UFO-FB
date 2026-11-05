@@ -55,18 +55,18 @@ done
 # Validate data and write all provenance before spawning GPU workers.
 "${PYTHON}" - <<'PY'
 from humanoidverse.utils.motion_data.manifest import prepare_motion_manifest
-m = prepare_motion_manifest('configs/data/astro_lafan_high_dynamic.yaml')
+m = prepare_motion_manifest('humanoidverse/data/robots/astro_p2/config/lafan_high_dynamic.yaml')
 assert m.train_data_weights == [0.9, 0.1], m.train_data_weights
 print('Validated motion sources:', list(zip(m.train_data_paths, m.train_data_weights)))
 PY
 mkdir -p "${RUN_DIR}"
 git -c safe.directory="${ROOT_DIR}" rev-parse HEAD > "${RUN_DIR}/git_commit.txt"
 git -c safe.directory="${ROOT_DIR}" diff --stat > "${RUN_DIR}/working_tree_diff_stat.txt"
-cp configs/data/astro_lafan_high_dynamic.yaml "${RUN_DIR}/data_manifest.yaml"
-cp humanoidverse/data/astro_high_dynamic/manifest.json "${RUN_DIR}/data_provenance.json"
+cp humanoidverse/data/robots/astro_p2/config/lafan_high_dynamic.yaml "${RUN_DIR}/data_manifest.yaml"
+cp humanoidverse/data/robots/astro_p2/motions/high_dynamic/manifest.json "${RUN_DIR}/data_provenance.json"
 args=("${PYTHON}" -m humanoidverse.train --agent fb --gpu-ids all
-  --robot-config configs/robots/astro_p2_29dof.yaml
-  --data-manifest configs/data/astro_lafan_high_dynamic.yaml
+  --robot-config humanoidverse/data/robots/astro_p2/config/robot.yaml
+  --data-manifest humanoidverse/data/robots/astro_p2/config/lafan_high_dynamic.yaml
   --num-envs 4096 --num-env-steps 192000000 --buffer-size 5120000
   --num-agent-updates 64 --checkpoint-every-steps 3200000
   --use-swanlab --swanlab-run-name "${RUN_NAME}" --work-dir "${RUN_DIR}")

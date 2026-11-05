@@ -20,15 +20,15 @@ git diff --check
 rm -rf /tmp/ufo_smoke_release_train
 ./run_train.sh \
   --agent fb \
-  --data-manifest configs/data/example_mix.yaml \
+  --data-manifest humanoidverse/data/robots/g1/config/lafan.yaml \
   --gpu-ids single \
   --smoke \
   --work-dir /tmp/ufo_smoke_release_train
 
 rm -f /tmp/g1_robot_state_release_smoke.yaml
 uv run python -m humanoidverse.tools.data_build \
-  --robot configs/robots/g1_29dof.yaml \
-  --source humanoidverse/data/examples/g1_robot_state_sample.csv \
+  --robot humanoidverse/data/robots/g1/config/robot.yaml \
+  --source humanoidverse/data/robots/g1/motions/examples/g1_robot_state_sample.csv \
   --format robot_state_csv \
   --name g1_robot_state_sample \
   --fps 50 \

@@ -125,8 +125,8 @@ class RobotConfigTrainingTest(unittest.TestCase):
             swanlab_run_name=None,
             smoke=True,
         )
-        self.assertTrue(str(cfg.env.robot_config_path).endswith("configs/robots/g1_29dof.yaml"))
-        self.assertTrue(str(cfg.env.mjcf_path).endswith("humanoidverse/data/robots/g1_mjlab/g1_29dof.xml"))
+        self.assertTrue(str(cfg.env.robot_config_path).endswith("humanoidverse/data/robots/g1/config/robot.yaml"))
+        self.assertTrue(str(cfg.env.mjcf_path).endswith("humanoidverse/data/robots/g1/mjcf/g1_29dof.xml"))
 
     def test_explicit_g1_robot_config_builds_cfg(self) -> None:
         cfg = build_ufo_mjlab_config(
@@ -138,9 +138,9 @@ class RobotConfigTrainingTest(unittest.TestCase):
             use_swanlab=False,
             swanlab_run_name=None,
             smoke=True,
-            robot_config="configs/robots/g1_29dof.yaml",
+            robot_config="humanoidverse/data/robots/g1/config/robot.yaml",
         )
-        self.assertTrue(str(cfg.env.robot_config_path).endswith("configs/robots/g1_29dof.yaml"))
+        self.assertTrue(str(cfg.env.robot_config_path).endswith("humanoidverse/data/robots/g1/config/robot.yaml"))
 
     def test_manifest_robot_config_is_used_when_cli_missing(self) -> None:
         argv = [
@@ -148,20 +148,20 @@ class RobotConfigTrainingTest(unittest.TestCase):
             "--agent",
             "fb",
             "--data-manifest",
-            "configs/data/example_mix.yaml",
+            "humanoidverse/data/robots/g1/config/lafan.yaml",
             "--gpu-ids",
             "single",
             "--smoke",
         ]
         with patch.object(sys, "argv", argv):
             args = parse_train_args()
-        self.assertTrue(str(args.robot_config).endswith("configs/robots/g1_29dof.yaml"))
+        self.assertTrue(str(args.robot_config).endswith("humanoidverse/data/robots/g1/config/robot.yaml"))
 
     def test_cli_manifest_robot_config_mismatch_errors(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tiny_robot = _write_tiny_robot_with_training(Path(tmpdir))
             with self.assertRaisesRegex(ValueError, "does not match data manifest robot_config"):
-                _resolve_training_robot_config(tiny_robot, "configs/robots/g1_29dof.yaml")
+                _resolve_training_robot_config(tiny_robot, "humanoidverse/data/robots/g1/config/robot.yaml")
 
     def test_tracking_manifest_robot_config_is_used_when_cli_missing(self) -> None:
         argv = [
@@ -169,7 +169,7 @@ class RobotConfigTrainingTest(unittest.TestCase):
             "--model-folder",
             "/tmp/ufo_unit_model",
             "--data-manifest",
-            "configs/data/example_robot_state_auto_build.yaml",
+            "humanoidverse/data/robots/g1/config/robot_state_example.yaml",
             "--dataset",
             "g1_robot_state_sample",
             "--export-onnx",
@@ -177,13 +177,13 @@ class RobotConfigTrainingTest(unittest.TestCase):
         ]
         with patch.object(sys, "argv", argv):
             args = parse_tracking_args()
-        self.assertTrue(str(args.robot_config).endswith("configs/robots/g1_29dof.yaml"))
+        self.assertTrue(str(args.robot_config).endswith("humanoidverse/data/robots/g1/config/robot.yaml"))
 
     def test_tracking_cli_manifest_robot_config_mismatch_errors(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             tiny_robot = _write_tiny_robot_with_training(Path(tmpdir))
             with self.assertRaisesRegex(ValueError, "does not match data manifest robot_config"):
-                _resolve_tracking_robot_config(tiny_robot, "configs/robots/g1_29dof.yaml")
+                _resolve_tracking_robot_config(tiny_robot, "humanoidverse/data/robots/g1/config/robot.yaml")
 
     def test_aux_rewards_require_two_contact_bodies_unconditionally(self) -> None:
         core = object.__new__(HumanoidVerseMjlabCore)

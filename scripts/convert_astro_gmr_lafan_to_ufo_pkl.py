@@ -9,8 +9,8 @@ DOF order (verified by MuJoCo FK against local_body_pos):
 
 For UFO Astro P2 29-DoF (fixed head) we drop head_joint and reorder into
 RobotSpec.control_joint_names, then emit the same two artifacts as G1 LaFAN:
-  humanoidverse/data/astro_lafan_29dof.pkl
-  humanoidverse/data/astro_lafan_29dof_10s-clipped.pkl
+  humanoidverse/data/robots/astro_p2/motions/lafan/astro_lafan_29dof.pkl
+  humanoidverse/data/robots/astro_p2/motions/lafan/astro_lafan_29dof_10s-clipped.pkl
 """
 
 from __future__ import annotations
@@ -138,11 +138,11 @@ def main(argv: list[str] | None = None) -> None:
         default=Path("/data/atom9/code/lafan1_gmr.zip"),
         help="Zip or directory of GMR per-motion PKLs",
     )
-    parser.add_argument("--robot", default="configs/robots/astro_p2_29dof.yaml")
+    parser.add_argument("--robot", default="humanoidverse/data/robots/astro_p2/config/robot.yaml")
     parser.add_argument(
         "--out-dir",
         type=Path,
-        default=Path("humanoidverse/data"),
+        default=Path("humanoidverse/data/robots/astro_p2/motions/lafan"),
         help="Directory for astro_lafan_29dof.pkl and clipped twin",
     )
     parser.add_argument("--clip-seconds", type=float, default=10.0)
@@ -151,7 +151,7 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument(
         "--manifest-out",
         type=Path,
-        default=Path("configs/data/astro_lafan.yaml"),
+        default=Path("humanoidverse/data/robots/astro_p2/config/lafan.yaml"),
     )
     parser.add_argument("--force", action="store_true")
     args = parser.parse_args(argv)

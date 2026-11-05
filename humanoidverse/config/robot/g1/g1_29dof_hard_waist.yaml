@@ -249,7 +249,7 @@ robot:
   motion:
     motion_file : 'data/lafan_29dof.pkl'
     asset:
-      assetRoot: "humanoidverse/data/robots/g1_mjlab/"
+      assetRoot: "humanoidverse/data/robots/g1/mjcf/"
       assetFileName: "g1_29dof.xml"
       urdfFileName: null
 

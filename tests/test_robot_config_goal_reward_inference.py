@@ -126,7 +126,7 @@ class RobotConfigGoalRewardInferenceTest(unittest.TestCase):
                 "--model-folder",
                 "/tmp/ufo_unit_model",
                 "--data-manifest",
-                "configs/data/example_robot_state_auto_build.yaml",
+                "humanoidverse/data/robots/g1/config/robot_state_example.yaml",
                 "--dataset",
                 "g1_robot_state_sample",
                 "--robot-config",

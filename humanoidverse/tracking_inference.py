@@ -34,7 +34,7 @@ from humanoidverse.utils.motion_data import prepare_manifest_dataset_path, prepa
 from humanoidverse.utils.robot_spec import assert_robot_configs_compatible, load_robot_training_spec, resolve_robot_config_path
 
 
-DEFAULT_ROBOT_CONFIG = "configs/robots/g1_29dof.yaml"
+DEFAULT_ROBOT_CONFIG = "humanoidverse/data/robots/g1/config/robot.yaml"
 
 
 def _resize_nearest(frame: np.ndarray, height: int, width: int) -> np.ndarray:

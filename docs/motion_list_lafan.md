@@ -1,4 +1,4 @@
-source pkl: `humanoidverse/data/lafan_29dof.pkl`
+source pkl: `humanoidverse/data/robots/g1/motions/lafan/lafan_29dof.pkl`
 - total motions: `40`
 
 | id | name |

@@ -71,9 +71,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--force', action='store_true', help='Rebuild existing generated datasets')
     args = parser.parse_args()
-    spec_path = ROOT / 'configs/robots/astro_p2_29dof.yaml'
+    spec_path = ROOT / 'humanoidverse/data/robots/astro_p2/config/robot.yaml'
     spec = load_robot_spec(spec_path)
-    folder = ROOT / 'humanoidverse/data/astro_high_dynamic'
+    folder = ROOT / 'humanoidverse/data/robots/astro_p2/motions/high_dynamic'
     outputs = [folder / 'astro_high_dynamic_50hz.pkl', folder / 'astro_high_dynamic_50hz_10s-clipped.pkl']
     if any(p.exists() for p in outputs) and not args.force:
         raise FileExistsError('Output exists; use --force to rebuild explicitly')

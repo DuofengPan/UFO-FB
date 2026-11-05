@@ -93,7 +93,7 @@ uv run swanlab login
 
 ```bash
 bash scripts/download_data.sh g1_lafan
-ls -lh humanoidverse/data/lafan_29dof_10s-clipped.pkl
+ls -lh humanoidverse/data/robots/g1/motions/lafan/lafan_29dof_10s-clipped.pkl
 ```
 
 ### 3. Smoke test
@@ -101,7 +101,7 @@ ls -lh humanoidverse/data/lafan_29dof_10s-clipped.pkl
 ```bash
 ./run_train.sh \
   --agent fb \
-  --data-manifest configs/data/example_mix.yaml \
+  --data-manifest humanoidverse/data/robots/g1/config/lafan.yaml \
   --gpu-ids single \
   --smoke \
   --work-dir /tmp/ufo_smoke_g1
@@ -117,7 +117,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
   --num-envs 1024 \
   --num-env-steps 192000000 \
   --work-dir runs/ufo_fb_g1 \
-  --data-path humanoidverse/data/lafan_29dof_10s-clipped.pkl \
+  --data-path humanoidverse/data/robots/g1/motions/lafan/lafan_29dof_10s-clipped.pkl \
   --update-z-every-step 100 \
   --buffer-size 5120000
 ```
@@ -126,15 +126,15 @@ Astro P2 的 GMR LaFAN1（与 G1 同结构：full + 10s-clipped；40 条 G1 长�
 
 ```bash
 bash scripts/download_data.sh astro_lafan
-ls -lh humanoidverse/data/astro_lafan_29dof_10s-clipped.pkl
+ls -lh humanoidverse/data/robots/astro_p2/motions/lafan/astro_lafan_29dof_10s-clipped.pkl
 
 # 或从 code/lafan1_gmr.zip 本地生成
 PYTHONPATH=. python scripts/convert_astro_gmr_lafan_to_ufo_pkl.py --force
 
 ./run_train.sh \
   --agent fb \
-  --robot-config configs/robots/astro_p2_29dof.yaml \
-  --data-manifest configs/data/astro_lafan.yaml \
+  --robot-config humanoidverse/data/robots/astro_p2/config/robot.yaml \
+  --data-manifest humanoidverse/data/robots/astro_p2/config/lafan.yaml \
   --gpu-ids single \
   --work-dir runs/ufo_fb_astro_lafan
 ```
@@ -209,11 +209,11 @@ uv run python -m humanoidverse.tools.data_build \
 
 ```bash
 PYTHONPATH=. python scripts/convert_astro_npz_to_ufo_pkl.py \
-  --robot configs/robots/astro_p2_29dof.yaml \
+  --robot humanoidverse/data/robots/astro_p2/config/robot.yaml \
   --motion-root /data/share/astro_supermimic_88883_20261022/motions \
   --selection /data/share/astro_supermimic_88883_20261022/training_selection_88724.yaml \
   --out-dir humanoidverse/data/astro_supermimic_ufo \
-  --manifest-out configs/data/astro_supermimic_near10s.yaml \
+  --manifest-out humanoidverse/data/robots/astro_p2/config/supermimic_near10s.yaml \
   --prefer-diversity --force
 ```
 
@@ -243,7 +243,7 @@ PYTHONPATH=. python scripts/convert_astro_npz_to_ufo_pkl.py \
 
 ## 多数据源技能注入
 
-UFO 支持基于 manifest 的多数据源混合。每个数据源之间的采样比例保持固定，prioritized sampling 在每个数据源内部进行。这适合在保持基础动作分布的同时注入少量稀有高敏捷技能，例如 cartwheel。可以参考 `configs/data/example_mix.yaml`。
+UFO 支持基于 manifest 的多数据源混合。每个数据源之间的采样比例保持固定，prioritized sampling 在每个数据源内部进行。这适合在保持基础动作分布的同时注入少量稀有高敏捷技能，例如 cartwheel。可以参考 `humanoidverse/data/robots/g1/config/lafan.yaml`。
 
 ## 文档链接
 
@@ -273,11 +273,11 @@ UFO 当前基于 CC BY-NC 4.0 发布，主要面向非商业科研使用，具�
 
 ## Astro LaFAN + 高动态数据（90% / 10%）
 
-新配置为 `configs/data/astro_lafan_high_dynamic.yaml`：原 `astro_lafan` 组占
+新配置为 `humanoidverse/data/robots/astro_p2/config/lafan_high_dynamic.yaml`：原 `astro_lafan` 组占
 90%，新增 `astro_high_dynamic` 组占 10%。新组包含 20 条已重定向功夫动作和
 4 条 Qingtong 空翻；组内沿用现有专家优先级采样。
 完整序列、约 10 秒训练切片、来源哈希及重建说明见
-[`astro_high_dynamic/README.md`](humanoidverse/data/astro_high_dynamic/README.md)。
+[`astro_high_dynamic/README.md`](humanoidverse/data/robots/astro_p2/motions/high_dynamic/README.md)。
 
 从头启动 8 卡、每卡 4096 环境、默认 buffer、64 次更新、SwanLab 监控：
 

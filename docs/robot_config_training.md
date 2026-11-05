@@ -8,7 +8,7 @@ training code.
 The default robot is still Unitree G1:
 
 ```bash
-./run_train.sh --agent fb --data-manifest configs/data/example_mix.yaml --gpu-ids single --smoke
+./run_train.sh --agent fb --data-manifest humanoidverse/data/robots/g1/config/lafan.yaml --gpu-ids single --smoke
 ```
 
 Old G1 commands that do not pass `--robot-config` remain supported. If a data

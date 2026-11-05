@@ -21,8 +21,8 @@ fi
 nohup python -m humanoidverse.train \
   --agent fb \
   --gpu-ids all \
-  --robot-config configs/robots/astro_p2_29dof.yaml \
-  --data-manifest configs/data/astro_lafan.yaml \
+  --robot-config humanoidverse/data/robots/astro_p2/config/robot.yaml \
+  --data-manifest humanoidverse/data/robots/astro_p2/config/lafan.yaml \
   --num-envs 1024 \
   --buffer-size 2560000 \
   --use-swanlab \
