@@ -4,6 +4,15 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "${ROOT_DIR}"
 PYTHON="${PYTHON:-${ROOT_DIR}/.venv/bin/python}"
+WAIT_FOR_GPUS=0
+if [[ "${1:-}" == "--wait-for-gpus" ]]; then
+  WAIT_FOR_GPUS=1
+  shift
+fi
+if (($#)); then
+  echo 'usage: scripts/start_astro_high_dynamic_8gpu.sh [--wait-for-gpus]' >&2
+  exit 2
+fi
 RUN_NAME="${RUN_NAME:-astro_fb_scratch_lafan90_highdynamic10_8gpu_4096_u64_$(date -u +%Y%m%d_%H%M%S)_UTC}"
 RUN_DIR="${ROOT_DIR}/runs/${RUN_NAME}"
 if [[ -e "${RUN_DIR}" ]]; then
@@ -15,6 +24,34 @@ export NCCL_NVLS_ENABLE=0
 export PYTHONUNBUFFERED=1
 export UFO_CACHE_DIR="${ROOT_DIR}/.cache"
 export BFMZERO_MJLAB_CACHE_DIR="${ROOT_DIR}/.cache"
+# Real startup with only ~9 GiB free failed during Warp graph capture. Require
+# headroom on all eight GPUs; waiting never kills or resets another workload.
+MIN_FREE_GPU_MIB="${MIN_FREE_GPU_MIB:-32768}"
+MAX_GPU_WAIT_SECONDS="${MAX_GPU_WAIT_SECONDS:-86400}"
+[[ "${MIN_FREE_GPU_MIB}" =~ ^[1-9][0-9]*$ && "${MAX_GPU_WAIT_SECONDS}" =~ ^[1-9][0-9]*$ ]] || {
+  echo 'error: memory threshold and maximum wait must be positive integers' >&2
+  exit 2
+}
+wait_started=${SECONDS}
+while true; do
+  free_memory="$(nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits)"
+  if awk -v minimum="${MIN_FREE_GPU_MIB}" '
+      NR <= 8 {if ($1 < minimum) insufficient=1}
+      END {exit (NR < 8 || insufficient)}' <<< "${free_memory}"; then
+    break
+  fi
+  if [[ "${WAIT_FOR_GPUS}" != 1 ]]; then
+    echo "error: GPUs 0-7 must each have at least ${MIN_FREE_GPU_MIB} MiB free" >&2
+    echo 'Use --wait-for-gpus to wait up to MAX_GPU_WAIT_SECONDS (default 24 h).' >&2
+    exit 1
+  fi
+  if (( SECONDS - wait_started >= MAX_GPU_WAIT_SECONDS )); then
+    echo 'error: timed out waiting for GPU memory; no training started' >&2
+    exit 1
+  fi
+  echo "$(date -Is) Waiting for all 8 GPUs >= ${MIN_FREE_GPU_MIB} MiB free; current: $(tr '\n' ' ' <<< "${free_memory}")"
+  sleep 60
+done
 # Validate data and write all provenance before spawning GPU workers.
 "${PYTHON}" - <<'PY'
 from humanoidverse.utils.motion_data.manifest import prepare_motion_manifest

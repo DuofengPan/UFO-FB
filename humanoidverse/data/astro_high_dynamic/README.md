@@ -44,3 +44,10 @@ The launcher creates a new timestamped run, records the commit/data manifest,
 refuses an existing directory, and never copies a checkpoint or replay buffer.
 Original baseline and flip-only runs are preserved. The original
 `configs/data/astro_lafan.yaml` stays available for baseline reproduction.
+
+GPU startup requires at least 32 GiB free on each of GPUs 0-7 (a conservative
+startup margin, not a measured peak allocation). The first attempt with about
+9 GiB free failed in Warp CUDA graph creation. If resources are occupied, use
+`--wait-for-gpus`; the launcher checks every 60 seconds for at most 24 hours and
+then starts the same full training command. It never resets GPUs or kills other
+jobs. `MIN_FREE_GPU_MIB` and `MAX_GPU_WAIT_SECONDS` are explicit overrides.
