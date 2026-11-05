@@ -269,3 +269,21 @@ UFO 支持基于 manifest 的多数据源混合。每个数据源之间的采样
 在 LaTeX 中，将上述条目加入 `.bib` 文件后，使用 `\cite{ufo2026}` 即可。
 
 UFO 当前基于 CC BY-NC 4.0 发布，主要面向非商业科研使用，具体以 [LICENSE](LICENSE) 文件为准。
+
+
+## Astro LaFAN + 高动态数据（90% / 10%）
+
+新配置为 `configs/data/astro_lafan_high_dynamic.yaml`：原 `astro_lafan` 组占
+90%，新增 `astro_high_dynamic` 组占 10%。新组包含 20 条已重定向功夫动作和
+4 条 Qingtong 空翻；组内沿用现有专家优先级采样。
+完整序列、约 10 秒训练切片、来源哈希及重建说明见
+[`astro_high_dynamic/README.md`](humanoidverse/data/astro_high_dynamic/README.md)。
+
+从头启动 8 卡、每卡 4096 环境、默认 buffer、64 次更新、SwanLab 监控：
+
+```bash
+bash scripts/start_astro_high_dynamic_8gpu.sh
+```
+
+此入口使用全新运行目录，不复用旧 checkpoint 或 buffer。原纯 LaFAN 配置和
+之前的 baseline / flip-only 训练结果均保留。

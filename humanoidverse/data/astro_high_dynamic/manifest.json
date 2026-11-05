@@ -1,0 +1,275 @@
+{
+  "schema": "astro_high_dynamic.v1",
+  "robot": "astro_p2_29dof",
+  "fps": 50,
+  "root_quat_order": "xyzw",
+  "joint_names": [
+    "left_hip_pitch_joint",
+    "left_hip_roll_joint",
+    "left_hip_yaw_joint",
+    "left_knee_joint",
+    "left_ankle_pitch_joint",
+    "left_ankle_roll_joint",
+    "right_hip_pitch_joint",
+    "right_hip_roll_joint",
+    "right_hip_yaw_joint",
+    "right_knee_joint",
+    "right_ankle_pitch_joint",
+    "right_ankle_roll_joint",
+    "waist_yaw_joint",
+    "waist_pitch_joint",
+    "waist_roll_joint",
+    "left_shoulder_pitch_joint",
+    "left_shoulder_roll_joint",
+    "left_shoulder_yaw_joint",
+    "left_elbow_joint",
+    "left_wrist_roll_joint",
+    "left_wrist_pitch_joint",
+    "left_wrist_yaw_joint",
+    "right_shoulder_pitch_joint",
+    "right_shoulder_roll_joint",
+    "right_shoulder_yaw_joint",
+    "right_elbow_joint",
+    "right_wrist_roll_joint",
+    "right_wrist_pitch_joint",
+    "right_wrist_yaw_joint"
+  ],
+  "source_counts": {
+    "kungfu": 20,
+    "backflip": 4
+  },
+  "full_motions": 24,
+  "training_clips": 43,
+  "full_duration_seconds": 356.74000000000007,
+  "training_frames": 17723,
+  "sources": [
+    {
+      "path": "humanoidverse/data/astro_high_dynamic/raw/kungfu/H2X01-2_Skeleton-12278.pkl",
+      "sha256": "3ba5cb465c607a469afcef395c7705d6e06b0ee0001b941ad5b8d83755291b53",
+      "motion_key": "kungfu_H2X01-2_Skeleton-12278",
+      "category": "kungfu",
+      "source_fps": 70.00007000007,
+      "source_frames": 703,
+      "frames_50hz": 502
+    },
+    {
+      "path": "humanoidverse/data/astro_high_dynamic/raw/kungfu/H2X02-2_Skeleton-122710.pkl",
+      "sha256": "e6dc35c1a519adf83aef2c02ab277134ebb5462330bef87e995829cf6765fdaf",
+      "motion_key": "kungfu_H2X02-2_Skeleton-122710",
+      "category": "kungfu",
+      "source_fps": 70.00007000007,
+      "source_frames": 687,
+      "frames_50hz": 490
+    },
+    {
+      "path": "humanoidverse/data/astro_high_dynamic/raw/kungfu/getready-03_Skeleton-122713.pkl",
+      "sha256": "61025ad2cba3bfbb5323894893fa23b06ae53f8652fed631bd125b8fda3cdd31",
+      "motion_key": "kungfu_getready-03_Skeleton-122713",
+      "category": "kungfu",
+      "source_fps": 70.00007000007,
+      "source_frames": 674,
+      "frames_50hz": 481
+    },
+    {
+      "path": "humanoidverse/data/astro_high_dynamic/raw/kungfu/hongquan02_Skeleton-122712.pkl",
+      "sha256": "3028e64372007d3efac207467dbb317fe40970f2e14141376f770cd033de7d9d",
+      "motion_key": "kungfu_hongquan02_Skeleton-122712",
+      "category": "kungfu",
+      "source_fps": 70.00007000007,
+      "source_frames": 1590,
+      "frames_50hz": 1135
+    },
+    {
+      "path": "humanoidverse/data/astro_high_dynamic/raw/kungfu/houzi-01_Skeleton-122713.pkl",
+      "sha256": "a1e7e11a2fbe1cf0fa2b879a8a6fc97118c0d6dbf1f94098292e3b12d56b8502",
+      "motion_key": "kungfu_houzi-01_Skeleton-122713",
+      "category": "kungfu",
+      "source_fps": 70.00007000007,
+      "source_frames": 769,
+      "frames_50hz": 549
+    },
+    {
+      "path": "humanoidverse/data/astro_high_dynamic/raw/kungfu/huquan_Skeleton-121.pkl",
+      "sha256": "65847b2bf72e30575dccdbee656a198050b940198b0bd95c8e4fa75f7c47f319",
+      "motion_key": "kungfu_huquan_Skeleton-121",
+      "category": "kungfu",
+      "source_fps": 70.00007000007,
+      "source_frames": 1180,
+      "frames_50hz": 843
+    },
+    {
+      "path": "humanoidverse/data/astro_high_dynamic/raw/kungfu/jichuquan02_Skeleton-11.pkl",
+      "sha256": "79d8f7dce1ad88ba44ea2dd75125072523e21b7d1ed8002176911ebbde85f316",
+      "motion_key": "kungfu_jichuquan02_Skeleton-11",
+      "category": "kungfu",
+      "source_fps": 70.00007000007,
+      "source_frames": 924,
+      "frames_50hz": 660
+    },
+    {
+      "path": "humanoidverse/data/astro_high_dynamic/raw/kungfu/jiequandao01_Skeleton-121.pkl",
+      "sha256": "36d013bb07e4f6aab2af118f6f38d04b6e3c46b35ef3b71f5ccf0e0779367573",
+      "motion_key": "kungfu_jiequandao01_Skeleton-121",
+      "category": "kungfu",
+      "source_fps": 70.00007000007,
+      "source_frames": 1112,
+      "frames_50hz": 794
+    },
+    {
+      "path": "humanoidverse/data/astro_high_dynamic/raw/kungfu/jiequandao04-slow_Skeleton-122.pkl",
+      "sha256": "f58049e72248f2aca303f94e6a7817dc3e8cbddd96ef03ee2125ca6715ae0d97",
+      "motion_key": "kungfu_jiequandao04-slow_Skeleton-122",
+      "category": "kungfu",
+      "source_fps": 70.00007000007,
+      "source_frames": 1290,
+      "frames_50hz": 921
+    },
+    {
+      "path": "humanoidverse/data/astro_high_dynamic/raw/kungfu/nanquan01_Skeleton-122.pkl",
+      "sha256": "f00bd086599b34d8f3b85a96924a6f61391a61b398f029ddba1e15bf9b3e5550",
+      "motion_key": "kungfu_nanquan01_Skeleton-122",
+      "category": "kungfu",
+      "source_fps": 70.00007000007,
+      "source_frames": 1467,
+      "frames_50hz": 1048
+    },
+    {
+      "path": "humanoidverse/data/astro_high_dynamic/raw/kungfu/qishi01_Skeleton-1227.pkl",
+      "sha256": "9b2fd8aeee38722a20916131c0a5c68667c2664fd7b2b5d44bad4cd7983186e1",
+      "motion_key": "kungfu_qishi01_Skeleton-1227",
+      "category": "kungfu",
+      "source_fps": 70.00007000007,
+      "source_frames": 545,
+      "frames_50hz": 389
+    },
+    {
+      "path": "humanoidverse/data/astro_high_dynamic/raw/kungfu/shaolin01_Skeleton-122.pkl",
+      "sha256": "19a4218a0eaf3d456d3c6897e36ff07543201d1c862d48a5b363ea0710788c27",
+      "motion_key": "kungfu_shaolin01_Skeleton-122",
+      "category": "kungfu",
+      "source_fps": 70.00007000007,
+      "source_frames": 982,
+      "frames_50hz": 701
+    },
+    {
+      "path": "humanoidverse/data/astro_high_dynamic/raw/kungfu/shixiaolong03_Skeleton-1227.pkl",
+      "sha256": "cd2c67af48a1d48173cbf8501af7d7dd9ea55b49f83dbec63164a16f8fb88fd3",
+      "motion_key": "kungfu_shixiaolong03_Skeleton-1227",
+      "category": "kungfu",
+      "source_fps": 70.00007000007,
+      "source_frames": 753,
+      "frames_50hz": 538
+    },
+    {
+      "path": "humanoidverse/data/astro_high_dynamic/raw/kungfu/taichi01_Skeleton-11.pkl",
+      "sha256": "dbd810bd2908a955c69b6bc68e41c0cab65201bfa16232f5aecf6f3bb87620cc",
+      "motion_key": "kungfu_taichi01_Skeleton-11",
+      "category": "kungfu",
+      "source_fps": 70.00007000007,
+      "source_frames": 1695,
+      "frames_50hz": 1210
+    },
+    {
+      "path": "humanoidverse/data/astro_high_dynamic/raw/kungfu/tiyvekongfan-01_Skeleton-122710.pkl",
+      "sha256": "2733b505ed475ab22e2b89d7765988f7c1e6a90abf8b5fc3f9f0f05c373c7153",
+      "motion_key": "kungfu_tiyvekongfan-01_Skeleton-122710",
+      "category": "kungfu",
+      "source_fps": 70.00007000007,
+      "source_frames": 653,
+      "frames_50hz": 466
+    },
+    {
+      "path": "humanoidverse/data/astro_high_dynamic/raw/kungfu/tuihua03_Skeleton-121.pkl",
+      "sha256": "06271595c9eda864d60faa9232c50f73a5c1cc1802da404208bbaf4e276a1308",
+      "motion_key": "kungfu_tuihua03_Skeleton-121",
+      "category": "kungfu",
+      "source_fps": 70.00007000007,
+      "source_frames": 497,
+      "frames_50hz": 355
+    },
+    {
+      "path": "humanoidverse/data/astro_high_dynamic/raw/kungfu/zuinaiquan01_Skeleton-1227.pkl",
+      "sha256": "628ef1f7f5651ad229db145ced9ec11a5a7fe983dccc35a4208a95e3a5dc65ac",
+      "motion_key": "kungfu_zuinaiquan01_Skeleton-1227",
+      "category": "kungfu",
+      "source_fps": 70.00007000007,
+      "source_frames": 2213,
+      "frames_50hz": 1580
+    },
+    {
+      "path": "humanoidverse/data/astro_high_dynamic/raw/kungfu/zuinaiquan02_Skeleton-1227.pkl",
+      "sha256": "83a30dec479b11dcdb37e8784f8c3a0cb328fbad1ed8cd9f56a74ab8d7b8e63a",
+      "motion_key": "kungfu_zuinaiquan02_Skeleton-1227",
+      "category": "kungfu",
+      "source_fps": 70.00007000007,
+      "source_frames": 1821,
+      "frames_50hz": 1300
+    },
+    {
+      "path": "humanoidverse/data/astro_high_dynamic/raw/kungfu/zuinaiquan03_Skeleton-1227.pkl",
+      "sha256": "f4f6be5189fd2bf74e2b29939a0cd3029e9b454f6ade053eec284e6a79a2e65d",
+      "motion_key": "kungfu_zuinaiquan03_Skeleton-1227",
+      "category": "kungfu",
+      "source_fps": 70.00007000007,
+      "source_frames": 1732,
+      "frames_50hz": 1237
+    },
+    {
+      "path": "humanoidverse/data/astro_high_dynamic/raw/kungfu/zuiquan01_Skeleton-1225.pkl",
+      "sha256": "2225e0b19d259a0c20b88970a26660ca118fe1d37b847cd32880d2c28008f322",
+      "motion_key": "kungfu_zuiquan01_Skeleton-1225",
+      "category": "kungfu",
+      "source_fps": 70.00007000007,
+      "source_frames": 2102,
+      "frames_50hz": 1501
+    },
+    {
+      "path": "humanoidverse/data/astro_high_dynamic/raw/qingtong/Take_012_Skeleton0.qpos.csv",
+      "sha256": "5f41f3020284bd8fad328be267ee7eb8c7d08b18ac91c2f684ca01fbdf8bb522",
+      "motion_key": "qingtong_Take_012_Skeleton0",
+      "category": "backflip",
+      "source_fps": 50,
+      "source_frames": 226,
+      "frames_50hz": 226
+    },
+    {
+      "path": "humanoidverse/data/astro_high_dynamic/raw/qingtong/Take_015_Skeleton0.qpos.csv",
+      "sha256": "43339e063cb8f7c2f3e8ee2f16fbf943cd06bb49bd1a142c67cbd1acc8c4e481",
+      "motion_key": "qingtong_Take_015_Skeleton0",
+      "category": "backflip",
+      "source_fps": 50,
+      "source_frames": 266,
+      "frames_50hz": 266
+    },
+    {
+      "path": "humanoidverse/data/astro_high_dynamic/raw/qingtong/Take_048_Skeleton0.qpos.csv",
+      "sha256": "ed6fa281d9ec2e3e1e82a7d2513cc9146da74a1c3ec8caf0e5f2276de291e6b8",
+      "motion_key": "qingtong_Take_048_Skeleton0",
+      "category": "backflip",
+      "source_fps": 50,
+      "source_frames": 310,
+      "frames_50hz": 310
+    },
+    {
+      "path": "humanoidverse/data/astro_high_dynamic/raw/qingtong/Take_049_Skeleton0.qpos.csv",
+      "sha256": "75765ff709802bf4850d777079e40fff5873070874a8ba1f67df4eb99453e855",
+      "motion_key": "qingtong_Take_049_Skeleton0",
+      "category": "backflip",
+      "source_fps": 50,
+      "source_frames": 359,
+      "frames_50hz": 359
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "humanoidverse/data/astro_high_dynamic/astro_high_dynamic_50hz.pkl",
+      "sha256": "e58f3f34e27b9079dd0751671243cc00e6cf50f86b14a06a2b2d89f956f9f08c",
+      "bytes": 9234804
+    },
+    {
+      "path": "humanoidverse/data/astro_high_dynamic/astro_high_dynamic_50hz_10s-clipped.pkl",
+      "sha256": "14958db8c84f239c9d45e76bbbc5baaf0934bee1da71376eb5c1f56311de4ef3",
+      "bytes": 9175813
+    }
+  ]
+}
