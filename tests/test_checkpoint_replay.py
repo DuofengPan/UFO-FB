@@ -448,3 +448,22 @@ def test_inference_rejects_snapshot_replacement_during_load(tmp_path):
     with patch.object(FBcprAuxModel, "load", side_effect=load):
         with pytest.raises(RuntimeError, match="changed while loading"):
             load_model_from_checkpoint_dir(tmp_path)
+
+
+@pytest.mark.parametrize("resume", [False, True])
+def test_online_cpu_replay_keeps_expert_device_independent(tmp_path, resume):
+    ws = make_workspace(tmp_path)
+    ws.cfg.replay_device = "cpu"
+    ws.cfg.buffer_device = "cuda"
+    if resume:
+        save(ws, make_buffer(), "all")
+    with patch.object(trainer, "load_expert_trajectories_from_motion_lib", return_value=object()) as experts:
+        buffer = ws._prepare_replay_buffers()["train"]
+    experts.assert_called_once_with(ws.train_env._env, ws.cfg.agent, device="cuda")
+    assert buffer.device == "cpu"
+    if not resume:
+        buffer.extend(row(0))
+    assert buffer.storage["observation"]["state"].device.type == "cpu"
+    buffer._get_idxs = get_idxs
+    assert buffer.can_sample()
+    assert buffer.sample(1)["next"]["observation"]["state"].device.type == "cpu"

@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")"
+source scripts/runtime_libraries.sh
+ufo_use_project_nccl "$PWD"
 if [[ -x "$(dirname "${BASH_SOURCE[0]}")/.venv/bin/python" ]]; then
   exec "$(dirname "${BASH_SOURCE[0]}")/.venv/bin/python" -m ufo.inference "$@"
 fi

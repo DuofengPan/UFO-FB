@@ -27,3 +27,11 @@ model/
 
 # Downloaded or converted motion datasets are distributed separately.
 ufo/data/*.pkl
+
+# LaFAN stays external; the existing 24-motion high-dynamic group remains versioned.
+ufo/data/robots/astro_p2/motions/lafan/*.pkl
+ufo/data/astro_supermimic_ufo/
+swanlog/
+
+# MuJoCo runtime diagnostics
+MUJOCO_LOG.TXT

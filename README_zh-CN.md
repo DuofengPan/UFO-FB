@@ -18,104 +18,146 @@
   <img src="./assets/rplab_logo.png" alt="ROBO PARTY LAB Logo" height="72" style="vertical-align: middle;" />
 </p>
 
-UFO 是基于 **mjlab** 的人形机器人无监督强化学习框架，支持 **Unitree G1 / RoboParty RP1.3**、**FB-CPR-Aux / TeCH**、多卡训练，以及 tracking、reward、goal 三种推理。
-
-**RP1 的 TeCH 策略尚未进行真机测试。**
-
-**[G1／RP1 训练数据](https://huggingface.co/datasets/xuewang/UFO-MotionData)和[已完成真机测试的 G1 FB policy](https://huggingface.co/xuewang/ufo-g1-policy)已发布。**
-
-## News
-
-**2026-10-15 — 训练性能与双机器人支持更新**
-
-**FB / mjlab 完整 1.92 亿步训练**：下列实验均使用 **8 × NVIDIA H20**、**BF16 混合精度**、**1024 宽度网络与共享 critic**。
-
-| 实验 | 全卡训练 FPS | 最后一次 EMD ↓ | 完成 1.92 亿步耗时 |
-| --- | ---: | ---: | ---: |
-| G1：原 DR＋原 reward | **12,440** | **0.6655** | **4 小时 45 分** |
-| G1：扩展域随机化＋原 reward | **12,467** | **0.7406** | **约 4 小时 51 分** |
-| G1：扩展域随机化＋新 reward | **12,217** | **0.7554** | **4 小时 55 分** |
-| RP1：基准配置 | **12,485** | **0.7139** | **4 小时 48 分** |
-
-<details>
-<summary>测速配置与统计口径</summary>
-
-各组均为每卡 1,024 个环境、batch size 1,024、六层残差主干，每次 rollout step 执行 16 次 agent 更新。FPS 表示八张卡合计的环境 transition 数／秒，取最后 20 条 FPS 日志的中位数，不代表包含全部开销的整场平均速度。
-
-三组 G1 均使用 LaFAN-40 和 30% 躺倒初始化。原 DR 实验使用 reset 边界修复前的代码，“扩展域随机化＋原 reward”实验已包含该修复。这些历史实验跨越代码修改，不能视为仅改变 DR／reward 的严格对照。新 reward 将非期望接触惩罚替换为身体冲击惩罚，滑移惩罚权重改为 -4，并新增权重为 -2 的脚部绊倒惩罚。RP1 使用共同 LaFAN-40、关闭躺倒初始化。G1 的 BF16 为实验覆盖设置，当前 G1 FB 默认仍为 FP32＋TF32，RP1 FB 默认 BF16。
-
-EMD 取最后一次周期跟踪评估的片段均值：三组 G1 均在 188,981,248 步评估 862 个片段，RP1 在 190,054,400 步评估 902 个片段，并非对最终 checkpoint 重新评估。总耗时包含启动、评估与 checkpoint 保存；除“G1：扩展域随机化＋原 reward”因缺少启动器结束时间、以启动至最终保存完成估算外，其余实验均使用启动器的起止记录。各组在名义 1.92 亿步预算下实际完成 191,995,904 步。
-
-</details>
-
-本次发布还将旧 `humanoidverse` 结构整理为 `ufo`，统一 G1／RP1、FB／TeCH 命令，修复 reset 边界观测与接触力方向，并提供机器人配置感知的 ONNX 导出、RP1 数据及已完成真机测试的 G1 policy。详见[代码结构](docs/ARCHITECTURE.md)和[训练与推理](docs/TRAIN_INFERENCE.md)。
+UFO 是基于 **mjlab** 的人形机器人无监督强化学习框架。本分支提供
+**Astro P2 / Unitree G1 / RoboParty RP1.3** 三种机器人入口，支持多卡训练与机器人配置感知的推理。
+Astro 维护 **FB-CPR-Aux** 基线，G1/RP1 继续保留上游 **FB、TeCH** 预设。
 
 ## 安装
 
-需要 Linux 和兼容 CUDA 12.8 的 NVIDIA 驱动。锁文件固定 PyTorch 2.7.1 / CUDA 12.8 和 NCCL 2.26.5，支持 Blackwell 显卡。执行以下命令，后续操作均在仓库根目录进行：
+使用 [DuofengPan/UFO-FB](https://github.com/DuofengPan/UFO-FB) 的
+`migration/astro-new-architecture` 分支，在包含 `ufo/` 的仓库根目录执行：
 
 ```bash
-git clone https://github.com/Roboparty/UFO.git
-cd UFO
 python3 -m pip install --user uv
 export PATH="$HOME/.local/bin:$PATH"
 uv sync --locked
 ```
 
-本文适用于包含 `ufo/` 和 `run_inference.sh` 的 mjlab 版本，不适用于旧的 `humanoidverse/` 版本。保存视频需要 `ffmpeg`，Ubuntu 可用 `sudo apt install ffmpeg` 安装。
+需要 Linux 和兼容 CUDA 12.8 的 NVIDIA 驱动。锁文件选择 PyTorch 2.7.1、mjlab 1.6、
+MuJoCo 3.11 和 NCCL 2.26.5；导出视频需要 `ffmpeg`。
+现有 `.22` 服务器的容器目录为 `/root/code/UFO-next`，独立 `.venv` 已就绪，
+进入方法见[服务器／VNC 开发入口](docs/ASTRO_MIGRATION.md#server-development-entry)。
 
-## 准备数据
+## 选择机器人
 
-下载对应机器人的完整动作和训练片段，脚本会校验 SHA256：
+以下命令均以 **FB** 为例。动作数据和 checkpoint 必须与机器人匹配。
+`--smoke` 只检查启动和采样，关闭云端日志、不更新权重；完整训练命令会实际启动训练。
+新实验使用新的 `--work-dir`，通用入口会恢复该目录里已有的 checkpoint。
+
+### Astro P2 · 29 自由度
+
+[机器人配置](configs/robots/astro_p2_29dof.yaml) ·
+[90/10 数据配置](configs/data/astro_lafan_high_dynamic.yaml) ·
+[实际网络层数](docs/ASTRO_NETWORK.md)
+
+LaFAN：**54 条完整动作 / 1,192 个训练片段**；高动态：**24 条完整动作 / 43 个片段**
+（20 条功夫、4 条后空翻）。数据源占比保持 **90% / 10%**，优先采样只在各源内部调整。
+LaFAN 单独下载；高动态动作、原始来源与溯源文件随本分支版本管理。
+
+```bash
+bash scripts/download_data.sh astro_lafan
+./run_train.sh --agent fb --data-manifest configs/data/astro_lafan_high_dynamic.yaml \
+  --gpu-ids single --smoke --buffer-size 8192 --work-dir /tmp/astro_smoke
+./run_train.sh --agent fb --data-manifest configs/data/astro_lafan_high_dynamic.yaml \
+  --gpu-ids all --num-envs 1024 --buffer-size 2560000 --num-agent-updates 16 --replay-device cpu \
+  --work-dir runs/astro_fb
+```
+
+网络保留 **2048 宽度的 Actor、Forward 和独立 Critic，6 层残差主干，z=256，FP32**
+（关闭 BF16，训练允许 TF32）。输入 embedding 的层数另计，详见上面的网络说明。
+5090 专用预设为 **8 卡、每卡 1024 环境、256 万 buffer、16 updates、batch 1024**：
+
+5090 预设将在线 replay 放在主机内存（`--replay-device cpu`），抽样批次再传入 GPU；
+专家数据仍留在 GPU。这样保留 FP32 数据和完整 buffer 容量，为物理模拟及优化器留出显存。
+该八卡预设建议至少留出 **256 GiB 主机可用内存**。
+
+```bash
+bash scripts/start_astro_high_dynamic_5090_8gpu.sh --dry-run  # 仅校验、打印命令
+# 从头启动新的后台训练，启用 SwanLab：
+bash scripts/start_astro_high_dynamic_5090_8gpu.sh
+```
+
+专用脚本拒绝复用已有运行目录。资产、前向和通信检查已通过，八卡满 buffer 长跑尚未验证。
+数据重建、SuperMimic 导入及迁移记录见 [Astro 使用说明](docs/ASTRO_MIGRATION.md)。
+
+### Unitree G1 · 29 自由度
+
+[机器人配置](configs/robots/g1_29dof.yaml) ·
+[已发布动作数据](https://huggingface.co/datasets/xuewang/UFO-MotionData) ·
+[已发布 FB 模型](https://huggingface.co/xuewang/ufo-g1-policy)
+
+发布的 LaFAN 数据包含 **40 条完整动作**。需要上游 TeCH 预设时，将 `--agent fb` 改为
+`--agent tech`。
 
 ```bash
 bash scripts/download_data.sh g1_lafan
+./run_train.sh --robot g1 --agent fb --gpu-ids single --smoke \
+  --buffer-size 8192 --work-dir /tmp/g1_smoke
+./run_train.sh --robot g1 --agent fb --gpu-ids all --work-dir runs/g1_fb
+./run_train.sh --robot g1  --agent tech --gpu-ids all --work-dir runs/g1_tech
+```
+
+### RoboParty RP1.3 · 24 自由度
+
+[机器人配置](configs/robots/rp1_3.yaml) ·
+[已发布动作数据](https://huggingface.co/datasets/xuewang/UFO-MotionData)
+
+发布的数据包含 **55 条完整动作 / 1,166 个训练片段，50 Hz**。
+需要上游 TeCH 预设时改为 `--agent tech`。RP1 的 TeCH 策略尚未进行真机测试。
+
+```bash
 bash scripts/download_data.sh rp1_lafan
+./run_train.sh --robot rp1 --agent fb --gpu-ids single --smoke \
+  --buffer-size 8192 --work-dir /tmp/rp1_smoke
+./run_train.sh --robot rp1 --agent fb --gpu-ids all --work-dir runs/rp1_fb
+./run_train.sh --robot rp1 --agent tech --gpu-ids all --work-dir runs/rp1_tech
 ```
 
-G1 包含 40 条动作；RP1 包含 55 条动作，50 Hz、24 个关节，切分为 1,166 个训练片段。每个机器人需要匹配的动作数据，G1 数据不能直接用于 RP1。
+## 训练参数与日志
 
-已有文件时，见[本地数据放置说明](docs/ROBOT_ADAPTATION.md#use-converted-data)。自行转换 RP1 NPZ 文件时，见 [RP1 数据导入说明](docs/ROBOT_ADAPTATION.md#rp1-data-import)。
+`--num-envs`、`--buffer-size` 和 agent 的 batch size 均为**每卡值**；
+`--num-env-steps` 为**全局采样预算**。`--gpu-ids all` 使用所有可见 GPU，
+可通过 `CUDA_VISIBLE_DEVICES` 选择显卡。不同机器人的网络与精度基线不同，Astro 已显式固定为上文配置。
 
-## 训练
-
-准备好数据后，选择一条命令运行：
+**SwanLab**，默认项目 `ufo-humanoid`：
 
 ```bash
-./run_train.sh --robot g1  --agent fb   --gpu-ids all
-./run_train.sh --robot rp1 --agent fb   --gpu-ids all
-./run_train.sh --robot g1  --agent tech --gpu-ids all
-./run_train.sh --robot rp1 --agent tech --gpu-ids all
+uv run swanlab login
+export SWANLAB_WORKSPACE=DuofengPan  # 可选的个人／组织工作空间
+./run_train.sh --agent fb --data-manifest configs/data/astro_lafan_high_dynamic.yaml \
+  --gpu-ids all --num-envs 1024 --buffer-size 2560000 --num-agent-updates 16 --replay-device cpu \
+  --work-dir runs/astro_fb_swanlab --use-swanlab --swanlab-run-name astro_fb
 ```
 
-`--gpu-ids all` 使用所有可见 GPU，通过 `CUDA_VISIBLE_DEVICES` 选择显卡。`--gpu-ids single --smoke` 只检查启动和采样，不更新权重；需要验证参数更新时，使用[短训练检查](docs/TRAIN_INFERENCE.md#short-training-check)。
+可用 `SWANLAB_PROJECT` 修改项目名。只有 rank 0 上传训练与评估指标，横轴为全局环境步数。
+正常结束、异常和可处理的中断会结束云端运行状态；凭据由 SDK 本地保存。
 
-默认输出到 `runs/<robot>_<agent>`。每个新实验请使用独立的 `--work-dir`；目录中已有 checkpoint 时会恢复训练。启用 W&B：
+**W&B** 可独立启用：先执行 `uv run wandb login`，再给训练命令添加
+`--use-wandb --wandb-run-name NAME`，通过 `WANDB_PROJECT`、`WANDB_ENTITY` 选择项目／账号。
+评估、模型与 replay 的保存周期及恢复语义见[训练与推理](docs/TRAIN_INFERENCE.md)。
+
+## 推理与导出
+
+推理读取训练时保存的机器人配置。Tracking 应选择匹配的完整动作，三种机器人使用相同入口：
 
 ```bash
-uv run wandb login
-WANDB_PROJECT=UFO ./run_train.sh --robot g1 --agent fb --gpu-ids all \
-  --work-dir runs/g1_fb_exp --use-wandb --wandb-run-name g1_fb_exp
+./run_inference.sh tracking --model-folder runs/astro_fb \
+  --data-path ufo/data/robots/astro_p2/motions/lafan/astro_lafan_29dof.pkl \
+  --motion-list 0 --save-mp4
+./run_inference.sh tracking --model-folder runs/g1_fb \
+  --data-path ufo/data/lafan_29dof.pkl --motion-list 0 --save-mp4
+./run_inference.sh tracking --model-folder runs/rp1_fb \
+  --data-path ufo/data/rp1_24dof_lafan_v7.pkl --motion-list 0 --save-mp4
 ```
 
-## 推理
+Tracking／ONNX 导出需要对应机器人训练好的 checkpoint；资产迁移本身不产生已训练的 Astro 策略。
+FB 的 reward 推理需要保存的 rank-0 replay，非 G1 当前支持根节点运动与移动类任务；
+非 G1 的 goal 推理需要机器人专属 goal JSON。
+完整命令见[训练、推理与导出](docs/TRAIN_INFERENCE.md)，或执行
+`./run_inference.sh <tracking|reward|goal> --help`。
 
-推理自动读取训练时保存的机器人配置。使用对应机器人的 checkpoint 和匹配的动作数据：
-
-```bash
-./run_inference.sh tracking --model-folder runs/g1_fb --motion-list 0 --save-mp4
-./run_inference.sh reward --model-folder runs/g1_fb --save-mp4
-./run_inference.sh goal --model-folder runs/g1_fb \
-  --data-path ufo/data/lafan_29dof.pkl --save-mp4
-```
-
-- **Tracking**：FB、TeCH 均支持 G1 和 RP1；可用 `--data-path` 指定动作数据，视频和 z 保存到实验目录。
-- **Reward**：仅支持 FB，需要保存的 rank-0 replay；RP1 当前支持根节点运动与移动类任务。
-- **Goal**：FB、TeCH 均支持 G1 和 RP1；内置 G1 目标对应完整动作文件。RP1 命令和目标 JSON 示例见 [Goal 推理](docs/TRAIN_INFERENCE.md#goal-inference)。
-
-完整参数见 `./run_inference.sh <tracking|reward|goal> --help`。
-
-[已发布的 G1 FB 模型](https://huggingface.co/xuewang/ufo-g1-policy)包含约 1.92 亿步的 checkpoint、ONNX，以及配套的 tracking、goal、向前行走 reward z。下载到 `model/` 后可直接运行：
+<details>
+<summary>使用已发布的 G1 FB 模型</summary>
 
 ```bash
 uv run hf download xuewang/ufo-g1-policy --local-dir model
@@ -123,20 +165,24 @@ uv run hf download xuewang/ufo-g1-policy --local-dir model
   --data-path ufo/data/lafan_29dof.pkl --motion-list 7 --save-mp4
 ```
 
-发布包包含模型权重，不含优化器状态和 replay buffer。重新计算其他 reward z 需要自行保存的 replay；包内 reward z 可直接用于部署。
+发布包包含约 1.92 亿步的策略、ONNX 和配套 z，不含优化器状态／replay。
+重新计算 reward z 需要自行保存的 replay。
+
+</details>
 
 ## 更多文档
 
-- [训练与推理](docs/TRAIN_INFERENCE.md)：默认配置、评估、checkpoint 和推理参数。
-- [机器人与数据适配](docs/ROBOT_ADAPTATION.md)：通过 `robot_setup` 添加机器人、导入已重定向的动作数据。
-- [代码结构](docs/ARCHITECTURE.md)：目录与模块职责。
-- [G1 真机部署](https://github.com/Roboparty/UFO/tree/deploy)。
-- **RP1 的 UFO 部署请见 [Roboparty/roboparty_deploy](https://github.com/Roboparty/roboparty_deploy)。**
+- [训练与推理](docs/TRAIN_INFERENCE.md)：调度、评估、checkpoint 和推理参数。
+- [Astro 实际网络配置](docs/ASTRO_NETWORK.md)：层数、输入输出维度和对应源码。
+- [Astro 资产与迁移](docs/ASTRO_MIGRATION.md)：服务器／VNC、数据重建和验证记录。
+- [机器人与数据适配](docs/ROBOT_ADAPTATION.md)：自定义机器人与动作转换。
+- [代码结构](docs/ARCHITECTURE.md) · [多卡排障](docs/MuitiGPU_TIPS.md)。
+- [上游历史测速](docs/UPSTREAM_RESULTS.md)：H20 上的 G1/RP1 实验和完整统计口径。
+- 真机部署：[G1](https://github.com/Roboparty/UFO/tree/deploy) · [RP1](https://github.com/Roboparty/roboparty_deploy)。
 
 ## 引用与许可
 
-<details>
-<summary>引用 UFO</summary>
+UFO 采用 [CC BY-NC 4.0](LICENSE) 许可，用于非商业研究。
 
 ```bibtex
 @misc{ufo2026,
@@ -147,7 +193,3 @@ uv run hf download xuewang/ufo-g1-policy --local-dir model
   note         = {Project page: \url{https://roboparty.github.io/UFO/}}
 }
 ```
-
-</details>
-
-UFO 采用 [CC BY-NC 4.0](LICENSE) 许可，用于非商业研究。

@@ -1,0 +1,103 @@
+{
+  "dependencies": {
+    "joint_velocity_limits": {
+      "path": "robot_retarget/assets/configs/astro_p2/ik/shared/velocity-limits.json",
+      "sha256": "93611ec315845768495b27f3adeaaabe21eeb0ac8a4c89667f3dec0165eb4806"
+    },
+    "per_frame_self_collision": {
+      "path": "robot_retarget/assets/configs/astro_p2/ik/shared/collision.json",
+      "sha256": "0001e84eadd65b0e87411270a273440c7094e3c7a9312430a79a1981fa57c3be"
+    },
+    "robot_config": {
+      "path": "robot_retarget/assets/configs/astro_p2/robot.json",
+      "sha256": "ba2042db52c66367999a4fec7b8ae00eb78b669a423227c7452233785aecd4ed"
+    },
+    "robot_init_pose": {
+      "path": "robot_retarget/assets/configs/astro_p2/poses/t-pose.json",
+      "sha256": "2379d10f762e3242934bf76bf6940d2a6af847714f33281369c4786e35aba70f"
+    },
+    "robot_model": {
+      "path": "assets/rl_robots/robot_menagerie/robot_assets/astro_p2/mjcf/astro_p2_capsule_retarget.xml",
+      "sha256": "7d3b06f23ad1556433a436008be1819d7342f738127010627a18fae3e5049aed"
+    },
+    "umr_completed": {
+      "path": "motion_retarget/runtime_resources/umr/jobs/umr-twqr4h8y/completed.json",
+      "sha256": "e42df313baf117afcc422060c4587f3ca3a3117f7a86f29590bbabfee7b07b3f"
+    },
+    "umr_job": {
+      "path": "motion_retarget/runtime_resources/umr/jobs/umr-twqr4h8y/job.json",
+      "sha256": "ab3091933862f7e72380c3c9206fdd42fc31f8dc5fe1a145843d60e1e768125f"
+    }
+  },
+  "output": {
+    "format": "gmr_pkl",
+    "fps": 70.00007000007,
+    "path": "motion_retarget/kunfu1026_umr_astro_p2_20261102/outputs/jiequandao04-slow_Skeleton-122.pkl",
+    "qpos_width": 36,
+    "sha256": "f58049e72248f2aca303f94e6a7817dc3e8cbddd96ef03ee2125ca6715ae0d97"
+  },
+  "retarget_config": {
+    "robot": {
+      "ik_iterations": 50
+    },
+    "solve": {
+      "method": "per_frame_ik",
+      "per_frame_ik": {
+        "collision": {
+          "full_body_floor": {
+            "enabled": true,
+            "plane_z": 0
+          },
+          "self_collision": {
+            "enabled": true
+          },
+          "self_collision_config": "astro_p2/ik/shared/collision.json"
+        },
+        "convergence": {
+          "relative_cost_tolerance": 0.001
+        },
+        "joint_limit": {
+          "enabled": true
+        },
+        "joint_velocity_limit": {
+          "enabled": true,
+          "limits": "astro_p2/ik/shared/velocity-limits.json",
+          "safety_scale": 1
+        },
+        "previous_q_regularization": {
+          "enabled": false,
+          "weight": 0
+        },
+        "sequence_selection": "bidirectional_dp"
+      }
+    }
+  },
+  "retarget_config_sha256": "6506ef1f4d477912e6b63ea3e54dc138f1273369635b7a8d9bd59a13aecc4779",
+  "robot": {
+    "config_name": "astro_p2",
+    "name": "astro_p2",
+    "qpos_width": 36
+  },
+  "run_config": {
+    "batch_size": 1,
+    "export_folder": "/data/atom6/code/soma-retargeter-adjust/motion_retarget/kunfu1026_umr_astro_p2_20261102/outputs",
+    "export_format": "gmr_pkl",
+    "method": "umr_newton",
+    "robot": "astro_p2",
+    "skip_initial_frames": 0,
+    "source_format": "fzmotion_bvh",
+    "source_path": "/data/atom6/code/soma-retargeter-adjust/motion_retarget/kunfu1026_umr_astro_p2_20261102/jobs/jiequandao04-slow_Skeleton-122/source",
+    "source_type": "fzmotion",
+    "source_up_axis": "y",
+    "umr_actor_binding_id": "5cd89d112887f55b147b5ac07024c4be35d24e2304fa67c711903064ef331bb9",
+    "umr_position_offset": false
+  },
+  "run_config_sha256": "0fd1874b27e5fbf79aae68b9170bfff8504172f3243d3c790c3b6b12d8a1f3b5",
+  "schema": "robot_retarget.motion_output_provenance.v1",
+  "source": {
+    "path": "motion_retarget/kunfu1026_umr_astro_p2_20261102/jobs/jiequandao04-slow_Skeleton-122/source/jiequandao04-slow_Skeleton-122.bvh",
+    "sha256": "038b66d9d78526778e9065b908588280235359dbe76362951e4d65f32f90aac6",
+    "source_format": "fzmotion_bvh",
+    "source_type": "fzmotion"
+  }
+}

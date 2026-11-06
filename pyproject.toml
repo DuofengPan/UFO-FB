@@ -26,6 +26,7 @@ dependencies = [
     "pydantic>=2.11.3",
     "rich>=14.0.0",
     "safetensors>=0.5.3",
+    "swanlab>=0.10.2",
     "torch==2.7.1",
     "torchvision==0.22.1",
     "wandb>=0.26.0",

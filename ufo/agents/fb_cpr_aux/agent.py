@@ -229,8 +229,9 @@ class FBcprAuxAgent(AgentExecutionMixin):
         )
         for aux_reward_name in self.cfg.aux_rewards:
             # let's log even this information
-            metrics[f"aux_rew/{aux_reward_name}"] = train_batch["aux_rewards"][aux_reward_name].mean()
-            aux_reward += self.cfg.aux_rewards_scaling[aux_reward_name] * train_batch["aux_rewards"][aux_reward_name].to(self.device)
+            reward = train_batch["aux_rewards"][aux_reward_name].to(self.device)
+            metrics[f"aux_rew/{aux_reward_name}"] = reward.mean()
+            aux_reward += self.cfg.aux_rewards_scaling[aux_reward_name] * reward
 
         aux_reward = self._model._aux_reward_normalizer(aux_reward)
 

@@ -1,5 +1,8 @@
 # UFO Setup, Training, and Inference
 
+Astro P2, the retained 2048-wide independent-critic baseline, its 90/10 data mix,
+and optional SwanLab logging are documented in [Astro migration](ASTRO_MIGRATION.md).
+
 Detailed training and inference options. For installation and the main commands,
 see the [README](../README.md).
 
@@ -47,7 +50,10 @@ The entrypoint builds defaults from `ufo/train.py`, `ufo/training/config.py` and
 - `--work-dir`: `runs/<robot>_<agent>` (for example, `runs/g1_fb`).
 - `--checkpoint-every-steps`: model checkpoints every `3200000` global environment steps.
 - `--buffer-every-steps`: complete rank-0 replay snapshots every `16000000` global environment steps.
-- `--buffer-size`: `5120000` transitions per GPU.
+- `--buffer-size`: `5120000` transitions per rank.
+- `--replay-device`: defaults to the agent device; `cpu` offloads only online replay
+  to host RAM, preserving its dtype and capacity. Expert data stays on the agent
+  device. The Astro 5090 launcher uses CPU replay; see [memory sizing](ASTRO_MIGRATION.md#5090-online-replay-memory-placement).
 - `--update-z-every-step`: defaults to `100` for FB and `10` for TeCH.
 
 All of these can be overridden from the command line; both save intervals must be positive.

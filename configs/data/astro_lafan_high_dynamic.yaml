@@ -1,0 +1,14 @@
+# Source-level sampling masses, preserved during within-source prioritization.
+# High dynamic is one group: four Qingtong backflips + 20 retargeted kungfu takes.
+robot_config: configs/robots/astro_p2_29dof.yaml
+datasets:
+  - name: astro_lafan
+    format: ufo_pkl
+    train_path: ufo/data/robots/astro_p2/motions/lafan/astro_lafan_29dof_10s-clipped.pkl
+    inference_path: ufo/data/robots/astro_p2/motions/lafan/astro_lafan_29dof.pkl
+    weight: 0.9
+  - name: astro_high_dynamic
+    format: ufo_pkl
+    train_path: ufo/data/robots/astro_p2/motions/high_dynamic/astro_high_dynamic_50hz_10s-clipped.pkl
+    inference_path: ufo/data/robots/astro_p2/motions/high_dynamic/astro_high_dynamic_50hz.pkl
+    weight: 0.1

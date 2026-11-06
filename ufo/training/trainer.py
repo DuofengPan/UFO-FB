@@ -43,6 +43,7 @@ from ufo.training.distributed import (
     sync_model_buffers,
 )
 from ufo.training.logging import CSVLogger
+from ufo.training.swanlab_logging import init_swanlab, log_swanlab
 
 TRAIN_LOG_FILENAME = "train_log.txt"
 
@@ -125,6 +126,7 @@ class Trainer:
 
         if self._write_shared_artifacts and self.cfg.use_wandb:
             init_wandb(self.cfg)
+        init_swanlab(self.cfg)
 
         if self._write_shared_artifacts:
             with (self.work_dir / "config.json").open("w") as f:
@@ -300,7 +302,9 @@ class Trainer:
         self._replay_update_after = max(self.cfg.num_seed_steps, self._checkpoint_status.get("replay_update_after", 0))
         if restore:
             print("Loading checkpointed buffer")
-            replay_buffer["train"] = ReplayBuffer.load(checkpoint_buffer_dir, device=self.cfg.buffer_device)
+            replay_buffer["train"] = ReplayBuffer.load(
+                checkpoint_buffer_dir, device=getattr(self.cfg, "replay_device", None) or self.cfg.buffer_device
+            )
             # The simulator resets on resume; never join its new state to an old trajectory.
             buffer = replay_buffer["train"]
             buffer.output_key_t = _trajectory_output_keys(self.cfg.agent)
@@ -316,7 +320,7 @@ class Trainer:
         else:
             replay_buffer["train"] = ReplayBuffer(
                 capacity=self.cfg.buffer_size // self.cfg.online_parallel_envs,  # make sure to divide by num_envs
-                device=self.cfg.buffer_device,
+                device=getattr(self.cfg, "replay_device", None) or self.cfg.buffer_device,
                 n_dim=2,
                 end_key="done",
                 output_key_t=_trajectory_output_keys(self.cfg.agent),
@@ -496,6 +500,15 @@ class Trainer:
                 data, label="replay.extend.data", local_time=local_time, global_time=global_time
             )
         replay_buffer["train"].extend(data)
+        if local_time == getattr(self, "_checkpoint_local_time", None) and getattr(replay_buffer["train"], "storage", None) is not None:
+            leaves = []
+            tree_map(lambda value: leaves.append(value), replay_buffer["train"].storage)
+            storage_gib = sum(value.numel() * value.element_size() for value in leaves) / 2**30
+            print(
+                f"[INFO] Replay allocated: rank={self.distributed_rank}, "
+                f"device={replay_buffer['train'].device}, storage_GiB={storage_gib:.3f}, "
+                f"capacity={self.cfg.buffer_size}", flush=True,
+            )
 
         return new_td, new_info, new_terminated, new_truncated, context
 
@@ -526,6 +539,10 @@ class Trainer:
                 metrics,
             )
 
+        # Opt-in compatibility with 5090 runs: Torch cache is unavailable to Warp.
+        if os.environ.get("UFO_RELEASE_TORCH_CACHE_AFTER_UPDATES") == "1" and self.agent.device == "cuda":
+            torch.cuda.synchronize()
+            torch.cuda.empty_cache()
         return total_metrics, metric_update_counts
 
     def _log_training(
@@ -563,6 +580,7 @@ class Trainer:
                 {f"train/{k}": v for k, v in m_dict.items()},
                 step=global_time,
             )
+        log_swanlab(self.cfg, m_dict, prefix="train", step=global_time)
         print(m_dict)
         m_dict["timestep"] = global_time
         m_dict["local_timestep"] = local_time
@@ -593,6 +611,9 @@ class Trainer:
                     {f"eval/{evaluation_name}/{k}": v for k, v in wandb_dict.items()},
                     step=t,
                 )
+
+            if wandb_dict is not None:
+                log_swanlab(self.cfg, wandb_dict, prefix=f"eval/{evaluation_name}", step=t)
 
             evaluation_results[evaluation_name] = evaluation_metrics
 

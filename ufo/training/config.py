@@ -50,6 +50,8 @@ class TrainConfig(BaseConfig):
 
     # Buffer
     buffer_size: int
+    # Optional online replay offload; expert data still uses buffer_device.
+    replay_device: str | None = None
 
     # WANDB
     use_wandb: bool = False
@@ -57,6 +59,13 @@ class TrainConfig(BaseConfig):
     wandb_gname: str | None = None
     wandb_pname: str | None = None
     wandb_run_name: str | None = None
+
+    # SwanLab (optional, rank zero only)
+    use_swanlab: bool = False
+    swanlab_project: str = "ufo-humanoid"
+    swanlab_workspace: str | None = None
+    swanlab_group: str | None = None
+    swanlab_run_name: str | None = None
 
     # misc
     buffer_device: str

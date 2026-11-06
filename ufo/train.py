@@ -87,6 +87,7 @@ def build_mjlab_config(
     data_mix_weights: list[float] | None = None,
     update_z_every_step: int | None = None,
     buffer_size: int = DEFAULT_BUFFER_SIZE,
+    replay_device: str | None = None,
     disable_dr: bool = False,
     disable_obs_noise: bool = False,
     lr_scale: float = 1.0,
@@ -96,6 +97,8 @@ def build_mjlab_config(
     robot_config: str | Path | None = None,
     network_width: int | None = None,
     shared_critic: bool | None = None,
+    use_swanlab: bool = False,
+    swanlab_run_name: str | None = None,
 ) -> TrainConfig:
     agent = canonical_agent_name(agent)
     if (network_width is not None or shared_critic is not None) and agent != "fb":
@@ -179,7 +182,13 @@ def build_mjlab_config(
         prioritization_min_val=0.5,
         prioritization_max_val=2.0,
         buffer_size=int(buffer_size),
+        replay_device=replay_device,
         use_wandb=use_wandb,
+        use_swanlab=use_swanlab,
+        swanlab_project=os.environ.get("SWANLAB_PROJECT", "ufo-humanoid"),
+        swanlab_workspace=os.environ.get("SWANLAB_WORKSPACE"),
+        swanlab_group=f"ufo_{agent}",
+        swanlab_run_name=swanlab_run_name,
         wandb_ename=os.environ.get("WANDB_ENTITY"),
         wandb_gname=f"ufo_{agent}",
         wandb_pname=os.environ.get("WANDB_PROJECT", DEFAULT_WANDB_PROJECT),
@@ -248,6 +257,8 @@ def run_train(args: argparse.Namespace, log_dir: Path) -> None:
         seed=seed,
         use_wandb=bool(args.use_wandb and rank == 0),
         wandb_run_name=args.wandb_run_name,
+        use_swanlab=bool(args.use_swanlab and rank == 0),
+        swanlab_run_name=args.swanlab_run_name,
         checkpoint_every_steps=args.checkpoint_every_steps,
         buffer_every_steps=args.buffer_every_steps,
         distributed_rank=rank,
@@ -259,6 +270,7 @@ def run_train(args: argparse.Namespace, log_dir: Path) -> None:
         data_mix_weights=args.data_mix_weights,
         update_z_every_step=args.update_z_every_step,
         buffer_size=args.buffer_size,
+        replay_device=args.replay_device,
         disable_dr=bool(args.disable_dr),
         disable_obs_noise=bool(args.disable_obs_noise),
         lr_scale=args.lr_scale,
@@ -276,6 +288,7 @@ def run_train(args: argparse.Namespace, log_dir: Path) -> None:
         f"data_path={cfg.env.motion_data_path}, data_mix_weights={cfg.env.data_mix_weights}, "
         f"num_envs_per_rank={args.num_envs}, global_parallel_envs={args.num_envs * world_size}, "
         f"num_env_steps_global={args.num_env_steps}, buffer_size_per_rank={cfg.buffer_size}, "
+        f"replay_device={cfg.replay_device or cfg.buffer_device}, expert_device={cfg.buffer_device}, "
         f"num_agent_updates={cfg.num_agent_updates}, update_agent_every_local={cfg.update_agent_every}, "
         f"cartwheel_aux_safe={args.cartwheel_aux_safe}, lr_scale={args.lr_scale}, clip_grad_norm={args.clip_grad_norm}, "
         f"disable_dr={cfg.env.disable_domain_randomization}, disable_obs_noise={cfg.env.disable_obs_noise}, "
@@ -288,6 +301,20 @@ def run_train(args: argparse.Namespace, log_dir: Path) -> None:
     try:
         trainer = cfg.build()
         trainer.train()
+    except (KeyboardInterrupt, SystemExit) as exc:
+        if cfg.use_swanlab:
+            from ufo.training.swanlab_logging import finish_swanlab
+            finish_swanlab(state="aborted", error=str(exc))
+        raise
+    except BaseException as exc:
+        if cfg.use_swanlab:
+            from ufo.training.swanlab_logging import finish_swanlab
+            finish_swanlab(state="crashed", error=str(exc))
+        raise
+    else:
+        if cfg.use_swanlab:
+            from ufo.training.swanlab_logging import finish_swanlab
+            finish_swanlab(state="success")
     finally:
         if world_size > 1:
             import torch.distributed as dist
@@ -342,7 +369,7 @@ def launch(args: argparse.Namespace) -> None:
     config = LaunchConfig(
         min_nodes=1, max_nodes=1, nproc_per_node=num_gpus,
         rdzv_backend="c10d", rdzv_endpoint="localhost:0",
-        run_id=str(os.getpid()), start_method="spawn",
+        run_id=str(os.getpid()), start_method="spawn", max_restarts=0,
     )
     elastic_launch(config, run_train)(args, log_dir)
 
@@ -417,6 +444,10 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--buffer-size", type=int, default=DEFAULT_BUFFER_SIZE, help="Replay capacity per rank/GPU.")
     parser.add_argument(
+        "--replay-device", choices=("cpu", "cuda"), default=None,
+        help="Online replay storage device; default follows the agent. Expert data stays on the agent device.",
+    )
+    parser.add_argument(
         "--num-agent-updates",
         type=int,
         default=None,
@@ -437,6 +468,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--use-wandb", action="store_true")
     parser.add_argument("--wandb-run-name", default=None)
+    parser.add_argument("--use-swanlab", action="store_true")
+    parser.add_argument("--swanlab-run-name", default=None)
     parser.add_argument(
         "--disable-eval-prioritization",
         action="store_true",
@@ -450,6 +483,7 @@ def parse_args() -> argparse.Namespace:
     if args.smoke:
         args.num_envs = min(args.num_envs, 16)
         args.use_wandb = False
+        args.use_swanlab = False
     manifest_robot_config = None
     if args.data_manifest is not None:
         if args.data_path is not None:

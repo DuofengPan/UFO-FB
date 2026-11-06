@@ -18,104 +18,158 @@
   <img src="./assets/rplab_logo.png" alt="ROBO PARTY LAB Logo" height="72" style="vertical-align: middle;" />
 </p>
 
-UFO is an unsupervised reinforcement learning framework for humanoid control, built on **mjlab**. It supports **Unitree G1 / RoboParty RP1.3**, **FB-CPR-Aux / TeCH**, multi-GPU training, and tracking, reward and goal inference.
-
-**The RP1 TeCH policy has not been tested on the physical robot.**
-
-**[G1 / RP1 training data](https://huggingface.co/datasets/xuewang/UFO-MotionData) and the [G1 FB policy tested on hardware](https://huggingface.co/xuewang/ufo-g1-policy) are available.**
-
-## News
-
-**2026-10-15 — Training performance and multi-robot update**
-
-**192M-step FB / mjlab training:** all runs below use **8 × NVIDIA H20**, **BF16 mixed precision**, and **1024-wide networks with shared critics**.
-
-| Experiment | Global training FPS | Last EMD ↓ | Time to 192M steps |
-| --- | ---: | ---: | ---: |
-| G1: original DR + original reward | **12,440** | **0.6655** | **4 h 45 min** |
-| G1: extended DR + original reward | **12,467** | **0.7406** | **≈4 h 51 min** |
-| G1: extended DR + updated reward | **12,217** | **0.7554** | **4 h 55 min** |
-| RP1: baseline | **12,485** | **0.7139** | **4 h 48 min** |
-
-<details>
-<summary>Measurement settings and scope</summary>
-
-All runs use 1,024 environments and batch size 1,024 per GPU, six residual layers, and 16 agent updates per rollout step. FPS counts environment transitions across all eight GPUs and is the median of the last 20 logged intervals, not whole-job throughput.
-
-All three G1 runs use LaFAN-40 and 30% lying-down initialization. The original-DR run predates the reset-boundary fix; the extended-DR/original-reward run includes it. These historical runs span code changes and are not a controlled DR/reward ablation. The updated reward replaces the undesired-contact penalty with a body-impact penalty, sets the slip penalty weight to -4, and adds a foot-stumble penalty with weight -2. RP1 uses common LaFAN-40 and no lying-down initialization. BF16 is an experiment override for G1; the current G1 FB default remains FP32 + TF32, while RP1 FB defaults to BF16.
-
-EMD is the mean over the last periodic tracking evaluation: all three G1 runs at 188,981,248 steps (862 clips), RP1 at 190,054,400 steps (902 clips), rather than a new evaluation of the final checkpoint. Wall time includes startup, evaluation and checkpoint saving. Times use launcher start/end records, except for G1 extended DR + original reward: its time is estimated from launch to the completed final save because its launcher completion timestamp is unavailable. All runs completed 191,995,904 steps under the nominal 192M budget.
-
-</details>
-
-The release also replaces the legacy `humanoidverse` layout with `ufo`, unifies G1 / RP1 and FB / TeCH commands, fixes reset-boundary observations and contact-force direction, and provides robot-aware ONNX exports, RP1 data and a G1 policy tested on hardware. See [architecture](docs/ARCHITECTURE.md) and [training/inference](docs/TRAIN_INFERENCE.md).
+UFO is a humanoid-control framework built on **mjlab**. This fork provides
+parallel entrypoints for **Astro P2 / Unitree G1 / RoboParty RP1.3**, multi-GPU
+training and robot-aware inference. **FB-CPR-Aux** is the Astro baseline;
+upstream G1/RP1 **FB and TeCH** presets remain available.
 
 ## Install
 
-Requires Linux and an NVIDIA driver compatible with CUDA 12.8. The lockfile selects PyTorch 2.7.1 / CUDA 12.8 and NCCL 2.26.5, including Blackwell support. Run these commands, then work from the repository root:
+Use the native `ufo/` checkout of [DuofengPan/UFO-FB](https://github.com/DuofengPan/UFO-FB),
+branch `migration/astro-new-architecture`. From its repository root:
 
 ```bash
-git clone https://github.com/Roboparty/UFO.git
-cd UFO
 python3 -m pip install --user uv
 export PATH="$HOME/.local/bin:$PATH"
 uv sync --locked
 ```
 
-This guide requires the mjlab checkout containing `ufo/` and `run_inference.sh`; it does not apply to the older `humanoidverse/` release. Video export requires `ffmpeg` (`sudo apt install ffmpeg` on Ubuntu).
+Requires Linux and a CUDA 12.8-compatible NVIDIA driver. The lockfile selects
+PyTorch 2.7.1, mjlab 1.6, MuJoCo 3.11 and NCCL 2.26.5. Video export requires
+`ffmpeg`. On the existing `.22` server, use `/root/code/UFO-next` inside
+`atom9-ufo-vnc`; its separate `.venv` is ready. See [server/VNC entry](docs/ASTRO_MIGRATION.md#server-development-entry).
 
-## Prepare data
+## Choose a robot
 
-Download matching full motions and training clips; the script verifies SHA256:
+Commands below use **FB**. Motion data and checkpoints must match the robot.
+The smoke command checks startup and sampling only; it disables cloud logging
+and does not update weights. Full-training commands start training deliberately.
+Use a fresh `--work-dir`; an existing checkpoint is resumed by the generic entrypoint.
+
+### Astro P2 · 29 DoF
+
+[Robot config](configs/robots/astro_p2_29dof.yaml) ·
+[90/10 data manifest](configs/data/astro_lafan_high_dynamic.yaml) ·
+[Network details](docs/ASTRO_NETWORK.md)
+
+LaFAN: **54 full motions / 1,192 clips**. High dynamic: **24 full motions / 43 clips**
+(20 kungfu and four backflips). Source weights remain **90% / 10%**, with
+prioritization inside each source. LaFAN is downloaded separately; the
+high-dynamic group, raw sources and provenance are versioned in this branch.
+
+```bash
+bash scripts/download_data.sh astro_lafan
+./run_train.sh --agent fb --data-manifest configs/data/astro_lafan_high_dynamic.yaml \
+  --gpu-ids single --smoke --buffer-size 8192 --work-dir /tmp/astro_smoke
+./run_train.sh --agent fb --data-manifest configs/data/astro_lafan_high_dynamic.yaml \
+  --gpu-ids all --num-envs 1024 --buffer-size 2560000 --num-agent-updates 16 --replay-device cpu \
+  --work-dir runs/astro_fb
+```
+
+Astro retains **2048-wide Actor/Forward/independent Critics, six residual trunk
+blocks, z=256 and FP32** (BF16 disabled; training allows TF32). Embedding depths
+are separate from trunk depth; see the network document above. The 5090 preset
+uses **eight GPUs, 1024 envs/GPU, 2,560,000 replay/rank, 16 updates and batch 1024**.
+Online replay uses host RAM (`--replay-device cpu`); sampled batches and expert
+data use the GPU. This keeps FP32 data and the full replay capacity while
+leaving GPU memory for physics and optimizer updates. Plan for at least
+256 GiB available host RAM for this eight-rank preset:
+
+```bash
+bash scripts/start_astro_high_dynamic_5090_8gpu.sh --dry-run  # validate/print only
+# Start a new background run with SwanLab:
+bash scripts/start_astro_high_dynamic_5090_8gpu.sh
+```
+
+The dedicated launcher refuses an existing run directory. Asset/forward and
+communication checks passed; eight-GPU full-buffer long-run stability remains
+untested. Rebuilding, SuperMimic import and migration notes are in
+[Astro usage](docs/ASTRO_MIGRATION.md).
+
+### Unitree G1 · 29 DoF
+
+[Robot config](configs/robots/g1_29dof.yaml) ·
+[Released motion data](https://huggingface.co/datasets/xuewang/UFO-MotionData) ·
+[Released FB policy](https://huggingface.co/xuewang/ufo-g1-policy)
+
+The released LaFAN data contains **40 full motions**. Use `--agent tech` to
+select the upstream TeCH preset.
 
 ```bash
 bash scripts/download_data.sh g1_lafan
+./run_train.sh --robot g1 --agent fb --gpu-ids single --smoke \
+  --buffer-size 8192 --work-dir /tmp/g1_smoke
+./run_train.sh --robot g1 --agent fb --gpu-ids all --work-dir runs/g1_fb
+./run_train.sh --robot g1  --agent tech --gpu-ids all --work-dir runs/g1_tech
+```
+
+### RoboParty RP1.3 · 24 DoF
+
+[Robot config](configs/robots/rp1_3.yaml) ·
+[Released motion data](https://huggingface.co/datasets/xuewang/UFO-MotionData)
+
+The released data contains **55 full motions / 1,166 training clips at 50 Hz**.
+Use `--agent tech` to select the upstream TeCH preset. The RP1 TeCH policy has
+not been tested on the physical robot.
+
+```bash
 bash scripts/download_data.sh rp1_lafan
+./run_train.sh --robot rp1 --agent fb --gpu-ids single --smoke \
+  --buffer-size 8192 --work-dir /tmp/rp1_smoke
+./run_train.sh --robot rp1 --agent fb --gpu-ids all --work-dir runs/rp1_fb
+./run_train.sh --robot rp1 --agent tech --gpu-ids all --work-dir runs/rp1_tech
 ```
 
-G1 contains 40 motions. RP1 contains 55 motions at 50 Hz, converted for its 24 controlled joints, with 1,166 training clips. Each robot requires matching data; G1 data cannot be used directly for RP1.
+## Training and logging
 
-For local files, see [data paths](docs/ROBOT_ADAPTATION.md#use-converted-data). To convert your own RP1 NPZ files, see [RP1 data import](docs/ROBOT_ADAPTATION.md#rp1-data-import).
+`--num-envs`, `--buffer-size` and agent batch size are **per GPU**;
+`--num-env-steps` is the **global** transition budget. `--gpu-ids all` uses all
+visible GPUs; set `CUDA_VISIBLE_DEVICES` to select them. Robot network/precision
+baselines differ; the Astro preset above is explicit.
 
-## Train
-
-After preparing data, choose one command:
+**SwanLab** (default project `ufo-humanoid`):
 
 ```bash
-./run_train.sh --robot g1  --agent fb   --gpu-ids all
-./run_train.sh --robot rp1 --agent fb   --gpu-ids all
-./run_train.sh --robot g1  --agent tech --gpu-ids all
-./run_train.sh --robot rp1 --agent tech --gpu-ids all
+uv run swanlab login
+export SWANLAB_WORKSPACE=DuofengPan  # optional personal/org workspace
+./run_train.sh --agent fb --data-manifest configs/data/astro_lafan_high_dynamic.yaml \
+  --gpu-ids all --num-envs 1024 --buffer-size 2560000 --num-agent-updates 16 --replay-device cpu \
+  --work-dir runs/astro_fb_swanlab --use-swanlab --swanlab-run-name astro_fb
 ```
 
-`--gpu-ids all` uses all visible GPUs; use `CUDA_VISIBLE_DEVICES` to select them. `--gpu-ids single --smoke` checks startup and sampling only; it does not update weights. See [a short training check with updates](docs/TRAIN_INFERENCE.md#short-training-check).
+Set `SWANLAB_PROJECT` to choose another project. Only rank zero uploads training
+and evaluation metrics, using global steps. Normal exit and handled errors or
+interruptions finalize the run; credentials stay in the SDK login store.
 
-Runs default to `runs/<robot>_<agent>`. Use a new `--work-dir` for each experiment; an existing checkpoint in that directory is resumed. To enable W&B:
+**W&B** is independently available: run `uv run wandb login`, then add
+`--use-wandb --wandb-run-name NAME` to a training command. `WANDB_PROJECT` and
+`WANDB_ENTITY` select the destination. See [training details](docs/TRAIN_INFERENCE.md)
+for evaluation, separate model/replay save intervals and recovery semantics.
+
+## Inference and export
+
+Inference reads the robot configuration saved with the run. Select a matching
+full-motion file for tracking; G1, RP1 and Astro use the same entrypoint:
 
 ```bash
-uv run wandb login
-WANDB_PROJECT=UFO ./run_train.sh --robot g1 --agent fb --gpu-ids all \
-  --work-dir runs/g1_fb_exp --use-wandb --wandb-run-name g1_fb_exp
+./run_inference.sh tracking --model-folder runs/astro_fb \
+  --data-path ufo/data/robots/astro_p2/motions/lafan/astro_lafan_29dof.pkl \
+  --motion-list 0 --save-mp4
+./run_inference.sh tracking --model-folder runs/g1_fb \
+  --data-path ufo/data/lafan_29dof.pkl --motion-list 0 --save-mp4
+./run_inference.sh tracking --model-folder runs/rp1_fb \
+  --data-path ufo/data/rp1_24dof_lafan_v7.pkl --motion-list 0 --save-mp4
 ```
 
-## Inference
+Tracking/ONNX outputs require a newly trained matching checkpoint; asset
+migration does not produce a trained Astro policy. FB reward inference needs
+saved rank-zero replay; non-G1 reward tasks currently cover root/locomotion.
+Non-G1 goal inference needs a robot-specific goal JSON. See
+[tracking, reward, goal and export](docs/TRAIN_INFERENCE.md) or
+`./run_inference.sh <tracking|reward|goal> --help`.
 
-Inference reads robot settings from the saved run. Use a checkpoint trained for the selected robot and matching motion data:
-
-```bash
-./run_inference.sh tracking --model-folder runs/g1_fb --motion-list 0 --save-mp4
-./run_inference.sh reward --model-folder runs/g1_fb --save-mp4
-./run_inference.sh goal --model-folder runs/g1_fb \
-  --data-path ufo/data/lafan_29dof.pkl --save-mp4
-```
-
-- **Tracking:** FB and TeCH, G1 and RP1. Add `--data-path` to select motion data; videos and z are saved under the run directory.
-- **Reward:** FB only; requires saved rank-0 replay. RP1 currently supports root/locomotion tasks.
-- **Goal:** FB and TeCH, G1 and RP1. Use full-motion data for the bundled G1 goals. For RP1 commands and a goal JSON example, see [goal inference](docs/TRAIN_INFERENCE.md#goal-inference).
-
-See `./run_inference.sh <tracking|reward|goal> --help` for options.
-
-The [released G1 FB model](https://huggingface.co/xuewang/ufo-g1-policy) includes the approximately 192M-step checkpoint, ONNX exports and matching tracking, goal and forward-walking z. Download it into `model/`:
+<details>
+<summary>Use the released G1 FB policy</summary>
 
 ```bash
 uv run hf download xuewang/ufo-g1-policy --local-dir model
@@ -123,20 +177,24 @@ uv run hf download xuewang/ufo-g1-policy --local-dir model
   --data-path ufo/data/lafan_29dof.pkl --motion-list 7 --save-mp4
 ```
 
-The download includes model weights, but no optimizer state or replay buffer. Computing new reward z requires your own saved replay; the provided reward z is ready for deployment.
+The release includes the approximately 192M-step policy, ONNX and matching z,
+but no optimizer/replay. Recomputing reward z requires your own replay.
+
+</details>
 
 ## Documentation
 
-- [Training and inference](docs/TRAIN_INFERENCE.md): defaults, evaluation, checkpoints and inference options.
-- [Robot and data adaptation](docs/ROBOT_ADAPTATION.md): add robots with `robot_setup` and import retargeted motions.
-- [Architecture](docs/ARCHITECTURE.md): code layout and component responsibilities.
-- [G1 real-robot deployment](https://github.com/Roboparty/UFO/tree/deploy).
-- **RP1 UFO deployment:** [Roboparty/roboparty_deploy](https://github.com/Roboparty/roboparty_deploy).
+- [Training and inference](docs/TRAIN_INFERENCE.md): schedules, evaluation, checkpoint and inference options.
+- [Astro network](docs/ASTRO_NETWORK.md): effective layer counts, input/output dimensions and source files.
+- [Astro assets and migration](docs/ASTRO_MIGRATION.md): server/VNC, data rebuilding and validation status.
+- [Robot/data adaptation](docs/ROBOT_ADAPTATION.md): custom robots and motion conversion.
+- [Architecture](docs/ARCHITECTURE.md) · [Multi-GPU troubleshooting](docs/MuitiGPU_TIPS.md).
+- [Upstream historical benchmarks](docs/UPSTREAM_RESULTS.md): H20 G1/RP1 results and measurement scope.
+- Deployment: [G1](https://github.com/Roboparty/UFO/tree/deploy) · [RP1](https://github.com/Roboparty/roboparty_deploy).
 
 ## Citation and license
 
-<details>
-<summary>Cite UFO</summary>
+UFO is released under [CC BY-NC 4.0](LICENSE) for non-commercial research use.
 
 ```bibtex
 @misc{ufo2026,
@@ -147,7 +205,3 @@ The download includes model weights, but no optimizer state or replay buffer. Co
   note         = {Project page: \url{https://roboparty.github.io/UFO/}}
 }
 ```
-
-</details>
-
-UFO is released under [CC BY-NC 4.0](LICENSE) for non-commercial research use.

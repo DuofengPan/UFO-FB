@@ -18,12 +18,13 @@ EXPECTED_SHA256S=(
 
 usage() {
   cat <<USAGE
-Usage: bash scripts/download_data.sh [g1_lafan|rp1_lafan]
+Usage: bash scripts/download_data.sh [g1_lafan|rp1_lafan|astro_lafan]
 
 Downloads full motions and 10-second training clips from Hugging Face:
   https://huggingface.co/datasets/${DATASET_REPO}
   g1_lafan:  G1 29-DoF, 40 motions
   rp1_lafan: RP1.3 24-DoF, 55 motions
+  astro_lafan: Astro P2 29-DoF, 54 motions (UFO_ASTRO_DATASET_REPO overrides its repository)
 
 Environment overrides:
   UFO_DATASET_REPO=${DATASET_REPO}
@@ -47,6 +48,14 @@ case "${1:-g1_lafan}" in
       "5cf6c98c298ad148b9182dc8dda5701a73224653325beee7e5ccb38f7eb0b75c"
       "c6587383d5888782f0dc8ff55b2ce2fd28e22008cd69fd8534e826a38aa4bc1b"
     )
+    ;;
+  astro_lafan|astro)
+    DATASET_REPO="${UFO_ASTRO_DATASET_REPO:-Duofeng/astro-lafan-29dof}"
+    DATASET_FILES=("astro/lafan_29dof_10s-clipped.pkl" "astro/lafan_29dof.pkl")
+    DESTS=("ufo/data/robots/astro_p2/motions/lafan/astro_lafan_29dof_10s-clipped.pkl"
+           "ufo/data/robots/astro_p2/motions/lafan/astro_lafan_29dof.pkl")
+    EXPECTED_SHA256S=("4e727221206c0e86dd9e01c53bafac2a743ba74c5866710134c07dad8ea2e5b3"
+                      "c832ad890de4ba766378e3e6843d1b089e398cef77b8656f81df4796bdf6e1a7")
     ;;
   -h|--help|help)
     usage

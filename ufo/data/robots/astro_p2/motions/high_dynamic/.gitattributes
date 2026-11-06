@@ -1,0 +1,5 @@
+# Preserve original CSV bytes and accept their standard CRLF row endings.
+raw/qingtong/*.csv -text whitespace=cr-at-eol
+
+# These small datasets were ordinary Git blobs in UFO-FB; preserve their bytes.
+*.pkl -filter -diff -merge -text

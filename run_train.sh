@@ -2,6 +2,8 @@
 set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$script_dir/scripts/runtime_libraries.sh"
+ufo_use_project_nccl "$script_dir"
 
 if [[ -z "${UFO_CACHE_DIR:-}" ]]; then
   work_dir=""
