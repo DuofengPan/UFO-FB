@@ -97,12 +97,13 @@ def build_mjlab_config(
     robot_config: str | Path | None = None,
     network_width: int | None = None,
     shared_critic: bool | None = None,
+    use_bf16_amp: bool | None = None,
     use_swanlab: bool = False,
     swanlab_run_name: str | None = None,
 ) -> TrainConfig:
     agent = canonical_agent_name(agent)
-    if (network_width is not None or shared_critic is not None) and agent != "fb":
-        raise ValueError("Network width and shared critic are currently supported for FB")
+    if (network_width is not None or shared_critic is not None or use_bf16_amp is not None) and agent != "fb":
+        raise ValueError("Network width, shared critic and BF16 AMP are currently supported for FB")
     robot_training = load_robot_training_spec(select_robot_config(robot_config))
     evaluations = []
     run_eval_and_prioritization = not smoke and not disable_eval_prioritization
@@ -124,6 +125,7 @@ def build_mjlab_config(
             clip_grad_norm=clip_grad_norm,
             network_width=network_width,
             shared_critic=shared_critic,
+            use_bf16_amp=use_bf16_amp,
             overrides=robot_training.fb_agent_overrides,
             cartwheel_aux_safe=cartwheel_aux_safe,
         )
@@ -280,6 +282,7 @@ def run_train(args: argparse.Namespace, log_dir: Path) -> None:
         robot_config=args.robot_config,
         network_width=args.network_width,
         shared_critic=args.shared_critic,
+        use_bf16_amp=args.bf16_amp,
     )
     print(
         "[INFO] UFO train: "
@@ -402,6 +405,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--shared-critic", action=argparse.BooleanOptionalAction, default=None,
                         help="Override the robot baseline's shared/independent FB critics.")
+    parser.add_argument("--bf16-amp", action=argparse.BooleanOptionalAction, default=None,
+                        help="Override the robot baseline's BF16 mixed precision setting for FB training.")
     parser.add_argument("--num-envs", type=int, default=DEFAULT_NUM_ENVS)
     parser.add_argument("--num-env-steps", type=int, default=None)
     parser.add_argument(

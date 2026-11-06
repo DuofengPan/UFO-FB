@@ -150,6 +150,7 @@ def build_fb_agent(
     clip_grad_norm: float = 0.0,
     network_width: int | None = None,
     shared_critic: bool | None = None,
+    use_bf16_amp: bool | None = None,
     *,
     overrides: dict | None = None,
     cartwheel_aux_safe: bool = False,
@@ -172,6 +173,8 @@ def build_fb_agent(
             archi[key]["hidden_dim"] = network_width
     if shared_critic is not None:
         archi["shared_critic"] = shared_critic
+    if use_bf16_amp is not None:
+        values["train"]["use_bf16_amp"] = use_bf16_amp
     for key in ("lr_f", "lr_b", "lr_actor", "lr_discriminator", "lr_critic", "lr_aux_critic"):
         values["train"][key] *= lr_scale
     if cartwheel_aux_safe:
