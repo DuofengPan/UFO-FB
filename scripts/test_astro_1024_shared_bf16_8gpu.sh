@@ -28,7 +28,11 @@ export OMP_NUM_THREADS=1
 export UFO_RELEASE_TORCH_CACHE_AFTER_UPDATES=1
 export PYTHONUNBUFFERED=1
 export SWANLAB_WORKSPACE="${SWANLAB_WORKSPACE:-DuofengPan}"
-export UFO_CACHE_DIR="${UFO_CACHE_DIR:-${ROOT_DIR}/cache}"
+export UFO_CACHE_DIR="${UFO_CACHE_DIR:-/var/tmp/ufo-cache}"
+export TMPDIR="${TMPDIR:-/var/tmp/ufo-tmp}"
+export TORCHINDUCTOR_CACHE_DIR="${TORCHINDUCTOR_CACHE_DIR:-/var/tmp/ufo-torchinductor}"
+export TRITON_CACHE_DIR="${TRITON_CACHE_DIR:-/var/tmp/ufo-triton}"
+mkdir -p "$UFO_CACHE_DIR" "$TMPDIR" "$TORCHINDUCTOR_CACHE_DIR" "$TRITON_CACHE_DIR"
 args=("$PYTHON" -m ufo.train --agent fb --gpu-ids all
   --robot-config configs/robots/astro_p2_29dof.yaml
   --data-manifest configs/data/astro_lafan_high_dynamic.yaml
