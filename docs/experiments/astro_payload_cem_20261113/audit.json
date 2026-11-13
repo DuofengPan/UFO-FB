@@ -1,0 +1,26 @@
+{
+  "source_commit": "cd1a0e708595086aa5f2bd22a3d7f4fad65654e4",
+  "branch": "feat/astro-payload-cem",
+  "formal_groups": 24,
+  "formal_episodes": 120,
+  "screening_groups": 24,
+  "frozen_model_fingerprint": "2bba2e92ab160615119ce269d2796d594885b98637e5d64e67eef5af1122a6de",
+  "all_model_checks_passed": 15,
+  "original_z_hash_checks": 6,
+  "tests": "4 passed",
+  "main_payload": {
+    "mass_kg": 8,
+    "body": "waist_roll_link",
+    "offset_m": [
+      0.3,
+      0,
+      0.1
+    ]
+  },
+  "excluded_main_tasks": [
+    "medium_squat",
+    "left_support",
+    "right_support"
+  ],
+  "status": "数值验证和算法测试完成；视频及网页核验单独记录"
+}

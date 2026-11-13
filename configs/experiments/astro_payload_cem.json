@@ -1,0 +1,50 @@
+{
+  "tasks": [
+    "stand",
+    "arms_forward",
+    "shallow_squat"
+  ],
+  "model": "0cui9p7l, frozen Actor and Backward, 191995904 steps",
+  "search": {
+    "payload_kg": "由seeds0/11负载预筛确定",
+    "offset_m": [
+      0,
+      0,
+      0.1
+    ],
+    "population": 128,
+    "elites": 16,
+    "iterations": 20,
+    "horizon_s": 10,
+    "seeds": [
+      0,
+      11
+    ]
+  },
+  "heldout": {
+    "masses_kg": "主负载及相邻负载",
+    "forward_offset_m": [
+      0.12,
+      0,
+      0.1
+    ],
+    "seeds": [
+      101,
+      202,
+      303,
+      404,
+      505
+    ],
+    "horizon_s": 30
+  },
+  "note": "配置归档；完整命令见实验文档。成功判据及代价实现在 rollout.py。",
+  "inventory_tasks": [
+    "stand",
+    "arms_forward",
+    "shallow_squat",
+    "medium_squat",
+    "left_support",
+    "right_support"
+  ],
+  "eligibility": "无负载闭环先稳定；原始z在负载下明显退化，才能纳入主适应实验。中蹲和单腿仅保留预检记录。"
+}
