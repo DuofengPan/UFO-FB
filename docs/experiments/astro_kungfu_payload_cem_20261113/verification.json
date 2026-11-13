@@ -675,5 +675,8 @@
         }
       }
     }
-  ]
+  ],
+  "existing_local_deployment_assets_preserved": 126,
+  "source_video_qa": "Viewed actual 28s frames and source target images; 4 files, each300 frames/10fps/30s. No browser visual QA.",
+  "independent_audit": "Source PKL/hash/pose and all A/C/D end frames independently checked against NPZ; FK support/clearance checked, saved contact diagnostics reviewed. Contact forces not independently reconstructed."
 }

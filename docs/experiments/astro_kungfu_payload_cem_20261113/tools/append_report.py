@@ -33,7 +33,7 @@ NAV_END = "<!-- END KUNGFU PAYLOAD CEM NAV -->"
 OPTIONAL_METRICS = {
     "root_height_m": ("实际 root 高度 m", 3),
     "actual_root_height_m": ("实际 root 高度 m", 3),
-    "lift_height_m": ("抬脚高度 m", 3),
+    "lift_height_m": ("足部 body 高度差 m", 3),
     "support_fraction": ("支撑达标比例", 3),
     "depth_fraction": ("蹲深达标比例", 3),
     "mean_knee_angle_rad": ("平均膝角 rad", 3),
@@ -46,13 +46,17 @@ OPTIONAL_METRICS = {
     "tilt_deg": ("平均倾角 °", 2),
     "torque_saturation_fraction": ("力矩饱和比例", 4),
     "undesired_contact_fraction": ("非脚接触比例", 4),
+    "final_root_height_m": ("终帧 root 高度 m", 3),
+    "final_left_knee_angle_rad": ("终帧左膝 rad", 3),
+    "final_right_knee_angle_rad": ("终帧右膝 rad", 3),
     "final_hold": ("终帧保持比例", 3),
     "last_second_hold_fraction": ("末1秒保持比例", 3),
     "last_second_support_fraction": ("末1秒支撑比例", 3),
     "last_second_depth_fraction": ("末1秒深度比例", 3),
 }
 TAIL_METRICS = ("last_second_hold_fraction", "last_second_support_fraction",
-                "last_second_depth_fraction", "final_hold")
+                "last_second_depth_fraction", "final_hold", "final_root_height_m",
+                "final_left_knee_angle_rad", "final_right_knee_angle_rad")
 
 
 def escape(value: Any) -> str:
