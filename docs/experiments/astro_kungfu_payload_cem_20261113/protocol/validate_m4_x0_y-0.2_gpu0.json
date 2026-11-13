@@ -1,0 +1,65 @@
+{
+  "run": "/data/UFO-next/runs/astro_fb_1024_shared_bf16_8gpu_no_backflips_20261110_183440",
+  "robot": "/data/UFO-next/configs/robots/astro_p2_29dof.yaml",
+  "data": "/data/model-comparison-20261111/selected_motions.pkl",
+  "actor_backward_normalizer_sha256": "2bba2e92ab160615119ce269d2796d594885b98637e5d64e67eef5af1122a6de",
+  "checkpoint_sha256": "b43d3cbdb7c28ce3fe085e847d5f7584847ca601c4c74326038d5e2457f80bec",
+  "robot_xml_sha256": "eaf3ebd2cf13a3d857110644e1f0a156140e93d99a3976ab4c1631d0c45a5840",
+  "physics": {
+    "payload": {
+      "mass_kg": 4.0,
+      "body": "waist_roll_link",
+      "offset_m": [
+        0.0,
+        -0.2,
+        0.1
+      ],
+      "size_m": [
+        0.16,
+        0.12,
+        0.12
+      ]
+    },
+    "total_robot_mass_kg": 44.582583,
+    "body_mass_kg": 13.29663,
+    "body_com_m": [
+      -0.0011932417153444144,
+      -0.0598664103003167,
+      0.14967965903014524
+    ],
+    "body_inertia_kgm2": [
+      [
+        0.2391211099614548,
+        0.0011222304210220344,
+        0.0027491318368753365
+      ],
+      [
+        0.0011222304210220344,
+        0.11645145411572987,
+        -0.039584685967795574
+      ],
+      [
+        0.0027491318368753357,
+        -0.039584685967795574,
+        0.17717780441355502
+      ]
+    ],
+    "xml": "/data/kungfu-payload-cem-20261113/main/physics/m4_x0_y-0.2_z0.1.xml"
+  },
+  "seeds": [
+    101,
+    202,
+    303,
+    404,
+    505
+  ],
+  "horizon_s": 30.0,
+  "dt": 0.02,
+  "actor_precision": "FP32 eager, deterministic mean actions",
+  "dr": false,
+  "obs_noise": false,
+  "entry": "YAML neutral standing z=.645; zero velocities; heldout Gaussian joint perturbation std .015 rad; fresh action/history",
+  "termination": "sticky death: simulator termination, nonfinite state/action, root<.28m, tilt>60deg; no automatic reset",
+  "tasks_json": "/data/kungfu-payload-cem-20261113/selected_tasks.json",
+  "metrics": "hold evaluated after 2s; full-horizon denominator; alive-only pose MAE; semantic success requires >90% hold and full survival"
+}

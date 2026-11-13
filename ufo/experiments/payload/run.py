@@ -36,9 +36,10 @@ def main():
     p=argparse.ArgumentParser(description='固定姿态、冻结 UFO、球面局部 CEM 负载适应')
     p.add_argument('--run',required=True,type=Path);p.add_argument('--out',required=True,type=Path)
     p.add_argument('--robot',default='configs/robots/astro_p2_29dof.yaml',type=Path)
+    p.add_argument('--tasks-json',type=Path,help='Explicit fixed poses with full qpos, support and source provenance')
     p.add_argument('--data',required=True,type=Path);p.add_argument('--device',default='cuda:0')
     p.add_argument('--mass',type=float,default=2);p.add_argument('--offset',type=float,nargs=3,default=[0,0,.1])
-    p.add_argument('--task',type=int,nargs='+',default=[0,1,2])
+    p.add_argument('--task',type=int,nargs='+',default=None)
     p.add_argument('--phase',choices=['baseline','search','validate'],required=True)
     p.add_argument('--population',type=int,default=128);p.add_argument('--elites',type=int,default=16)
     p.add_argument('--iterations',type=int,default=20);p.add_argument('--horizon',type=float,default=None)
@@ -57,7 +58,9 @@ def main():
     print('BUILD',count,a.phase,a.mass,flush=True)
     env,_=cfg.build(num_envs=count)
     c=env._env
-    tasks=make_tasks(original_xml,list(c.dof_names),c.default_dof_pos[0].cpu().numpy())
+    tasks=json.loads(a.tasks_json.read_text()) if a.tasks_json else make_tasks(original_xml,list(c.dof_names),c.default_dof_pos[0].cpu().numpy())
+    if isinstance(tasks,dict): tasks=tasks['tasks']
+    if a.task is None: a.task=list(range(len(tasks))) if a.tasks_json else [0,1,2]
     policy=FrozenPolicy(a.run,a.device);before=policy.fingerprint()
     evaluator=PoseEvaluator(env,policy,tasks)
     # The original files are write-once and checked on every subsequent invocation.
@@ -71,6 +74,8 @@ def main():
                 saved=json.loads((a.out/'tasks.json').read_text())[i]
                 if digest(path)!=saved['original_z_sha256']: raise AssertionError('original z file changed')
                 np.testing.assert_allclose(task['qpos'],saved['qpos'],rtol=0,atol=1e-7)
+                for key in ('support','max_root_height_m','min_mean_knee_angle_rad'):
+                    if task.get(key)!=saved.get(key): raise AssertionError('task semantics changed')
             evaluator.targets[i]['z']=canonical
         else:
             np.savetxt(path,z[None],delimiter=',',fmt='%.9g')
@@ -83,6 +88,7 @@ def main():
                   dt=evaluator.dt,actor_precision='FP32 eager, deterministic mean actions',dr=False,obs_noise=False,
                   entry='YAML neutral standing z=.645; zero velocities; heldout Gaussian joint perturbation std .015 rad; fresh action/history',
                   termination='sticky death: simulator termination, nonfinite state/action, root<.28m, tilt>60deg; no automatic reset',
+                  tasks_json=str(a.tasks_json.resolve()) if a.tasks_json else None,
                   metrics='hold evaluated after 2s; full-horizon denominator; alive-only pose MAE; semantic success requires >90% hold and full survival')
     save(a.out/'protocol'/f'{a.phase}_{tag}_gpu{a.device[-1]}.json',protocol)
     started=time.time()
@@ -109,7 +115,7 @@ def main():
                                                    rows=rows[i*len(seeds):(i+1)*len(seeds)],elapsed_s=time.time()-started))
                 dest.parent.mkdir(exist_ok=True)
                 # Only seed101 has a movie; all seeds retain full scalar results.
-                np.savez_compressed(str(dest)+'.npz',qpos=traj[:,i*len(seeds)],target=np.array(task['qpos']),dt=evaluator.dt)
+                np.savez_compressed(str(dest)+'.npz',qpos=traj[:,i*len(seeds)],qpos_all=traj[:,i*len(seeds):(i+1)*len(seeds)],seeds=np.array(seeds),target=np.array(task['qpos']),dt=evaluator.dt)
             print(name,[(l,float(s)) for l,s in zip(labels,scores)],flush=True)
     after=policy.fingerprint()
     if before!=after:raise AssertionError('model or normalizer changed')

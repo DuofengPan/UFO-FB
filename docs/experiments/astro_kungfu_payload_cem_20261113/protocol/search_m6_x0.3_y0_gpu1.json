@@ -1,0 +1,62 @@
+{
+  "run": "/data/UFO-next/runs/astro_fb_1024_shared_bf16_8gpu_no_backflips_20261110_183440",
+  "robot": "/data/UFO-next/configs/robots/astro_p2_29dof.yaml",
+  "data": "/data/model-comparison-20261111/selected_motions.pkl",
+  "actor_backward_normalizer_sha256": "2bba2e92ab160615119ce269d2796d594885b98637e5d64e67eef5af1122a6de",
+  "checkpoint_sha256": "b43d3cbdb7c28ce3fe085e847d5f7584847ca601c4c74326038d5e2457f80bec",
+  "robot_xml_sha256": "eaf3ebd2cf13a3d857110644e1f0a156140e93d99a3976ab4c1631d0c45a5840",
+  "physics": {
+    "payload": {
+      "mass_kg": 6.0,
+      "body": "waist_roll_link",
+      "offset_m": [
+        0.3,
+        0.0,
+        0.1
+      ],
+      "size_m": [
+        0.16,
+        0.12,
+        0.12
+      ]
+    },
+    "total_robot_mass_kg": 46.582583,
+    "body_mass_kg": 15.29663,
+    "body_com_m": [
+      0.11663574960043485,
+      0.000260089497392563,
+      0.1431841552453057
+    ],
+    "body_inertia_kgm2": [
+      [
+        0.13586577357084595,
+        0.0006364188433291395,
+        0.08058366954938675
+      ],
+      [
+        0.0006364188433291395,
+        0.45933400552156955,
+        0.00013319894122504843
+      ],
+      [
+        0.08058366954938675,
+        0.00013319894122504838,
+        0.40342352299641937
+      ]
+    ],
+    "xml": "/data/kungfu-payload-cem-20261113/main/physics/m6_x0.3_y0_z0.1.xml"
+  },
+  "seeds": [
+    0,
+    11
+  ],
+  "horizon_s": 10.0,
+  "dt": 0.02,
+  "actor_precision": "FP32 eager, deterministic mean actions",
+  "dr": false,
+  "obs_noise": false,
+  "entry": "YAML neutral standing z=.645; zero velocities; heldout Gaussian joint perturbation std .015 rad; fresh action/history",
+  "termination": "sticky death: simulator termination, nonfinite state/action, root<.28m, tilt>60deg; no automatic reset",
+  "tasks_json": "/data/kungfu-payload-cem-20261113/selected_tasks.json",
+  "metrics": "hold evaluated after 2s; full-horizon denominator; alive-only pose MAE; semantic success requires >90% hold and full survival"
+}

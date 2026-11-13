@@ -1,0 +1,679 @@
+{
+  "formal_groups": 24,
+  "formal_episodes": 120,
+  "source_goal_count": 4,
+  "model_fingerprint": "2bba2e92ab160615119ce269d2796d594885b98637e5d64e67eef5af1122a6de",
+  "original_z_hashes_preserved": true,
+  "finite_recorded_qpos": true,
+  "heldout_seeds": [
+    101,
+    202,
+    303,
+    404,
+    505
+  ],
+  "horizon_s": 30,
+  "protocol_checks": "paired conditions, frozen model, fixed original z, same seeds, no DR or observation noise",
+  "unit_tests": "15 passed",
+  "summary": [
+    {
+      "task": "kf_0021_single_left",
+      "title": "洪拳02 左腿支撑",
+      "z_angle_rad": 0.14980335797462674,
+      "conditions": {
+        "unloaded_original": {
+          "successes": 5,
+          "n": 5,
+          "failure_seeds": [],
+          "max_drift_m": 0.08699414134025574,
+          "mean_hold_fraction": 1.0,
+          "last_second_hold_fraction": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "final_hold": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "actual_root_height_m": 0.6435056328773499,
+          "left_knee_angle_rad": 0.35449488162994386,
+          "right_knee_angle_rad": 1.180269455909729
+        },
+        "unloaded_cem": {
+          "successes": 0,
+          "n": 5,
+          "failure_seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "max_drift_m": 2.3963584899902344,
+          "mean_hold_fraction": 0.0,
+          "last_second_hold_fraction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "final_hold": [
+            false,
+            false,
+            false,
+            false,
+            false
+          ],
+          "actual_root_height_m": 0.6518031597137451,
+          "left_knee_angle_rad": 0.33412041068077086,
+          "right_knee_angle_rad": 1.1171348810195922
+        },
+        "main_original": {
+          "successes": 0,
+          "n": 5,
+          "failure_seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "max_drift_m": 0.9661211371421814,
+          "mean_hold_fraction": 0.03457142822444439,
+          "last_second_hold_fraction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "final_hold": [
+            false,
+            false,
+            false,
+            false,
+            false
+          ],
+          "actual_root_height_m": 0.6458449840545655,
+          "left_knee_angle_rad": 0.3310146689414978,
+          "right_knee_angle_rad": 1.0816601991653443
+        },
+        "main_cem": {
+          "successes": 5,
+          "n": 5,
+          "failure_seeds": [],
+          "max_drift_m": 0.1657799482345581,
+          "mean_hold_fraction": 0.9824285626411438,
+          "last_second_hold_fraction": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "final_hold": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "actual_root_height_m": 0.6409150958061218,
+          "left_knee_angle_rad": 0.42038233280181886,
+          "right_knee_angle_rad": 1.0805891275405883
+        },
+        "neighbor_original": {
+          "successes": 0,
+          "n": 5,
+          "failure_seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "max_drift_m": 0.7678283452987671,
+          "mean_hold_fraction": 0.06942857131361961,
+          "last_second_hold_fraction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "final_hold": [
+            false,
+            false,
+            false,
+            false,
+            false
+          ],
+          "actual_root_height_m": 0.645998764038086,
+          "left_knee_angle_rad": 0.3236932098865509,
+          "right_knee_angle_rad": 1.107273554801941
+        },
+        "neighbor_cem": {
+          "successes": 5,
+          "n": 5,
+          "failure_seeds": [],
+          "max_drift_m": 0.1383841633796692,
+          "mean_hold_fraction": 0.999142849445343,
+          "last_second_hold_fraction": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "final_hold": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "actual_root_height_m": 0.6424003839492798,
+          "left_knee_angle_rad": 0.3936031699180603,
+          "right_knee_angle_rad": 1.0656694889068603
+        }
+      }
+    },
+    {
+      "task": "kf_0108_single_right",
+      "title": "长拳01 右腿支撑",
+      "z_angle_rad": 0.20123169979767067,
+      "conditions": {
+        "unloaded_original": {
+          "successes": 5,
+          "n": 5,
+          "failure_seeds": [],
+          "max_drift_m": 0.092288076877594,
+          "mean_hold_fraction": 1.0,
+          "last_second_hold_fraction": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "final_hold": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "actual_root_height_m": 0.6338038325309754,
+          "left_knee_angle_rad": 0.8307006478309631,
+          "right_knee_angle_rad": 0.38705965876579285
+        },
+        "unloaded_cem": {
+          "successes": 0,
+          "n": 5,
+          "failure_seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "max_drift_m": 0.0730699971318245,
+          "mean_hold_fraction": 0.8471428513526916,
+          "last_second_hold_fraction": [
+            0.85999995470047,
+            0.85999995470047,
+            0.7199999690055847,
+            0.85999995470047,
+            0.8399999737739563
+          ],
+          "final_hold": [
+            true,
+            true,
+            false,
+            true,
+            true
+          ],
+          "actual_root_height_m": 0.6279453277587891,
+          "left_knee_angle_rad": 1.1541967868804932,
+          "right_knee_angle_rad": 0.31561418771743777
+        },
+        "main_original": {
+          "successes": 0,
+          "n": 5,
+          "failure_seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "max_drift_m": 2.4645323753356934,
+          "mean_hold_fraction": 0.20099999606609345,
+          "last_second_hold_fraction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "final_hold": [
+            false,
+            false,
+            false,
+            false,
+            false
+          ],
+          "actual_root_height_m": 0.6346353769302369,
+          "left_knee_angle_rad": 0.8675695180892944,
+          "right_knee_angle_rad": 0.4446370005607605
+        },
+        "main_cem": {
+          "successes": 5,
+          "n": 5,
+          "failure_seeds": [],
+          "max_drift_m": 0.09096008539199829,
+          "mean_hold_fraction": 1.0,
+          "last_second_hold_fraction": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "final_hold": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "actual_root_height_m": 0.6279792785644531,
+          "left_knee_angle_rad": 1.1084532976150512,
+          "right_knee_angle_rad": 0.3537345349788666
+        },
+        "neighbor_original": {
+          "successes": 5,
+          "n": 5,
+          "failure_seeds": [],
+          "max_drift_m": 0.09486158937215805,
+          "mean_hold_fraction": 1.0,
+          "last_second_hold_fraction": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "final_hold": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "actual_root_height_m": 0.6344246625900268,
+          "left_knee_angle_rad": 0.8254564881324769,
+          "right_knee_angle_rad": 0.3837240397930145
+        },
+        "neighbor_cem": {
+          "successes": 4,
+          "n": 5,
+          "failure_seeds": [
+            303
+          ],
+          "max_drift_m": 0.08787721395492554,
+          "mean_hold_fraction": 0.9659999966621399,
+          "last_second_hold_fraction": [
+            1.0,
+            1.0,
+            0.8399999737739563,
+            1.0,
+            1.0
+          ],
+          "final_hold": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "actual_root_height_m": 0.6280242085456849,
+          "left_knee_angle_rad": 1.1243192434310914,
+          "right_knee_angle_rad": 0.3411196231842041
+        }
+      }
+    },
+    {
+      "task": "kf_0171_deep_squat",
+      "title": "南拳01 低蹲（双膝屈曲）",
+      "z_angle_rad": 0.17349830013433087,
+      "conditions": {
+        "unloaded_original": {
+          "successes": 5,
+          "n": 5,
+          "failure_seeds": [],
+          "max_drift_m": 0.1013997420668602,
+          "mean_hold_fraction": 1.0,
+          "last_second_hold_fraction": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "final_hold": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "actual_root_height_m": 0.42064448595047,
+          "left_knee_angle_rad": 1.4541121482849122,
+          "right_knee_angle_rad": 1.7637937545776368
+        },
+        "unloaded_cem": {
+          "successes": 5,
+          "n": 5,
+          "failure_seeds": [],
+          "max_drift_m": 0.09969667345285416,
+          "mean_hold_fraction": 1.0,
+          "last_second_hold_fraction": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "final_hold": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "actual_root_height_m": 0.4546860158443451,
+          "left_knee_angle_rad": 1.4412944078445435,
+          "right_knee_angle_rad": 1.5220166444778442
+        },
+        "main_original": {
+          "successes": 0,
+          "n": 5,
+          "failure_seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "max_drift_m": 2.859898328781128,
+          "mean_hold_fraction": 0.27785713970661163,
+          "last_second_hold_fraction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "final_hold": [
+            false,
+            false,
+            false,
+            false,
+            false
+          ],
+          "actual_root_height_m": 0.4144934415817261,
+          "left_knee_angle_rad": 1.4321070909500122,
+          "right_knee_angle_rad": 1.7219382524490356
+        },
+        "main_cem": {
+          "successes": 5,
+          "n": 5,
+          "failure_seeds": [],
+          "max_drift_m": 0.04503253102302551,
+          "mean_hold_fraction": 1.0,
+          "last_second_hold_fraction": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "final_hold": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "actual_root_height_m": 0.43726949095726014,
+          "left_knee_angle_rad": 1.3144063234329224,
+          "right_knee_angle_rad": 1.4533880949020386
+        },
+        "neighbor_original": {
+          "successes": 1,
+          "n": 5,
+          "failure_seeds": [
+            202,
+            303,
+            404,
+            505
+          ],
+          "max_drift_m": 0.8204014301300049,
+          "mean_hold_fraction": 0.8154285550117493,
+          "last_second_hold_fraction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "final_hold": [
+            false,
+            false,
+            false,
+            false,
+            false
+          ],
+          "actual_root_height_m": 0.4150982141494751,
+          "left_knee_angle_rad": 1.4195104837417603,
+          "right_knee_angle_rad": 1.756185817718506
+        },
+        "neighbor_cem": {
+          "successes": 5,
+          "n": 5,
+          "failure_seeds": [],
+          "max_drift_m": 0.05481111630797386,
+          "mean_hold_fraction": 1.0,
+          "last_second_hold_fraction": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "final_hold": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "actual_root_height_m": 0.44452557563781736,
+          "left_knee_angle_rad": 1.3896069765090941,
+          "right_knee_angle_rad": 1.5043911457061767
+        }
+      }
+    },
+    {
+      "task": "kf_0219_deep_squat",
+      "title": "虎拳 低蹲（不对称）",
+      "z_angle_rad": 0.1711819682408815,
+      "conditions": {
+        "unloaded_original": {
+          "successes": 5,
+          "n": 5,
+          "failure_seeds": [],
+          "max_drift_m": 0.10045818984508514,
+          "mean_hold_fraction": 1.0,
+          "last_second_hold_fraction": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "final_hold": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "actual_root_height_m": 0.4732330620288849,
+          "left_knee_angle_rad": 1.6838856935501099,
+          "right_knee_angle_rad": 1.347186517715454
+        },
+        "unloaded_cem": {
+          "successes": 0,
+          "n": 5,
+          "failure_seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "max_drift_m": 0.05109535902738571,
+          "mean_hold_fraction": 0.0,
+          "last_second_hold_fraction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "final_hold": [
+            false,
+            false,
+            false,
+            false,
+            false
+          ],
+          "actual_root_height_m": 0.5137869834899902,
+          "left_knee_angle_rad": 1.4951784372329713,
+          "right_knee_angle_rad": 0.9427131295204163
+        },
+        "main_original": {
+          "successes": 0,
+          "n": 5,
+          "failure_seeds": [
+            101,
+            202,
+            303,
+            404,
+            505
+          ],
+          "max_drift_m": 0.17591001093387604,
+          "mean_hold_fraction": 0.006285714358091355,
+          "last_second_hold_fraction": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "final_hold": [
+            false,
+            false,
+            false,
+            false,
+            false
+          ],
+          "actual_root_height_m": 0.4047171652317047,
+          "left_knee_angle_rad": 1.934209656715393,
+          "right_knee_angle_rad": 1.5026066541671752
+        },
+        "main_cem": {
+          "successes": 5,
+          "n": 5,
+          "failure_seeds": [],
+          "max_drift_m": 0.054227445274591446,
+          "mean_hold_fraction": 1.0,
+          "last_second_hold_fraction": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "final_hold": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "actual_root_height_m": 0.47499858736991885,
+          "left_knee_angle_rad": 1.6576854467391968,
+          "right_knee_angle_rad": 0.9866300582885742
+        },
+        "neighbor_original": {
+          "successes": 5,
+          "n": 5,
+          "failure_seeds": [],
+          "max_drift_m": 0.12395317852497101,
+          "mean_hold_fraction": 1.0,
+          "last_second_hold_fraction": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "final_hold": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "actual_root_height_m": 0.4336171209812164,
+          "left_knee_angle_rad": 1.8289247035980225,
+          "right_knee_angle_rad": 1.5289462566375733
+        },
+        "neighbor_cem": {
+          "successes": 5,
+          "n": 5,
+          "failure_seeds": [],
+          "max_drift_m": 0.04643412306904793,
+          "mean_hold_fraction": 0.97028568983078,
+          "last_second_hold_fraction": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "final_hold": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "actual_root_height_m": 0.48981677889823916,
+          "left_knee_angle_rad": 1.6009024858474732,
+          "right_knee_angle_rad": 1.0486663818359374
+        }
+      }
+    }
+  ]
+}
