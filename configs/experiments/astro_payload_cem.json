@@ -6,9 +6,9 @@
   ],
   "model": "0cui9p7l, frozen Actor and Backward, 191995904 steps",
   "search": {
-    "payload_kg": "由seeds0/11负载预筛确定",
+    "payload_kg": 8,
     "offset_m": [
-      0,
+      0.3,
       0,
       0.1
     ],
@@ -19,14 +19,47 @@
     "seeds": [
       0,
       11
-    ]
+    ],
+    "sigma": 0.18,
+    "min_sigma": 0.025,
+    "smoothing": 0.7,
+    "max_angle_rad": 0.55,
+    "cem_seed_base": 20261113
   },
   "heldout": {
-    "masses_kg": "主负载及相邻负载",
-    "forward_offset_m": [
-      0.12,
-      0,
-      0.1
+    "conditions": [
+      {
+        "mass_kg": 0,
+        "offset_m": [
+          0,
+          0,
+          0.1
+        ]
+      },
+      {
+        "mass_kg": 8,
+        "offset_m": [
+          0.3,
+          0,
+          0.1
+        ]
+      },
+      {
+        "mass_kg": 6,
+        "offset_m": [
+          0.3,
+          0,
+          0.1
+        ]
+      },
+      {
+        "mass_kg": 8,
+        "offset_m": [
+          0.25,
+          0,
+          0.1
+        ]
+      }
     ],
     "seeds": [
       101,
@@ -37,7 +70,7 @@
     ],
     "horizon_s": 30
   },
-  "note": "配置归档；完整命令见实验文档。成功判据及代价实现在 rollout.py。",
+  "note": "归档本次实际选定条件；CLI完整命令见docs/experiments/astro_payload_cem.md。主负载仅按seeds0/11预筛选择，未根据heldout结果改选。",
   "inventory_tasks": [
     "stand",
     "arms_forward",
