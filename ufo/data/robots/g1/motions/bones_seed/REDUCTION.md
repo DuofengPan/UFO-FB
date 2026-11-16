@@ -1,0 +1,804 @@
+# 由 1000 条精简到 600 条的对照
+
+原始文件未删除。以下是本次未纳入训练精选集的400条；其中392条按相似度与家族配额精简，8条为明确上箱/被外力拉动等支撑依赖或非目标运动。相似度是混合描述向量距离，不能理解为关节误差。
+
+- `lift_crate_come_down_50cm_box_R_001__A163`（日常操作）
+  - 原说明：A person lifting a crate steps down from a box and stands upright.
+- `lift_crate_come_down_50cm_box_R_003__A249`（日常操作）
+  - 原说明：A person lifting a crate steps down from a box and stands upright.
+- `lift_crate_come_up_50cm_box_R_002__A159`（日常操作）
+  - 原说明：A person steps up onto a box while securely lifting a heavy crate.
+- `exercise_2_001__A044`（放物姿态）
+  - 原说明：A person energetically performs a high knee jogging exercise in place.
+- `exercise_2_003__A070`（放物姿态）
+  - 原说明：A person is doing high knees jogging and then stands at a place.
+- `exercise_v002_R_003__A362`（放物姿态）
+  - 原说明：A person energetically performs a high knee jogging exercise in place.
+- `walk_the_dog_ff_000_pull_leash_R_002__A493`（推拉与按压姿态）
+  - 原说明：A person gets pulled behind over their left shoulder by a dog on a leash and walks to the left diagonal, following the dog before coming to a stop.
+- `walk_the_dog_ff_225_pull_leash_R_001__A494`（推拉与按压姿态）
+  - 原说明：A person quickly walks diagonally to the right while being pulled by the dog's leash, and then stands in place.
+- `neutral_avoid_obstacle_bend_down_jog_ff_180_R_001__A543`（弯腰避让）
+  - 最近的保留动作：`neutral_avoid_obstacle_bend_down_jog_ff_180_R_001__A544`；描述距离 0.2433。
+- `big_light_one_hand_hold_R_001__A508`（持物姿态）
+  - 最近的保留动作：`big_light_one_hand_hold_long_R_001__A508`；描述距离 0.1500。
+- `big_light_one_hand_hold_R_001__A509`（持物姿态）
+  - 最近的保留动作：`big_light_one_hand_hold_R_001__A511`；描述距离 0.1886。
+- `big_light_one_hand_hold_R_001__A510`（持物姿态）
+  - 最近的保留动作：`medium_big_light_one_hand_hold_R_001__A505`；描述距离 0.1356。
+- `big_light_one_hand_hold_long_R_001__A509`（持物姿态）
+  - 最近的保留动作：`big_light_one_hand_hold_R_001__A511`；描述距离 0.2411。
+- `big_light_two_hands_hold_R_001__A508`（持物姿态）
+  - 最近的保留动作：`big_light_two_hands_hold_long_R_001__A508`；描述距离 0.1876。
+- `big_light_two_hands_hold_R_001__A511`（持物姿态）
+  - 最近的保留动作：`big_light_two_hands_hold_R_001__A510`；描述距离 0.1940。
+- `big_light_two_hands_hold_long_R_001__A510`（持物姿态）
+  - 最近的保留动作：`big_light_two_hands_hold_R_001__A509`；描述距离 0.2771。
+- `medium_big_light_one_hand_hold_R_001__A504`（持物姿态）
+  - 最近的保留动作：`medium_big_light_one_hand_hold_R_001__A505`；描述距离 0.1545。
+- `medium_big_light_one_hand_hold_R_001__A506`（持物姿态）
+  - 最近的保留动作：`big_light_one_hand_hold_R_001__A511`；描述距离 0.1727。
+- `medium_big_light_one_hand_hold_R_001__A507`（持物姿态）
+  - 最近的保留动作：`medium_big_light_one_hand_hold_R_001__A505`；描述距离 0.1663。
+- `medium_big_light_one_hand_hold_long_R_002__A504`（持物姿态）
+  - 最近的保留动作：`medium_big_light_one_hand_hold_R_001__A505`；描述距离 0.1899。
+- `medium_big_light_one_hand_hold_long_R_002__A506`（持物姿态）
+  - 最近的保留动作：`big_light_one_hand_hold_R_001__A511`；描述距离 0.1979。
+- `medium_big_light_two_hands_hold_R_001__A509`（持物姿态）
+  - 最近的保留动作：`medium_big_light_two_hands_hold_long_R_001__A509`；描述距离 0.1631。
+- `medium_big_light_two_hands_hold_R_001__A510`（持物姿态）
+  - 最近的保留动作：`medium_big_light_two_hands_hold_long_R_001__A510`；描述距离 0.1522。
+- `medium_big_light_two_hands_hold_R_001__A511`（持物姿态）
+  - 最近的保留动作：`medium_big_light_two_hands_hold_long_R_001__A511`；描述距离 0.1248。
+- `medium_big_light_two_hands_hold_long_R_001__A508`（持物姿态）
+  - 最近的保留动作：`medium_big_light_two_hands_hold_R_001__A508`；描述距离 0.1075。
+- `medium_light_two_hands_hold_R_001__A506`（持物姿态）
+  - 最近的保留动作：`small_light_two_hands_hold_R_001__A506`；描述距离 0.1654。
+- `medium_light_two_hands_hold_R_001__A507`（持物姿态）
+  - 最近的保留动作：`medium_light_two_hands_hold_R_001__A505`；描述距离 0.0981。
+- `medium_light_two_hands_hold_long_R_001__A506`（持物姿态）
+  - 最近的保留动作：`small_light_two_hands_hold_R_001__A506`；描述距离 0.2098。
+- `petting_cat_standing_R_001__A533`（持物姿态）
+  - 最近的保留动作：`petting_cat_standing_R_002__A533`；描述距离 0.0874。
+- `small_light_one_hand_hold_001__A504`（持物姿态）
+  - 最近的保留动作：`small_light_one_hand_hold_001__A505`；描述距离 0.0916。
+- `small_light_one_hand_hold_001__A506`（持物姿态）
+  - 最近的保留动作：`small_light_one_hand_hold_long_001__A506`；描述距离 0.1354。
+- `small_light_one_hand_hold_001__A507`（持物姿态）
+  - 最近的保留动作：`small_light_one_hand_hold_001__A505`；描述距离 0.1327。
+- `small_light_one_hand_hold_long_001__A504`（持物姿态）
+  - 最近的保留动作：`small_light_one_hand_hold_long_001__A505`；描述距离 0.1915。
+- `small_light_one_hand_hold_long_001__A507`（持物姿态）
+  - 最近的保留动作：`small_light_one_hand_hold_001__A505`；描述距离 0.2053。
+- `small_light_two_hands_hold_R_001__A505`（持物姿态）
+  - 最近的保留动作：`small_light_two_hands_hold_R_001__A506`；描述距离 0.1557。
+- `small_light_two_hands_hold_R_001__A507`（持物姿态）
+  - 最近的保留动作：`small_light_two_hands_hold_R_001__A506`；描述距离 0.1715。
+- `small_light_two_hands_hold_long_R_002__A505`（持物姿态）
+  - 最近的保留动作：`medium_light_two_hands_hold_R_001__A505`；描述距离 0.2072。
+- `lift_crate_loop_003__A140`（日常操作）
+  - 最近的保留动作：`lift_crate_loop_001__A140`；描述距离 0.0187。
+- `lift_crate_turn_270_002__A162`（日常操作）
+  - 最近的保留动作：`lift_crate_loop_001__A140`；描述距离 0.1975。
+- `lift_crate_walk_ff_loop_180_R_001__A159`（日常操作）
+  - 最近的保留动作：`lift_crate_walk_ff_loop_180_R_003__A159`；描述距离 0.1477。
+- `lift_crate_walk_ff_loop_315_001__A163`（日常操作）
+  - 最近的保留动作：`lift_crate_walk_ff_loop_315_003__A163`；描述距离 0.1137。
+- `lift_crate_walk_ff_start_225_003__A159`（日常操作）
+  - 最近的保留动作：`lift_crate_walk_ff_stop_225_001__A159`；描述距离 0.1336。
+- `lift_crate_walk_ff_start_360_001__A159`（日常操作）
+  - 最近的保留动作：`lift_crate_walk_ff_start_360_002__A159`；描述距离 0.1083。
+- `lift_crate_walk_ff_stop_180_R_003__A159`（日常操作）
+  - 最近的保留动作：`lift_crate_walk_ff_loop_180_R_003__A159`；描述距离 0.1532。
+- `lift_crate_walk_ff_stop_270_003__A163`（日常操作）
+  - 最近的保留动作：`lift_crate_walk_ff_loop_315_003__A163`；描述距离 0.1806。
+- `lift_crate_walk_ff_stop_315_002__A163`（日常操作）
+  - 最近的保留动作：`lift_crate_walk_ff_loop_315_003__A163`；描述距离 0.1260。
+- `lift_crate_walk_ff_stop_360_003__A163`（日常操作）
+  - 最近的保留动作：`lift_crate_walk_ff_start_315_003__A163`；描述距离 0.1776。
+- `sweep_floor_back_R_002__A330`（日常操作）
+  - 最近的保留动作：`sweep_floor_back_R_001__A330`；描述距离 0.1467。
+- `big_light_one_hand_pick_up_behind_high_R_001__A523`（取物姿态）
+  - 最近的保留动作：`big_light_one_hand_pick_up_right_side_high_R_001__A523`；描述距离 0.2824。
+- `big_light_one_hand_pick_up_behind_low_R_002__A508`（取物姿态）
+  - 最近的保留动作：`big_light_one_hand_pick_up_right_side_low_R_002__A508`；描述距离 0.1870。
+- `big_light_one_hand_pick_up_behind_medium_R_001__A511`（取物姿态）
+  - 最近的保留动作：`medium_big_light_one_hand_pick_up_behind_medium_R_001__A511`；描述距离 0.1818。
+- `big_light_one_hand_pick_up_front_high_R_001__A522`（取物姿态）
+  - 最近的保留动作：`big_light_one_hand_put_down_front_high_R_002__A522`；描述距离 0.2686。
+- `big_light_one_hand_pick_up_front_low_R_005__A508`（取物姿态）
+  - 最近的保留动作：`big_light_one_hand_pick_up_right_side_low_R_002__A508`；描述距离 0.1694。
+- `big_light_one_hand_pick_up_front_low_R_005__A509`（取物姿态）
+  - 最近的保留动作：`medium_big_light_one_hand_hold_R_001__A505`；描述距离 0.1975。
+- `big_light_one_hand_pick_up_front_low_R_005__A510`（取物姿态）
+  - 最近的保留动作：`big_light_one_hand_pick_up_front_medium_R_001__A510`；描述距离 0.1889。
+- `big_light_one_hand_pick_up_front_medium_R_001__A509`（取物姿态）
+  - 最近的保留动作：`small_light_one_hand_pick_up_front_high_R_001__A519`；描述距离 0.2102。
+- `big_light_one_hand_pick_up_right_side_high_R_001__A522`（取物姿态）
+  - 最近的保留动作：`big_light_one_hand_pick_up_front_high_R_001__A521`；描述距离 0.2453。
+- `big_light_one_hand_pick_up_right_side_low_R_002__A510`（取物姿态）
+  - 最近的保留动作：`neutral_item_pick_up_table_R_001__A545`；描述距离 0.1978。
+- `big_light_one_hand_pick_up_right_side_low_R_002__A511`（取物姿态）
+  - 最近的保留动作：`big_light_one_hand_pick_up_front_low_R_005__A511`；描述距离 0.1563。
+- `big_light_one_hand_pick_up_right_side_medium_R_001__A508`（取物姿态）
+  - 最近的保留动作：`big_light_one_hand_pick_up_front_medium_R_001__A508`；描述距离 0.1687。
+- `big_light_one_hand_pick_up_right_side_medium_R_001__A510`（取物姿态）
+  - 最近的保留动作：`big_light_one_hand_pick_up_right_side_medium_R_001__A509`；描述距离 0.2003。
+- `big_light_two_hands_pick_up_behind_high_R_001__A520`（取物姿态）
+  - 最近的保留动作：`big_light_two_hands_pick_up_right_side_high_R_001__A520`；描述距离 0.2932。
+- `big_light_two_hands_pick_up_behind_low_R_001__A511`（取物姿态）
+  - 最近的保留动作：`big_light_two_hands_pick_up_right_side_low_R_001__A511`；描述距离 0.2535。
+- `big_light_two_hands_pick_up_behind_medium_R_001__A509`（取物姿态）
+  - 最近的保留动作：`big_light_two_hands_pick_up_right_side_medium_R_001__A509`；描述距离 0.1899。
+- `big_light_two_hands_pick_up_front_medium_R_001__A511`（取物姿态）
+  - 最近的保留动作：`big_light_two_hands_pick_up_front_medium_R_001__A508`；描述距离 0.2398。
+- `big_light_two_hands_pick_up_right_side_medium_R_001__A508`（取物姿态）
+  - 最近的保留动作：`big_light_two_hands_pick_up_behind_medium_R_001__A508`；描述距离 0.1889。
+- `big_light_two_hands_put_down_front_high_R_001__A523`（取物姿态）
+  - 最近的保留动作：`big_light_two_hands_put_down_front_high_R_001__A522`；描述距离 0.2097。
+- `cigarette_pick_up_R_002__A459`（取物姿态）
+  - 最近的保留动作：`cigarette_pick_up_R_002__A458`；描述距离 0.3255。
+- `item_pick_up_jog_R_003__A350`（取物姿态）
+  - 最近的保留动作：`item_pick_up_jog_R_003__A352`；描述距离 0.2549。
+- `item_pick_up_standing_R_001__A414`（取物姿态）
+  - 最近的保留动作：`item_pick_up_standing_R_003__A414`；描述距离 0.1559。
+- `item_pick_up_walk_R_002__A411`（取物姿态）
+  - 最近的保留动作：`item_pick_up_walk_R_002__A413`；描述距离 0.2510。
+- `m_whaaat_grab_head_stadium_003__A041`（取物姿态）
+  - 最近的保留动作：`m_whaaat_grab_head_stadium_002__A041`；描述距离 0.2710。
+- `medium_big_light_one_hand_pick_up_behind_high_R_001__A526`（取物姿态）
+  - 最近的保留动作：`medium_big_light_one_hand_put_down_front_high_R_003__A526`；描述距离 0.2377。
+- `medium_big_light_one_hand_pick_up_behind_low_R_001__A504`（取物姿态）
+  - 最近的保留动作：`medium_big_light_one_hand_pick_up_behind_low_R_001__A505`；描述距离 0.2143。
+- `medium_big_light_one_hand_pick_up_behind_medium_R_001__A508`（取物姿态）
+  - 最近的保留动作：`big_light_one_hand_pick_up_behind_medium_R_001__A508`；描述距离 0.2143。
+- `medium_big_light_one_hand_pick_up_front_high_R_002__A524`（取物姿态）
+  - 最近的保留动作：`medium_big_light_one_hand_pick_up_front_high_R_002__A525`；描述距离 0.2023。
+- `medium_big_light_one_hand_pick_up_front_low_R_003__A504`（取物姿态）
+  - 最近的保留动作：`medium_big_light_one_hand_pick_up_front_low_R_003__A507`；描述距离 0.1921。
+- `medium_big_light_one_hand_pick_up_front_low_R_003__A505`（取物姿态）
+  - 最近的保留动作：`medium_big_light_one_hand_pick_up_front_low_R_003__A507`；描述距离 0.2054。
+- `medium_big_light_one_hand_pick_up_front_low_R_003__A506`（取物姿态）
+  - 最近的保留动作：`big_light_one_hand_pick_up_front_low_R_005__A511`；描述距离 0.1651。
+- `medium_big_light_one_hand_pick_up_front_medium_R_003__A510`（取物姿态）
+  - 最近的保留动作：`big_light_one_hand_pick_up_front_medium_R_001__A510`；描述距离 0.1324。
+- `medium_big_light_one_hand_pick_up_front_medium_R_003__A511`（取物姿态）
+  - 最近的保留动作：`medium_big_light_one_hand_pick_up_front_medium_R_003__A508`；描述距离 0.1911。
+- `medium_big_light_one_hand_pick_up_right_side_low_R_001__A504`（取物姿态）
+  - 最近的保留动作：`big_light_one_hand_pick_up_right_side_low_R_002__A509`；描述距离 0.1798。
+- `medium_big_light_one_hand_pick_up_right_side_low_R_001__A506`（取物姿态）
+  - 最近的保留动作：`big_light_one_hand_pick_up_front_low_R_005__A511`；描述距离 0.1836。
+- `medium_big_light_one_hand_pick_up_right_side_low_R_001__A507`（取物姿态）
+  - 最近的保留动作：`medium_big_light_one_hand_pick_up_right_side_low_R_001__A505`；描述距离 0.1983。
+- `medium_big_light_one_hand_pick_up_right_side_medium_R_001__A510`（取物姿态）
+  - 最近的保留动作：`big_light_one_hand_pick_up_right_side_medium_R_001__A509`；描述距离 0.1966。
+- `medium_big_light_one_hand_put_down_front_high_R_003__A525`（取物姿态）
+  - 最近的保留动作：`medium_big_light_one_hand_put_down_front_high_R_003__A526`；描述距离 0.2473。
+- `medium_big_light_two_hands_pick_up_behind_high_R_002__A530`（取物姿态）
+  - 最近的保留动作：`big_light_two_hands_pick_up_behind_medium_R_001__A510`；描述距离 0.3639。
+- `medium_big_light_two_hands_pick_up_behind_medium_R_001__A511`（取物姿态）
+  - 最近的保留动作：`medium_big_light_two_hands_pick_up_front_medium_R_001__A511`；描述距离 0.2806。
+- `medium_big_light_two_hands_pick_up_front_high_R_002__A528`（取物姿态）
+  - 最近的保留动作：`medium_light_two_hands_pick_up_front_high_R_001__A525`；描述距离 0.2360。
+- `medium_big_light_two_hands_pick_up_front_medium_R_001__A509`（取物姿态）
+  - 最近的保留动作：`medium_big_light_two_hands_pick_up_right_side_medium_R_001__A508`；描述距离 0.2783。
+- `medium_big_light_two_hands_pick_up_right_side_high_R_001__A529`（取物姿态）
+  - 最近的保留动作：`medium_big_light_two_hands_pick_up_right_side_high_R_001__A528`；描述距离 0.2396。
+- `medium_big_light_two_hands_pick_up_right_side_medium_R_001__A511`（取物姿态）
+  - 最近的保留动作：`medium_big_light_two_hands_pick_up_front_medium_R_001__A511`；描述距离 0.2098。
+- `medium_light_two_hands_pick_up_behind_high_R_001__A525`（取物姿态）
+  - 最近的保留动作：`medium_light_two_hands_pick_up_behind_high_R_001__A524`；描述距离 0.2197。
+- `medium_light_two_hands_pick_up_behind_medium_R_001__A508`（取物姿态）
+  - 最近的保留动作：`small_light_two_hands_pick_up_behind_medium_R_002__A508`；描述距离 0.1969。
+- `medium_light_two_hands_pick_up_front_high_R_001__A526`（取物姿态）
+  - 最近的保留动作：`medium_light_two_hands_pick_up_front_high_R_001__A525`；描述距离 0.1794。
+- `medium_light_two_hands_pick_up_front_medium_R_002__A508`（取物姿态）
+  - 最近的保留动作：`medium_light_two_hands_pick_up_right_side_medium_R_001__A508`；描述距离 0.1541。
+- `medium_light_two_hands_pick_up_front_medium_R_002__A509`（取物姿态）
+  - 最近的保留动作：`medium_light_two_hands_pick_up_front_medium_R_002__A510`；描述距离 0.1399。
+- `medium_light_two_hands_pick_up_right_side_high_R_001__A526`（取物姿态）
+  - 最近的保留动作：`medium_light_two_hands_pick_up_front_high_R_001__A525`；描述距离 0.2706。
+- `medium_light_two_hands_pick_up_right_side_medium_R_001__A510`（取物姿态）
+  - 最近的保留动作：`medium_light_two_hands_pick_up_behind_medium_R_001__A510`；描述距离 0.2120。
+- `neutral_item_pick_up_table_R_001__A543`（取物姿态）
+  - 最近的保留动作：`neutral_item_pick_up_table_R_001__A545`；描述距离 0.1689。
+- `neutral_item_pick_up_table_R_001__A544`（取物姿态）
+  - 最近的保留动作：`neutral_item_pick_up_table_R_001__A545`；描述距离 0.1152。
+- `pickaxe_idle_R_002__A288`（取物姿态）
+  - 最近的保留动作：`pickaxe_idle_R_101__A355`；描述距离 0.1369。
+- `pickaxe_idle_R_102__A358`（取物姿态）
+  - 最近的保留动作：`pickaxe_idle_R_101__A355`；描述距离 0.1696。
+- `small_light_one_hand_pick_up_behind_high_R_001__A517`（取物姿态）
+  - 最近的保留动作：`small_light_one_hand_pick_up_behind_high_R_001__A519`；描述距离 0.2273。
+- `small_light_one_hand_pick_up_behind_low_001__A507`（取物姿态）
+  - 最近的保留动作：`small_light_one_hand_pick_up_behind_low_001__A505`；描述距离 0.2444。
+- `small_light_one_hand_pick_up_behind_medium_R_001__A511`（取物姿态）
+  - 最近的保留动作：`small_light_one_hand_pick_up_right_side_medium_R_002__A511`；描述距离 0.1944。
+- `small_light_one_hand_pick_up_front_high_R_001__A518`（取物姿态）
+  - 最近的保留动作：`small_light_one_hand_pick_up_front_high_R_001__A519`；描述距离 0.1607。
+- `small_light_one_hand_pick_up_front_medium_R_001__A508`（取物姿态）
+  - 最近的保留动作：`neutral_item_pick_up_table_R_001__A545`；描述距离 0.1314。
+- `small_light_one_hand_pick_up_front_medium_R_001__A510`（取物姿态）
+  - 最近的保留动作：`neutral_item_pick_up_table_R_001__A545`；描述距离 0.1227。
+- `small_light_one_hand_pick_up_front_medium_R_001__A511`（取物姿态）
+  - 最近的保留动作：`small_light_one_hand_pick_up_right_side_medium_R_002__A511`；描述距离 0.1385。
+- `small_light_one_hand_pick_up_right_side_high_R_001__A517`（取物姿态）
+  - 最近的保留动作：`small_light_one_hand_pick_up_right_side_high_R_001__A516`；描述距离 0.1548。
+- `small_light_one_hand_pick_up_right_side_high_R_001__A518`（取物姿态）
+  - 最近的保留动作：`small_light_one_hand_pick_up_behind_high_R_001__A518`；描述距离 0.2033。
+- `small_light_one_hand_pick_up_right_side_high_R_001__A519`（取物姿态）
+  - 最近的保留动作：`big_light_one_hand_pick_up_right_side_medium_R_001__A509`；描述距离 0.1984。
+- `small_light_one_hand_pick_up_right_side_medium_R_002__A508`（取物姿态）
+  - 最近的保留动作：`small_light_one_hand_pick_up_right_side_medium_R_002__A511`；描述距离 0.1448。
+- `small_light_one_hand_pick_up_right_side_medium_R_002__A509`（取物姿态）
+  - 最近的保留动作：`small_light_one_hand_pick_up_front_medium_R_001__A509`；描述距离 0.1850。
+- `small_light_one_hand_pick_up_right_side_medium_R_002__A510`（取物姿态）
+  - 最近的保留动作：`neutral_item_pick_up_table_R_001__A545`；描述距离 0.1636。
+- `small_light_two_hands_pick_up_behind_high_R_001__A519`（取物姿态）
+  - 最近的保留动作：`small_light_two_hands_pick_up_behind_medium_R_002__A511`；描述距离 0.2886。
+- `small_light_two_hands_pick_up_behind_medium_R_001__A508`（取物姿态）
+  - 最近的保留动作：`small_light_two_hands_pick_up_behind_medium_R_001__A511`；描述距离 0.1807。
+- `small_light_two_hands_pick_up_behind_medium_R_001__A509`（取物姿态）
+  - 最近的保留动作：`small_light_two_hands_pick_up_behind_medium_R_001__A511`；描述距离 0.1918。
+- `small_light_two_hands_pick_up_behind_medium_R_002__A509`（取物姿态）
+  - 最近的保留动作：`small_light_two_hands_put_down_behind_medium_R_001__A509`；描述距离 0.2107。
+- `small_light_two_hands_pick_up_front_high_R_001__A517`（取物姿态）
+  - 最近的保留动作：`small_light_two_hands_pick_up_right_side_high_R_002__A517`；描述距离 0.1840。
+- `small_light_two_hands_pick_up_right_side_high_R_002__A518`（取物姿态）
+  - 最近的保留动作：`small_light_two_hands_pick_up_front_high_R_001__A518`；描述距离 0.2156。
+- `small_light_two_hands_pick_up_right_side_medium_R_001__A508`（取物姿态）
+  - 最近的保留动作：`medium_light_two_hands_pick_up_right_side_medium_R_001__A508`；描述距离 0.1787。
+- `small_light_two_hands_pick_up_right_side_medium_R_001__A510`（取物姿态）
+  - 最近的保留动作：`small_light_two_hands_pick_up_right_side_medium_R_001__A511`；描述距离 0.1896。
+- `walk_forward_grab_normal_001__A417`（取物姿态）
+  - 最近的保留动作：`walk_forward_grab_normal_003__A417`；描述距离 0.2697。
+- `walk_forward_grab_relax_001__A006`（取物姿态）
+  - 最近的保留动作：`walk_forward_grab_normal_001__A006`；描述距离 0.2835。
+- `big_light_one_hand_put_down_behind_low_R_002__A509`（放物姿态）
+  - 最近的保留动作：`big_light_one_hand_put_down_behind_low_R_002__A510`；描述距离 0.2057。
+- `big_light_one_hand_put_down_front_low_R_002__A510`（放物姿态）
+  - 最近的保留动作：`medium_big_light_one_hand_hold_R_001__A505`；描述距离 0.1842。
+- `big_light_one_hand_put_down_front_low_R_002__A511`（放物姿态）
+  - 最近的保留动作：`medium_big_light_one_hand_put_down_front_low_R_001__A504`；描述距离 0.2019。
+- `big_light_one_hand_put_down_front_medium_R_002__A510`（放物姿态）
+  - 最近的保留动作：`medium_big_light_one_hand_put_down_front_medium_R_001__A510`；描述距离 0.1615。
+- `big_light_one_hand_put_down_right_side_high_R_001__A521`（放物姿态）
+  - 最近的保留动作：`big_light_one_hand_put_down_right_side_high_R_002__A521`；描述距离 0.1778。
+- `big_light_one_hand_put_down_right_side_low_R_003__A508`（放物姿态）
+  - 最近的保留动作：`mid_button_push_002__A485`；描述距离 0.1951。
+- `big_light_two_hands_put_down_right_side_medium_R_001__A509`（放物姿态）
+  - 最近的保留动作：`big_light_two_hands_put_down_behind_medium_R_001__A509`；描述距离 0.1996。
+- `cellpone_put_away_stand_R_001__A424`（放物姿态）
+  - 最近的保留动作：`cellpone_put_away_stand_R_001__A427`；描述距离 0.1833。
+- `cellpone_put_away_stand_R_001__A426`（放物姿态）
+  - 最近的保留动作：`cellpone_put_away_stand_R_001__A427`；描述距离 0.1858。
+- `medium_big_light_one_hand_put_down_behind_low_R_001__A506`（放物姿态）
+  - 最近的保留动作：`medium_big_light_one_hand_pick_up_behind_low_R_001__A506`；描述距离 0.2072。
+- `medium_big_light_one_hand_put_down_front_high_R_002__A524`（放物姿态）
+  - 最近的保留动作：`medium_big_light_one_hand_put_down_front_high_R_002__A525`；描述距离 0.1926。
+- `medium_big_light_one_hand_put_down_front_low_R_001__A506`（放物姿态）
+  - 最近的保留动作：`medium_big_light_one_hand_put_down_front_low_R_001__A504`；描述距离 0.2021。
+- `medium_big_light_one_hand_put_down_front_low_R_001__A507`（放物姿态）
+  - 最近的保留动作：`low_button_over_push_001__A486`；描述距离 0.1855。
+- `medium_big_light_one_hand_put_down_front_medium_R_001__A508`（放物姿态）
+  - 最近的保留动作：`big_light_one_hand_put_down_front_medium_R_002__A508`；描述距离 0.1785。
+- `medium_big_light_one_hand_put_down_right_side_high_R_001__A524`（放物姿态）
+  - 最近的保留动作：`medium_big_light_one_hand_put_down_right_side_high_R_001__A526`；描述距离 0.1638。
+- `medium_big_light_one_hand_put_down_right_side_low_R_001__A506`（放物姿态）
+  - 最近的保留动作：`big_light_one_hand_put_down_right_side_low_R_003__A511`；描述距离 0.1755。
+- `medium_big_light_one_hand_put_down_right_side_medium_R_001__A510`（放物姿态）
+  - 最近的保留动作：`small_light_one_hand_put_down_right_side_high_R_001__A517`；描述距离 0.1654。
+- `medium_light_two_hands_put_down_front_high_R_001__A526`（放物姿态）
+  - 最近的保留动作：`medium_light_two_hands_put_down_front_high_R_001__A524`；描述距离 0.1652。
+- `medium_light_two_hands_put_down_front_medium_R_002__A510`（放物姿态）
+  - 最近的保留动作：`medium_light_two_hands_put_down_behind_medium_R_001__A510`；描述距离 0.2042。
+- `medium_light_two_hands_put_down_right_side_high_R_001__A525`（放物姿态）
+  - 最近的保留动作：`medium_light_two_hands_put_down_front_high_R_001__A524`；描述距离 0.2019。
+- `neutral_item_put_away_R_002__A543`（放物姿态）
+  - 最近的保留动作：`neutral_item_put_away_R_001__A544`；描述距离 0.1807。
+- `neutral_item_put_away_R_002__A545`（放物姿态）
+  - 最近的保留动作：`neutral_item_put_away_R_001__A544`；描述距离 0.1468。
+- `small_light_one_hand_put_down_behind_medium_R_001__A508`（放物姿态）
+  - 最近的保留动作：`small_light_one_hand_put_down_behind_medium_R_001__A509`；描述距离 0.1921。
+- `small_light_one_hand_put_down_behind_medium_R_001__A510`（放物姿态）
+  - 最近的保留动作：`big_light_one_hand_put_down_behind_low_R_002__A510`；描述距离 0.1875。
+- `small_light_one_hand_put_down_front_high_R_001__A517`（放物姿态）
+  - 最近的保留动作：`small_light_one_hand_put_down_front_high_R_001__A519`；描述距离 0.1969。
+- `small_light_one_hand_put_down_front_medium_R_001__A508`（放物姿态）
+  - 最近的保留动作：`neutral_item_put_down_table_R_001__A545`；描述距离 0.1832。
+- `small_light_one_hand_put_down_front_medium_R_001__A511`（放物姿态）
+  - 最近的保留动作：`small_light_two_hands_put_down_front_medium_R_001__A511`；描述距离 0.1563。
+- `small_light_one_hand_put_down_right_side_high_R_001__A516`（放物姿态）
+  - 最近的保留动作：`small_light_one_hand_put_down_right_side_high_R_001__A519`；描述距离 0.1944。
+- `small_light_one_hand_put_down_right_side_medium_R_002__A509`（放物姿态）
+  - 最近的保留动作：`small_light_one_hand_put_down_right_side_medium_R_002__A510`；描述距离 0.1262。
+- `small_light_one_hand_put_down_right_side_medium_R_002__A511`（放物姿态）
+  - 最近的保留动作：`big_light_one_hand_put_down_right_side_low_R_003__A511`；描述距离 0.1871。
+- `small_light_two_hands_put_down_front_high_R_001__A517`（放物姿态）
+  - 最近的保留动作：`medium_light_two_hands_put_down_front_high_R_001__A525`；描述距离 0.1934。
+- `small_light_two_hands_put_down_front_medium_R_001__A508`（放物姿态）
+  - 最近的保留动作：`small_light_two_hands_put_down_front_medium_R_001__A511`；描述距离 0.1857。
+- `small_light_two_hands_put_down_front_medium_R_001__A510`（放物姿态）
+  - 最近的保留动作：`small_light_one_hand_put_down_front_medium_R_001__A509`；描述距离 0.1786。
+- `small_light_two_hands_put_down_right_side_medium_R_001__A508`（放物姿态）
+  - 最近的保留动作：`small_light_two_hands_put_down_behind_medium_R_001__A508`；描述距离 0.1903。
+- `small_light_two_hands_put_down_right_side_medium_R_001__A510`（放物姿态）
+  - 最近的保留动作：`small_light_two_hands_put_down_right_side_medium_R_001__A509`；描述距离 0.2069。
+- `boss_dust_brushing_R_001__A072`（伸手够取）
+  - 最近的保留动作：`reaching_up_R_003__A101`；描述距离 0.2556。
+- `reaching_down_001__A044`（伸手够取）
+  - 最近的保留动作：`patches_crouch_R_002__A431`；描述距离 0.3635。
+- `reaching_down_002__A044`（伸手够取）
+  - 最近的保留动作：`small_light_two_hands_put_down_front_low_R_001__A506`；描述距离 0.3769。
+- `reaching_down_R_001__A047`（伸手够取）
+  - 最近的保留动作：`patches_crouch_R_002__A431`；描述距离 0.3695。
+- `reaching_down_R_001__A050`（伸手够取）
+  - 最近的保留动作：`reaching_down_R_001__A058`；描述距离 0.3482。
+- `reaching_down_R_001__A053`（伸手够取）
+  - 最近的保留动作：`reaching_down_R_001__A058`；描述距离 0.3731。
+- `reaching_down_R_001__A056`（伸手够取）
+  - 最近的保留动作：`reaching_down_R_001__A272`；描述距离 0.3608。
+- `reaching_down_R_001__A406`（伸手够取）
+  - 最近的保留动作：`patches_crouch_R_002__A431`；描述距离 0.3791。
+- `reaching_down_R_002__A045`（伸手够取）
+  - 最近的保留动作：`patches_crouch_R_002__A431`；描述距离 0.3777。
+- `reaching_down_R_002__A047`（伸手够取）
+  - 最近的保留动作：`reaching_down_R_003__A140`；描述距离 0.4044。
+- `reaching_down_R_002__A050`（伸手够取）
+  - 最近的保留动作：`reaching_down_R_001__A058`；描述距离 0.3550。
+- `reaching_down_R_002__A063`（伸手够取）
+  - 最近的保留动作：`reaching_down_R_001__A058`；描述距离 0.3597。
+- `reaching_down_R_002__A143`（伸手够取）
+  - 最近的保留动作：`patches_crouch_R_002__A431`；描述距离 0.3917。
+- `reaching_down_R_003__A056`（伸手够取）
+  - 最近的保留动作：`reaching_down_R_001__A272`；描述距离 0.4512。
+- `reaching_down_R_003__A058`（伸手够取）
+  - 最近的保留动作：`reaching_down_R_001__A058`；描述距离 0.3668。
+- `reaching_down_R_003__A260`（伸手够取）
+  - 最近的保留动作：`reaching_down_R_001__A272`；描述距离 0.3646。
+- `reaching_down_R_003__A269`（伸手够取）
+  - 最近的保留动作：`reaching_down_R_001__A272`；描述距离 0.3474。
+- `reaching_down_R_003__A272`（伸手够取）
+  - 最近的保留动作：`reaching_down_R_001__A272`；描述距离 0.2671。
+- `reaching_down_R_004__A140`（伸手够取）
+  - 最近的保留动作：`reaching_down_R_003__A140`；描述距离 0.1045。
+- `reaching_down_R_004__A142`（伸手够取）
+  - 最近的保留动作：`lift_crate_stop_001__A144`；描述距离 0.4339。
+- `reaching_far_001__A034`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2433。
+- `reaching_far_001__A035`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2879。
+- `reaching_far_001__A036`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2047。
+- `reaching_far_001__A042`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A270`；描述距离 0.2154。
+- `reaching_far_001__A044`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2315。
+- `reaching_far_002__A033`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A270`；描述距离 0.2362。
+- `reaching_far_002__A034`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2549。
+- `reaching_far_002__A035`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2600。
+- `reaching_far_002__A036`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2227。
+- `reaching_far_002__A041`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_001__A271`；描述距离 0.2174。
+- `reaching_far_002__A042`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A270`；描述距离 0.2653。
+- `reaching_far_002__A043`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2520。
+- `reaching_far_002__A044`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A237`；描述距离 0.2718。
+- `reaching_far_003__A033`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2400。
+- `reaching_far_003__A034`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2504。
+- `reaching_far_003__A035`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2563。
+- `reaching_far_003__A036`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2305。
+- `reaching_far_003__A041`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_001__A271`；描述距离 0.2454。
+- `reaching_far_003__A042`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A270`；描述距离 0.2613。
+- `reaching_far_003__A043`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A064`；描述距离 0.2703。
+- `reaching_far_003__A044`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2023。
+- `reaching_far_R_001__A045`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_001__A236`；描述距离 0.2388。
+- `reaching_far_R_001__A046`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_002__A048`；描述距离 0.2574。
+- `reaching_far_R_001__A047`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_002__A048`；描述距离 0.1997。
+- `reaching_far_R_001__A049`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2540。
+- `reaching_far_R_001__A050`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2248。
+- `reaching_far_R_001__A054`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2763。
+- `reaching_far_R_001__A055`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2454。
+- `reaching_far_R_001__A058`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_002__A048`；描述距离 0.2335。
+- `reaching_far_R_001__A059`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A064`；描述距离 0.2572。
+- `reaching_far_R_001__A060`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_001__A141`；描述距离 0.2516。
+- `reaching_far_R_001__A063`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A270`；描述距离 0.2481。
+- `reaching_far_R_001__A064`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A064`；描述距离 0.1518。
+- `reaching_far_R_001__A065`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A064`；描述距离 0.2751。
+- `reaching_far_R_001__A066`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A270`；描述距离 0.2639。
+- `reaching_far_R_001__A067`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A237`；描述距离 0.2742。
+- `reaching_far_R_001__A068`（伸手够取）
+  - 最近的保留动作：`reaching_down_R_002__A071`；描述距离 0.2563。
+- `reaching_far_R_001__A069`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A064`；描述距离 0.2263。
+- `reaching_far_R_001__A071`（伸手够取）
+  - 最近的保留动作：`reaching_down_R_002__A071`；描述距离 0.2056。
+- `reaching_far_R_001__A072`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2310。
+- `reaching_far_R_001__A097`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2537。
+- `reaching_far_R_001__A099`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A099`；描述距离 0.2570。
+- `reaching_far_R_001__A100`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A064`；描述距离 0.2810。
+- `reaching_far_R_001__A101`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A270`；描述距离 0.2040。
+- `reaching_far_R_001__A116`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A116`；描述距离 0.1844。
+- `reaching_far_R_001__A119`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2822。
+- `reaching_far_R_001__A140`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A270`；描述距离 0.2381。
+- `reaching_far_R_001__A142`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2610。
+- `reaching_far_R_001__A144`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_001__A236`；描述距离 0.2075。
+- `reaching_far_R_001__A234`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A116`；描述距离 0.2469。
+- `reaching_far_R_001__A238`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_002__A048`；描述距离 0.2538。
+- `reaching_far_R_001__A259`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A270`；描述距离 0.2130。
+- `reaching_far_R_001__A261`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.1525。
+- `reaching_far_R_001__A270`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A270`；描述距离 0.1642。
+- `reaching_far_R_001__A272`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A237`；描述距离 0.2246。
+- `reaching_far_R_001__A438`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2364。
+- `reaching_far_R_002__A045`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_001__A236`；描述距离 0.2403。
+- `reaching_far_R_002__A046`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_002__A048`；描述距离 0.2860。
+- `reaching_far_R_002__A049`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2545。
+- `reaching_far_R_002__A050`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2092。
+- `reaching_far_R_002__A055`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2742。
+- `reaching_far_R_002__A058`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_002__A048`；描述距离 0.2083。
+- `reaching_far_R_002__A059`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A064`；描述距离 0.2280。
+- `reaching_far_R_002__A060`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_001__A141`；描述距离 0.2692。
+- `reaching_far_R_002__A063`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2545。
+- `reaching_far_R_002__A064`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A064`；描述距离 0.1425。
+- `reaching_far_R_002__A069`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A270`；描述距离 0.2697。
+- `reaching_far_R_002__A072`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2194。
+- `reaching_far_R_002__A097`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A064`；描述距离 0.2173。
+- `reaching_far_R_002__A099`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A099`；描述距离 0.1485。
+- `reaching_far_R_002__A100`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A064`；描述距离 0.2696。
+- `reaching_far_R_002__A101`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A270`；描述距离 0.2080。
+- `reaching_far_R_002__A116`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A116`；描述距离 0.1459。
+- `reaching_far_R_002__A140`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A270`；描述距离 0.2053。
+- `reaching_far_R_002__A144`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_001__A236`；描述距离 0.2329。
+- `reaching_far_R_002__A259`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A270`；描述距离 0.2584。
+- `reaching_far_R_002__A261`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.1976。
+- `reaching_far_R_002__A272`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A237`；描述距离 0.2245。
+- `reaching_far_R_002__A405`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2557。
+- `reaching_far_R_002__A438`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A116`；描述距离 0.2545。
+- `reaching_far_R_003__A045`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2138。
+- `reaching_far_R_003__A046`（伸手够取）
+  - 最近的保留动作：`big_light_one_hand_put_down_front_medium_R_002__A511`；描述距离 0.2560。
+- `reaching_far_R_003__A051`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A049`；描述距离 0.2475。
+- `reaching_far_R_003__A052`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A049`；描述距离 0.2608。
+- `reaching_far_R_003__A053`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A064`；描述距离 0.2530。
+- `reaching_far_R_003__A056`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2797。
+- `reaching_far_R_003__A059`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2381。
+- `reaching_far_R_003__A060`（伸手够取）
+  - 最近的保留动作：`big_light_one_hand_put_down_front_medium_R_002__A511`；描述距离 0.2726。
+- `reaching_far_R_003__A063`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A270`；描述距离 0.2729。
+- `reaching_far_R_003__A065`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2424。
+- `reaching_far_R_003__A067`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A237`；描述距离 0.2851。
+- `reaching_far_R_003__A068`（伸手够取）
+  - 最近的保留动作：`reaching_down_R_002__A071`；描述距离 0.2405。
+- `reaching_far_R_003__A069`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A270`；描述距离 0.2505。
+- `reaching_far_R_003__A097`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A064`；描述距离 0.2590。
+- `reaching_far_R_003__A101`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A270`；描述距离 0.2233。
+- `reaching_far_R_003__A140`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A270`；描述距离 0.2063。
+- `reaching_far_R_003__A141`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_001__A141`；描述距离 0.2611。
+- `reaching_far_R_003__A144`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_001__A236`；描述距离 0.2384。
+- `reaching_far_R_003__A234`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2669。
+- `reaching_far_R_003__A236`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A237`；描述距离 0.2474。
+- `reaching_far_R_003__A238`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A064`；描述距离 0.2392。
+- `reaching_far_R_003__A259`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A270`；描述距离 0.2607。
+- `reaching_far_R_003__A269`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A064`；描述距离 0.2650。
+- `reaching_far_R_003__A271`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A270`；描述距离 0.2347。
+- `reaching_far_R_003__A438`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2486。
+- `reaching_far_R_004__A049`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2425。
+- `reaching_far_R_004__A050`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A261`；描述距离 0.2289。
+- `reaching_far_R_004__A234`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A116`；描述距离 0.2025。
+- `reaching_far_R_004__A236`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A064`；描述距离 0.2010。
+- `reaching_far_R_004__A237`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A237`；描述距离 0.1457。
+- `reaching_far_R_004__A238`（伸手够取）
+  - 最近的保留动作：`reaching_far_R_003__A064`；描述距离 0.2267。
+- `reaching_up_R_001__A065`（伸手够取）
+  - 最近的保留动作：`medium_big_light_one_hand_put_down_right_side_high_R_001__A526`；描述距离 0.2255。
+- `reaching_up_R_001__A101`（伸手够取）
+  - 最近的保留动作：`reaching_up_R_003__A101`；描述距离 0.1810。
+- `reaching_up_R_001__A141`（伸手够取）
+  - 最近的保留动作：`big_light_one_hand_put_down_front_high_R_003__A523`；描述距离 0.2357。
+- `reaching_up_R_001__A270`（伸手够取）
+  - 最近的保留动作：`big_light_one_hand_pick_up_front_high_R_001__A523`；描述距离 0.2273。
+- `reaching_up_R_002__A050`（伸手够取）
+  - 最近的保留动作：`medium_big_light_one_hand_put_down_right_side_high_R_001__A526`；描述距离 0.2244。
+- `reaching_up_R_002__A116`（伸手够取）
+  - 最近的保留动作：`reaching_up_R_003__A101`；描述距离 0.2308。
+- `reaching_up_R_002__A236`（伸手够取）
+  - 最近的保留动作：`big_light_one_hand_pick_up_front_high_R_001__A523`；描述距离 0.2536。
+- `reaching_up_R_003__A062`（伸手够取）
+  - 最近的保留动作：`medium_big_light_one_hand_put_down_right_side_high_R_001__A526`；描述距离 0.2323。
+- `reaching_up_R_003__A237`（伸手够取）
+  - 最近的保留动作：`big_light_one_hand_put_down_front_high_R_003__A523`；描述距离 0.2400。
+- `reaching_up_R_004__A058`（伸手够取）
+  - 最近的保留动作：`medium_big_light_one_hand_pick_up_front_high_R_002__A526`；描述距离 0.2540。
+- `Relaxed_stoop_down_002__A057`（蹲与低姿态）
+  - 最近的保留动作：`Relaxed_stoop_down_004__A057`；描述距离 0.2356。
+- `Trusting_stoop_down_003__A057`（蹲与低姿态）
+  - 最近的保留动作：`Trusting_stoop_down_002__A057`；描述距离 0.2041。
+- `crouch_cupboard_low_out_mid_loot_R_001__A297`（蹲与低姿态）
+  - 最近的保留动作：`crouch_cupboard_low_out_mid_loot_R_002__A297`；描述距离 0.2542。
+- `crouch_cupboard_low_out_mid_loot_R_001__A299`（蹲与低姿态）
+  - 最近的保留动作：`crouch_cupboard_low_out_mid_loot_R_003__A299`；描述距离 0.3471。
+- `crouch_cupboard_low_out_mid_loot_R_002__A289`（蹲与低姿态）
+  - 最近的保留动作：`crouch_cupboard_low_out_mid_loot_R_001__A289`；描述距离 0.3361。
+- `crouch_cupboard_low_out_mid_loot_R_002__A299`（蹲与低姿态）
+  - 最近的保留动作：`crouch_cupboard_low_out_mid_loot_R_003__A299`；描述距离 0.2831。
+- `crouch_cupboard_mid_in_R_003__A291`（蹲与低姿态）
+  - 最近的保留动作：`crouch_cupboard_mid_in_R_003__A289`；描述距离 0.2034。
+- `crouch_cupboard_mid_in_R_005__A289`（蹲与低姿态）
+  - 最近的保留动作：`crouch_cupboard_mid_out_R_002__A289`；描述距离 0.2361。
+- `crouch_cupboard_mid_in_R_005__A291`（蹲与低姿态）
+  - 最近的保留动作：`crouch_cupboard_mid_in_R_003__A289`；描述距离 0.2150。
+- `crouch_cupboard_mid_out_R_001__A289`（蹲与低姿态）
+  - 最近的保留动作：`crouch_cupboard_mid_out_R_002__A289`；描述距离 0.1811。
+- `crouch_cupboard_mid_out_R_003__A289`（蹲与低姿态）
+  - 最近的保留动作：`crouch_cupboard_mid_out_R_002__A289`；描述距离 0.1502。
+- `crouch_cupboard_mid_out_R_003__A290`（蹲与低姿态）
+  - 最近的保留动作：`crouch_operating_cupboard_low_out_R_002__A290`；描述距离 0.1985。
+- `crouch_ff_loop_180_R_001__A197`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_start_180_R_002__A245`；描述距离 0.3014。
+- `crouch_ff_loop_180_R_001__A245`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_start_180_R_002__A245`；描述距离 0.2651。
+- `crouch_ff_loop_180_R_001__A247`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_stop_180_R_003__A247`；描述距离 0.2925。
+- `crouch_ff_loop_180_R_002__A197`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_stop_180_R_001__A197`；描述距离 0.3904。
+- `crouch_ff_loop_225_R_001__A248`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_start_225_R_003__A248`；描述距离 0.2195。
+- `crouch_ff_loop_225_R_002__A248`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_loop_225_R_003__A248`；描述距离 0.1381。
+- `crouch_ff_loop_270_R_003__A196`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_stop_270_R_002__A196`；描述距离 0.2646。
+- `crouch_ff_loop_270_R_003__A197`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_loop_315_R_001__A197`；描述距离 0.3106。
+- `crouch_ff_loop_270_R_004__A196`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_loop_270_R_002__A196`；描述距离 0.2965。
+- `crouch_ff_loop_315_R_001__A198`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_loop_315_R_001__A197`；描述距离 0.2698。
+- `crouch_ff_loop_315_R_003__A196`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_stop_315_R_002__A196`；描述距离 0.2340。
+- `crouch_ff_loop_315_R_003__A197`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_loop_315_R_001__A197`；描述距离 0.2554。
+- `crouch_ff_loop_315_R_003__A247`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_stop_315_R_002__A247`；描述距离 0.2625。
+- `crouch_ff_loop_360_R_001__A197`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_loop_360_R_002__A197`；描述距离 0.2419。
+- `crouch_ff_loop_360_R_002__A195`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_stop_360_R_003__A195`；描述距离 0.2152。
+- `crouch_ff_start_180_R_001__A246`（蹲与低姿态）
+  - 最近的保留动作：`crouch_idle_to_crouch_idle_right_R_001__A246`；描述距离 0.2156。
+- `crouch_ff_start_180_R_002__A198`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_start_180_R_003__A198`；描述距离 0.2814。
+- `crouch_ff_start_180_R_002__A247`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_stop_180_R_003__A247`；描述距离 0.2976。
+- `crouch_ff_start_225_R_001__A248`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_loop_225_R_003__A248`；描述距离 0.2384。
+- `crouch_ff_start_225_R_002__A247`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_loop_225_R_003__A247`；描述距离 0.2563。
+- `crouch_ff_start_270_R_001__A196`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_start_270_R_003__A196`；描述距离 0.1917。
+- `crouch_ff_start_270_R_001__A246`（蹲与低姿态）
+  - 最近的保留动作：`crouch_idle_to_crouch_idle_right_R_001__A246`；描述距离 0.2948。
+- `crouch_ff_start_270_R_002__A196`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_start_270_R_003__A196`；描述距离 0.2793。
+- `crouch_ff_start_315_R_002__A197`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_start_270_R_002__A197`；描述距离 0.2516。
+- `crouch_ff_start_315_R_003__A197`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_loop_315_R_001__A197`；描述距离 0.2646。
+- `crouch_ff_start_360_R_001__A197`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_start_360_R_002__A197`；描述距离 0.2382。
+- `crouch_ff_start_360_R_001__A198`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_start_360_R_003__A198`；描述距离 0.2712。
+- `crouch_ff_start_360_R_003__A197`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_start_360_R_002__A197`；描述距离 0.2346。
+- `crouch_ff_stop_180_R_002__A196`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_stop_180_R_001__A196`；描述距离 0.2267。
+- `crouch_ff_stop_180_R_002__A197`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_stop_180_R_001__A197`；描述距离 0.2521。
+- `crouch_ff_stop_180_R_003__A196`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_stop_180_R_001__A196`；描述距离 0.2486。
+- `crouch_ff_stop_180_R_003__A248`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_stop_180_R_001__A196`；描述距离 0.3090。
+- `crouch_ff_stop_225_R_001__A247`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_stop_225_R_002__A247`；描述距离 0.1887。
+- `crouch_ff_stop_225_R_003__A195`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_stop_225_R_002__A197`；描述距离 0.2935。
+- `crouch_ff_stop_225_R_004__A248`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_loop_225_R_003__A248`；描述距离 0.2695。
+- `crouch_ff_stop_270_R_001__A196`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_stop_270_R_002__A196`；描述距离 0.2326。
+- `crouch_ff_stop_270_R_001__A197`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_stop_270_R_003__A197`；描述距离 0.2010。
+- `crouch_ff_stop_270_R_001__A247`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_stop_315_R_002__A247`；描述距离 0.2183。
+- `crouch_ff_stop_270_R_003__A196`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_stop_270_R_002__A196`；描述距离 0.2245。
+- `crouch_ff_stop_315_R_001__A247`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_stop_315_R_002__A247`；描述距离 0.2414。
+- `crouch_ff_stop_315_R_003__A196`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_stop_315_R_002__A196`；描述距离 0.2016。
+- `crouch_ff_stop_315_R_003__A247`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_stop_315_R_002__A247`；描述距离 0.2085。
+- `crouch_ff_stop_360_R_001__A196`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_loop_360_R_002__A196`；描述距离 0.1573。
+- `crouch_ff_stop_360_R_001__A197`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_loop_360_R_003__A197`；描述距离 0.2263。
+- `crouch_ff_stop_360_R_002__A197`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_loop_360_R_003__A197`；描述距离 0.2281。
+- `crouch_ff_stop_360_R_003__A194`（蹲与低姿态）
+  - 最近的保留动作：`crouch_ff_stop_360_R_003__A197`；描述距离 0.2259。
+- `crouch_idle_003__A248`（蹲与低姿态）
+  - 最近的保留动作：`idle_crouch_loop_001__A198`；描述距离 0.1744。
+- `crouch_idle_right_to_crouch_idle_R_001__A247`（蹲与低姿态）
+  - 最近的保留动作：`crouch_idle_right_to_crouch_idle_R_002__A247`；描述距离 0.1214。
+- `crouch_idle_right_to_crouch_idle_R_003__A247`（蹲与低姿态）
+  - 最近的保留动作：`crouch_idle_right_to_crouch_idle_R_002__A247`；描述距离 0.1243。
+- `crouch_idle_to_crouch_idle_right_R_002__A246`（蹲与低姿态）
+  - 最近的保留动作：`crouch_idle_to_crouch_idle_right_R_001__A246`；描述距离 0.1383。
+- `crouch_operating_cupboard_low_in_R_001__A289`（蹲与低姿态）
+  - 最近的保留动作：`crouch_operating_cupboard_low_in_R_003__A297`；描述距离 0.2410。
+- `crouch_operating_cupboard_low_in_R_001__A298`（蹲与低姿态）
+  - 最近的保留动作：`crouch_operating_cupboard_mid_in_R_005__A298`；描述距离 0.2232。
+- `crouch_operating_cupboard_low_in_R_003__A299`（蹲与低姿态）
+  - 最近的保留动作：`crouch_operating_cupboard_low_in_R_004__A299`；描述距离 0.1962。
+- `crouch_operating_cupboard_low_in_R_004__A289`（蹲与低姿态）
+  - 最近的保留动作：`crouch_cupboard_mid_out_R_002__A289`；描述距离 0.2460。
+- `crouch_operating_cupboard_low_out_R_002__A298`（蹲与低姿态）
+  - 最近的保留动作：`crouch_operating_cupboard_low_in_R_004__A298`；描述距离 0.2302。
+- `crouch_operating_cupboard_low_out_R_002__A299`（蹲与低姿态）
+  - 最近的保留动作：`crouch_operating_cupboard_low_in_R_004__A299`；描述距离 0.1431。
+- `crouch_operating_cupboard_mid_in_R_004__A298`（蹲与低姿态）
+  - 最近的保留动作：`crouch_operating_cupboard_mid_in_R_003__A298`；描述距离 0.1574。
+- `crouch_operating_cupboard_mid_out_R_001__A297`（蹲与低姿态）
+  - 最近的保留动作：`crouch_operating_cupboard_mid_out_R_002__A297`；描述距离 0.1476。
+- `crouch_turn_270_R_002__A246`（蹲与低姿态）
+  - 最近的保留动作：`crouch_turn_360_R_001__A246`；描述距离 0.2142。
+- `crouch_turn_270_R_003__A246`（蹲与低姿态）
+  - 最近的保留动作：`crouch_turn_360_R_001__A246`；描述距离 0.2200。
+- `crouch_turn_360_R_002__A246`（蹲与低姿态）
+  - 最近的保留动作：`crouch_turn_360_R_001__A246`；描述距离 0.1636。
+- `crouch_turn_360_R_004__A246`（蹲与低姿态）
+  - 最近的保留动作：`crouch_turn_360_R_001__A246`；描述距离 0.2166。
+- `crouch_walk_forward_and_back_turn_360_to_idle_R_002__A492`（蹲与低姿态）
+  - 最近的保留动作：`crouch_walk_forward_and_back_turn_360_to_idle_R_002__A493`；描述距离 0.3565。
+- `idle_crouch_loop_002__A198`（蹲与低姿态）
+  - 最近的保留动作：`idle_crouch_loop_001__A198`；描述距离 0.0279。
+- `idle_crouch_loop_003__A197`（蹲与低姿态）
+  - 最近的保留动作：`idle_crouch_loop_001__A197`；描述距离 0.1569。
+- `idle_crouch_loop_003__A198`（蹲与低姿态）
+  - 最近的保留动作：`idle_crouch_loop_001__A198`；描述距离 0.0643。
+- `idle_crouch_to_idle_crouch_right_R_002__A195`（蹲与低姿态）
+  - 最近的保留动作：`crouch_idle_to_crouch_idle_right_R_001__A246`；描述距离 0.1847。
+- `idle_crouch_to_idle_crouch_right_R_002__A198`（蹲与低姿态）
+  - 最近的保留动作：`idle_crouch_to_idle_crouch_right_R_003__A198`；描述距离 0.0732。
+- `idle_crouch_to_idle_crouch_right_R_003__A195`（蹲与低姿态）
+  - 最近的保留动作：`idle_crouch_to_idle_crouch_right_R_003__A198`；描述距离 0.2010。
+- `item_pick_up_crouch_idle_R_002__A352`（蹲与低姿态）
+  - 最近的保留动作：`item_pick_up_crouch_idle_R_001__A352`；描述距离 0.1000。
+- `item_pick_up_crouch_idle_R_002__A353`（蹲与低姿态）
+  - 最近的保留动作：`item_pick_up_crouch_idle_R_001__A353`；描述距离 0.1055。
+- `item_pick_up_crouch_idle_R_002__A414`（蹲与低姿态）
+  - 最近的保留动作：`item_pick_up_crouch_idle_R_003__A414`；描述距离 0.0879。
+- `item_pick_up_crouch_idle_R_003__A352`（蹲与低姿态）
+  - 最近的保留动作：`item_pick_up_crouch_idle_R_001__A352`；描述距离 0.1138。
+- `item_pick_up_crouch_walk_R_001__A352`（蹲与低姿态）
+  - 最近的保留动作：`item_pick_up_crouch_walk_R_003__A352`；描述距离 0.2473。
+- `item_pick_up_crouch_walk_R_002__A352`（蹲与低姿态）
+  - 最近的保留动作：`item_pick_up_crouch_walk_R_003__A352`；描述距离 0.2692。
+- `item_pick_up_crouch_walk_R_003__A351`（蹲与低姿态）
+  - 最近的保留动作：`item_pick_up_crouch_walk_R_001__A351`；描述距离 0.2905。
+- `item_pick_up_crouch_walk_R_003__A353`（蹲与低姿态）
+  - 最近的保留动作：`item_pick_up_crouch_walk_R_003__A352`；描述距离 0.2646。
+- `neutral_stoop_down_R_002__A438`（蹲与低姿态）
+  - 最近的保留动作：`neutral_stoop_down_R_002__A075`；描述距离 0.2510。
+- `neutral_stoop_down_R_003__A088`（蹲与低姿态）
+  - 最近的保留动作：`neutral_stoop_down_R_002__A075`；描述距离 0.2153。
+- `neutral_stoop_down_R_003__A118`（蹲与低姿态）
+  - 最近的保留动作：`neutral_stoop_down_R_002__A075`；描述距离 0.2443。
+- `neutral_stoop_down_R_003__A438`（蹲与低姿态）
+  - 最近的保留动作：`neutral_stoop_down_R_002__A075`；描述距离 0.2541。
+- `squat_002__A361`（蹲与低姿态）
+  - 最近的保留动作：`squat_003__A361`；描述距离 0.2362。
+- `turn_crouch_270_R_001__A198`（蹲与低姿态）
+  - 最近的保留动作：`idle_crouch_to_idle_crouch_right_R_003__A198`；描述距离 0.2235。
+- `turn_crouch_270_R_002__A197`（蹲与低姿态）
+  - 最近的保留动作：`turn_crouch_270_R_003__A197`；描述距离 0.2133。
+- `turn_crouch_360_R_001__A195`（蹲与低姿态）
+  - 最近的保留动作：`crouch_turn_360_R_001__A246`；描述距离 0.2289。
+- `turn_crouch_360_R_002__A197`（蹲与低姿态）
+  - 最近的保留动作：`turn_crouch_360_R_003__A197`；描述距离 0.1773。

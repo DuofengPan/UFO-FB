@@ -511,13 +511,20 @@ def assert_robot_configs_compatible(cli_config: str | Path, manifest_config: str
 
 
 BUILTIN_ROBOTS = {
-    "g1": ("configs/robots/g1_29dof.yaml", "ufo/data/lafan_29dof_10s-clipped.pkl"),
+    "g1": ("configs/robots/g1_29dof.yaml", "ufo/data/robots/g1/motions/lafan/lafan_29dof_10s-clipped.pkl"),
     "rp1": ("configs/robots/rp1_3.yaml", "ufo/data/rp1_24dof_lafan_v7_10s-clipped.pkl"),
 }
 
 
 def builtin_robot_config(name: str) -> Path:
     return Path(__file__).resolve().parents[2] / BUILTIN_ROBOTS[name][0]
+
+
+def default_robot_training_manifest(config: str | Path) -> Path | None:
+    """G1 CLI training uses the bundled 70/30 mix unless data is explicit."""
+    if Path(config).resolve() == builtin_robot_config("g1"):
+        return Path(__file__).resolve().parents[2] / "configs/data/g1_lafan_bones_seed.yaml"
+    return None
 
 
 def select_robot_config(cli_robot_config: str | Path | None, manifest_robot_config: str | Path | None = None) -> Path:

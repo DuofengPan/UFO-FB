@@ -29,7 +29,15 @@ def test_robot_algorithm_cli_defaults(monkeypatch, robot, agent):
     args = parse_args()
     assert args.robot_config == builtin_robot_config(robot)
     assert args.work_dir == f"runs/{robot}_{agent}"
-    assert ("rp1_24dof" in args.data_path) == (robot == "rp1")
+    if robot == "g1":
+        assert args.data_manifest.name == "g1_lafan_bones_seed.yaml"
+        assert len(args.data_path) == 2
+        assert "/g1/motions/lafan/" in args.data_path[0]
+        assert "/g1/motions/bones_seed/" in args.data_path[1]
+        assert args.data_mix_weights == pytest.approx([.7, .3])
+    else:
+        assert "rp1_24dof" in args.data_path
+        assert args.data_manifest is None
     assert args.num_env_steps == (384000000 if robot == "rp1" else 192000000)
     cfg = config(robot, agent)
     assert cfg.env.robot_training["robot"]["name"] == ("g1_29dof" if robot == "g1" else "rp1_24dof")
@@ -39,6 +47,29 @@ def test_cli_robot_sources_are_exclusive(monkeypatch):
     monkeypatch.setattr(sys, "argv", ["train", "--robot", "rp1", "--robot-config", str(builtin_robot_config("g1"))])
     with pytest.raises(SystemExit):
         parse_args()
+
+
+def test_g1_explicit_data_overrides_default_mix(monkeypatch):
+    monkeypatch.setattr(sys, "argv", ["train", "--robot", "g1", "--data-path", "custom.pkl"])
+    args = parse_args()
+    assert args.data_path == "custom.pkl"
+    assert args.data_manifest is None
+    assert args.data_mix_weights is None
+
+
+def test_g1_explicit_manifest_overrides_default_mix(monkeypatch, tmp_path):
+    import joblib
+
+    path = tmp_path / "one.pkl"
+    joblib.dump({"tiny": {"root_trans_offset": np.zeros((3, 3), dtype=np.float32),
+                         "pose_aa": np.zeros((3, 30, 3), dtype=np.float32), "fps": 50}}, path)
+    manifest = tmp_path / "one.yaml"
+    manifest.write_text("datasets:\n  - name: one\n    format: ufo_pkl\n    weight: 1\n    train_path: one.pkl\n")
+    monkeypatch.setattr(sys, "argv", ["train", "--robot", "g1", "--data-manifest", str(manifest)])
+    args = parse_args()
+    assert args.data_manifest == manifest
+    assert args.data_path == [str(path)]
+    assert args.data_mix_weights == [1.0]
 
 
 @pytest.mark.parametrize("robot", ["g1", "rp1"])

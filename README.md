@@ -89,14 +89,22 @@ untested. Rebuilding, SuperMimic import and migration notes are in
 ### Unitree G1 · 29 DoF
 
 [Robot config](configs/robots/g1_29dof.yaml) ·
-[Released motion data](https://huggingface.co/datasets/xuewang/UFO-MotionData) ·
+[70/30 data manifest](configs/data/g1_lafan_bones_seed.yaml) ·
+[Assets and motions](ufo/data/robots/g1/README.md) ·
 [Released FB policy](https://huggingface.co/xuewang/ufo-g1-policy)
 
-The released LaFAN data contains **40 full motions**. Use `--agent tech` to
-select the upstream TeCH preset.
+G1 training defaults to **LaFAN 70% / BONES-SEED 30%** by source sampling weight.
+LaFAN contains **40 full motions / 862 clips**; curated BONES-SEED contains
+**600 full motions / 714 clips**. All four PKLs are versioned with Git LFS under
+`ufo/data/robots/g1/motions/`. Install LFS before cloning, or run `git lfs pull`
+in an existing checkout. No external dataset path is required for training.
+Explicit `--data-path` / `--data-manifest` overrides this G1 default.
+Use `--agent tech` to select the TeCH algorithm with the same mixed data;
+see [BONES preparation and evaluation](docs/BONES_SEED.md).
 
 ```bash
-bash scripts/download_data.sh g1_lafan
+git lfs install
+git lfs pull
 ./run_train.sh --robot g1 --agent fb --gpu-ids single --smoke \
   --buffer-size 8192 --work-dir /tmp/g1_smoke
 ./run_train.sh --robot g1 --agent fb --gpu-ids all --work-dir runs/g1_fb
@@ -156,7 +164,7 @@ full-motion file for tracking; G1, RP1 and Astro use the same entrypoint:
   --data-path ufo/data/robots/astro_p2/motions/lafan/astro_lafan_29dof.pkl \
   --motion-list 0 --save-mp4
 ./run_inference.sh tracking --model-folder runs/g1_fb \
-  --data-path ufo/data/lafan_29dof.pkl --motion-list 0 --save-mp4
+  --data-path ufo/data/robots/g1/motions/lafan/lafan_29dof.pkl --motion-list 0 --save-mp4
 ./run_inference.sh tracking --model-folder runs/rp1_fb \
   --data-path ufo/data/rp1_24dof_lafan_v7.pkl --motion-list 0 --save-mp4
 ```
@@ -174,7 +182,7 @@ Non-G1 goal inference needs a robot-specific goal JSON. See
 ```bash
 uv run hf download xuewang/ufo-g1-policy --local-dir model
 ./run_inference.sh tracking --model-folder model/g1_policy \
-  --data-path ufo/data/lafan_29dof.pkl --motion-list 7 --save-mp4
+  --data-path ufo/data/robots/g1/motions/lafan/lafan_29dof.pkl --motion-list 7 --save-mp4
 ```
 
 The release includes the approximately 192M-step policy, ONNX and matching z,

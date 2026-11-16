@@ -151,7 +151,7 @@ def test_real_mjlab_timeout_preserves_state_and_other_lane_history(tmp_path):
     from ufo.train import build_mjlab_config
     cfg = build_mjlab_config(device="cuda:0", work_dir=str(tmp_path), num_envs=4, num_env_steps=16,
                             seed=4728, use_wandb=False, wandb_run_name=None, disable_obs_noise=True,
-                            data_path=os.environ.get("UFO_TEST_RESET_DATA", "ufo/data/lafan_29dof_10s-clipped.pkl"),
+                            data_path=os.environ.get("UFO_TEST_RESET_DATA", "ufo/data/robots/g1/motions/lafan/lafan_29dof_10s-clipped.pkl"),
                             robot_config=os.environ.get("UFO_TEST_RESET_ROBOT", "configs/robots/g1_speed_pbfm_reward.yaml"))
     env, _ = cfg.env.build(num_envs=4)
     try:

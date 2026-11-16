@@ -1,0 +1,16 @@
+# G1 training default: fixed source sampling mass, prioritization within each source.
+robot_config: ../robots/g1_29dof.yaml
+
+datasets:
+  - name: g1_lafan
+    format: ufo_pkl
+    weight: 0.7
+    train_path: ../../ufo/data/robots/g1/motions/lafan/lafan_29dof_10s-clipped.pkl
+    eval_path: ../../ufo/data/robots/g1/motions/lafan/lafan_29dof.pkl
+    inference_path: ../../ufo/data/robots/g1/motions/lafan/lafan_29dof.pkl
+  - name: bones_seed_g1_600
+    format: ufo_pkl
+    weight: 0.3
+    train_path: ../../ufo/data/robots/g1/motions/bones_seed/g1_curated600_10s.pkl
+    eval_path: ../../ufo/data/robots/g1/motions/bones_seed/g1_curated600_full.pkl
+    inference_path: ../../ufo/data/robots/g1/motions/bones_seed/g1_curated600_full.pkl

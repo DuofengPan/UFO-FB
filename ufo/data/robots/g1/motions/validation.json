@@ -1,0 +1,36 @@
+{
+  "status": "verified",
+  "checked_at": "2026-11-16",
+  "device": "cpu",
+  "all_four_files_hash_and_format_verified": true,
+  "default_cli_manifest": "g1_lafan_bones_seed.yaml",
+  "training_config_weights": [
+    0.7,
+    0.3
+  ],
+  "source_training_clip_counts": [
+    862,
+    714
+  ],
+  "probability_mass_before_prioritization": [
+    0.6999999284744263,
+    0.30000001192092896
+  ],
+  "probability_mass_after_prioritization": [
+    0.699999988079071,
+    0.29999998211860657
+  ],
+  "exact_source_quota_for_1024": [
+    717,
+    307
+  ],
+  "loaded_motion_source_counts": [
+    7,
+    3
+  ],
+  "sampled_states": 30,
+  "extended_bodies": 31,
+  "finite": true,
+  "policy_training": "NOT_STARTED",
+  "physics_rollout": "NOT_RUN"
+}

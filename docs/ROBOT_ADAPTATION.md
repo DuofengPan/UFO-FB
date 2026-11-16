@@ -122,11 +122,14 @@ new paths. After changing source data or clip settings, use `--rebuild-cache`.
 
 ## Use converted data
 
-The default commands look for these files relative to the repository root:
+The single-source motion files use these paths relative to the repository root.
+G1 CLI training defaults to `configs/data/g1_lafan_bones_seed.yaml`: LaFAN 70% /
+BONES-SEED 30%, with both sources bundled under `ufo/data/robots/g1/motions/`
+through Git LFS. Explicit data arguments override that mix.
 
 | Robot | Training clips | Full motions for inference |
 |---|---|---|
-| G1 | `ufo/data/lafan_29dof_10s-clipped.pkl` | `ufo/data/lafan_29dof.pkl` |
+| G1 | `ufo/data/robots/g1/motions/lafan/lafan_29dof_10s-clipped.pkl` | `ufo/data/robots/g1/motions/lafan/lafan_29dof.pkl` |
 | RP1 | `ufo/data/rp1_24dof_lafan_v7_10s-clipped.pkl` | `ufo/data/rp1_24dof_lafan_v7.pkl` |
 
 Copy or symlink your matching files to these paths. Alternatively, pass their
@@ -194,3 +197,8 @@ shared-policy training.
 Robot inspection and training drafts share one semantic inference result.
 Explicit `--feet`, `--hands`, and `--key-bodies` selections also apply to training
 metadata; an explicit empty selection stays empty and requires manual review.
+
+
+## BONES-SEED G1
+
+已重定向的 BONES G1 CSV 可用 `python -m ufo.tools.bones_motion_import` 直接转换，不需要 UMR。单位、120 Hz、外部数据根、转换/FK 校验及批量闭环评估命令见 [BONES_SEED.md](BONES_SEED.md)。

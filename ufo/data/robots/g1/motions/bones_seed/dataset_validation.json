@@ -1,0 +1,32 @@
+{
+  "status": "verified",
+  "source_motions": 600,
+  "training_clips": 714,
+  "full_frames": 532722,
+  "training_frames": 531536,
+  "short_tail_frames_dropped": 1186,
+  "all_sources_have_training_clip": true,
+  "training_clips_exact_source_slices": true,
+  "motionlib": [
+    {
+      "split": "full",
+      "motions": 600,
+      "frames": 532722,
+      "sampled_states": 1800,
+      "extended_bodies": 31,
+      "finite": true,
+      "endpoints_match": true
+    },
+    {
+      "split": "train",
+      "motions": 714,
+      "frames": 531536,
+      "sampled_states": 2142,
+      "extended_bodies": 31,
+      "finite": true,
+      "endpoints_match": true
+    }
+  ],
+  "policy_training": "NOT_STARTED",
+  "new_policy_tracking_eval": "NOT_RUN"
+}

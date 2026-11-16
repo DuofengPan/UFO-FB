@@ -46,7 +46,7 @@ The entrypoint builds defaults from `ufo/train.py`, `ufo/training/config.py` and
 
 - `--num-envs`: `1024` environments per GPU.
 - `--num-env-steps`: `192000000` global environment steps.
-- `--data-path`: `ufo/data/lafan_29dof_10s-clipped.pkl`.
+- G1 default `--data-manifest`: `configs/data/g1_lafan_bones_seed.yaml`, LaFAN 70% / BONES-SEED 30% source sampling weight. Both full and training PKLs are bundled through Git LFS in `ufo/data/robots/g1/motions/`. Explicit `--data-path` or another manifest overrides the mix.
 - `--work-dir`: `runs/<robot>_<agent>` (for example, `runs/g1_fb`).
 - `--checkpoint-every-steps`: model checkpoints every `3200000` global environment steps.
 - `--buffer-every-steps`: complete rank-0 replay snapshots every `16000000` global environment steps.
@@ -185,7 +185,7 @@ output and verification options.
 CUDA_VISIBLE_DEVICES=0 \
 uv run python -m ufo.inference.goal_inference \
   --model-folder runs/g1_fb \
-  --data-path ufo/data/lafan_29dof.pkl \
+  --data-path ufo/data/robots/g1/motions/lafan/lafan_29dof.pkl \
   --device cuda:0 \
   --disable-dr \
   --disable-obs-noise \
@@ -290,9 +290,9 @@ and their limits.
 
 ## LaFAN full-sequence index
 
-The following 40 IDs apply only to `ufo/data/lafan_29dof.pkl`, with the original
+The following 40 IDs apply only to `ufo/data/robots/g1/motions/lafan/lafan_29dof.pkl`, with the original
 full-sequence ordering. The default training dataset,
-`ufo/data/lafan_29dof_10s-clipped.pkl`, contains 862 clips with a different index.
+`ufo/data/robots/g1/motions/lafan/lafan_29dof_10s-clipped.pkl`, contains 862 clips with a different index.
 Custom imports or reordered datasets also have their own motion IDs; do not use
 this table to interpret their evaluation rows or `--motion-list` values.
 

@@ -49,6 +49,7 @@ from ufo.tools.robot_config import (
     BUILTIN_ROBOTS,
     builtin_robot_config,
     default_robot_data,
+    default_robot_training_manifest,
     load_robot_training_spec,
     select_robot_config,
 )
@@ -378,7 +379,7 @@ def launch(args: argparse.Namespace) -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Train UFO.")
+    parser = argparse.ArgumentParser(description="Train UFO.", allow_abbrev=False)
     parser.add_argument(
         "--agent",
         default=DEFAULT_AGENT,
@@ -434,7 +435,7 @@ def parse_args() -> argparse.Namespace:
         "--data-manifest",
         type=Path,
         default=None,
-        help="YAML manifest describing weighted motion data sources. Cannot be combined with --data-path.",
+        help="YAML manifest describing weighted motion data sources. G1 defaults to LaFAN/BONES-SEED 70/30. Cannot be combined with --data-path.",
     )
     parser.add_argument(
         "--rebuild-motion-cache",
@@ -490,6 +491,9 @@ def parse_args() -> argparse.Namespace:
         args.use_wandb = False
         args.use_swanlab = False
     manifest_robot_config = None
+    if args.data_manifest is None and args.data_path is None:
+        selected_config = builtin_robot_config(args.robot) if args.robot is not None else select_robot_config(args.robot_config)
+        args.data_manifest = default_robot_training_manifest(selected_config)
     if args.data_manifest is not None:
         if args.data_path is not None:
             parser.error("--data-manifest and --data-path cannot be used together")

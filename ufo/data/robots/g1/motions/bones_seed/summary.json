@@ -1,0 +1,36 @@
+{
+  "source_count": 1000,
+  "selected_count": 600,
+  "removed_count": 400,
+  "semantic_exclusions": 8,
+  "pinned_pilot_kept": 50,
+  "named_families_before": 253,
+  "named_families_after": 248,
+  "kind_counts": {
+    "squat": 132,
+    "bend": 5,
+    "pickup": 204,
+    "place": 141,
+    "carry": 33,
+    "reach": 25,
+    "household": 43,
+    "push_pull": 17
+  },
+  "geometry_tag_counts": {
+    "屈膝低姿态": 207,
+    "躯干前倾": 311,
+    "双手前伸": 373,
+    "抬手/高位够取": 447
+  },
+  "total_duration_s": 4434.349999999999,
+  "total_frames": 532722,
+  "source_manifest_sha256": "b734eb09a3c308a938a971ea87670ee135279a324d04d096aa8627d16acda5d8",
+  "selection": "Pinned pilot + one medoid per named family + quality-weighted farthest-point selection with family cap ceil(1+sqrt(n))",
+  "descriptor": "64 original-frame phase samples of 29 named joint angles, root height, initial-yaw-aligned XY root displacement, gravity, relative heading, existing FK features, duration/speed; no resampling of saved data",
+  "similarity_cutoff": 0.055,
+  "minimum_count_before_cutoff": 570,
+  "descriptor_distance_is_physical_error": false,
+  "policy_metrics_used_for_filtering": false,
+  "original_files_deleted": false,
+  "source_fps": 120
+}

@@ -16,7 +16,7 @@ git diff --check
 rm -rf /tmp/ufo_smoke_release_train
 ./run_train.sh \
   --agent fb \
-  --data-path ufo/data/lafan_29dof_10s-clipped.pkl \
+  --data-path ufo/data/robots/g1/motions/lafan/lafan_29dof_10s-clipped.pkl \
   --gpu-ids single \
   --smoke \
   --work-dir /tmp/ufo_smoke_release_train

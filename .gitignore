@@ -25,7 +25,7 @@ tea_debug.log
 # Generated inference media
 model/
 
-# Downloaded or converted motion datasets are distributed separately.
+# Legacy root-level datasets remain external; G1 motions below robots/g1 use Git LFS.
 ufo/data/*.pkl
 
 # LaFAN stays external; the existing 24-motion high-dynamic group remains versioned.
