@@ -36,12 +36,12 @@
   ],
   "source_counts": {
     "kungfu": 20,
-    "backflip": 4
+    "sideflip": 2
   },
-  "full_motions": 24,
-  "training_clips": 43,
-  "full_duration_seconds": 356.74000000000007,
-  "training_frames": 17723,
+  "full_motions": 22,
+  "training_clips": 41,
+  "full_duration_seconds": 346.06000000000006,
+  "training_frames": 17187,
   "sources": [
     {
       "path": "humanoidverse/data/robots/astro_p2/motions/high_dynamic/raw/kungfu/H2X01-2_Skeleton-12278.pkl",
@@ -224,22 +224,46 @@
       "frames_50hz": 1501
     },
     {
+      "path": "humanoidverse/data/robots/astro_p2/motions/high_dynamic/raw/qingtong/Take_015_Skeleton0.qpos.csv",
+      "sha256": "43339e063cb8f7c2f3e8ee2f16fbf943cd06bb49bd1a142c67cbd1acc8c4e481",
+      "motion_key": "qingtong_Take_015_Skeleton0",
+      "category": "sideflip",
+      "source_fps": 50,
+      "source_frames": 266,
+      "frames_50hz": 266
+    },
+    {
+      "path": "humanoidverse/data/robots/astro_p2/motions/high_dynamic/raw/qingtong/Take_049_Skeleton0.qpos.csv",
+      "sha256": "75765ff709802bf4850d777079e40fff5873070874a8ba1f67df4eb99453e855",
+      "motion_key": "qingtong_Take_049_Skeleton0",
+      "category": "sideflip",
+      "source_fps": 50,
+      "source_frames": 359,
+      "frames_50hz": 359
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "ufo/data/robots/astro_p2/motions/high_dynamic/astro_high_dynamic_50hz.pkl",
+      "sha256": "a24c68c205c1c4845a62aa91124aca82d08d9af84b20904b57a50aeed75367d8",
+      "bytes": 8957064
+    },
+    {
+      "path": "ufo/data/robots/astro_p2/motions/high_dynamic/astro_high_dynamic_50hz_10s-clipped.pkl",
+      "sha256": "fe1029146bde609eae0376de7d64b78530748bd7adde9580ae23ac5960b996c0",
+      "bytes": 8897673
+    }
+  ],
+  "excluded_sources": [
+    {
       "path": "humanoidverse/data/robots/astro_p2/motions/high_dynamic/raw/qingtong/Take_012_Skeleton0.qpos.csv",
       "sha256": "5f41f3020284bd8fad328be267ee7eb8c7d08b18ac91c2f684ca01fbdf8bb522",
       "motion_key": "qingtong_Take_012_Skeleton0",
       "category": "backflip",
       "source_fps": 50,
       "source_frames": 226,
-      "frames_50hz": 226
-    },
-    {
-      "path": "humanoidverse/data/robots/astro_p2/motions/high_dynamic/raw/qingtong/Take_015_Skeleton0.qpos.csv",
-      "sha256": "43339e063cb8f7c2f3e8ee2f16fbf943cd06bb49bd1a142c67cbd1acc8c4e481",
-      "motion_key": "qingtong_Take_015_Skeleton0",
-      "category": "backflip",
-      "source_fps": 50,
-      "source_frames": 266,
-      "frames_50hz": 266
+      "frames_50hz": 226,
+      "reason": "Removed from active training and inference datasets at user request; raw provenance retained outside active dataset selection."
     },
     {
       "path": "humanoidverse/data/robots/astro_p2/motions/high_dynamic/raw/qingtong/Take_048_Skeleton0.qpos.csv",
@@ -248,28 +272,8 @@
       "category": "backflip",
       "source_fps": 50,
       "source_frames": 310,
-      "frames_50hz": 310
-    },
-    {
-      "path": "humanoidverse/data/robots/astro_p2/motions/high_dynamic/raw/qingtong/Take_049_Skeleton0.qpos.csv",
-      "sha256": "75765ff709802bf4850d777079e40fff5873070874a8ba1f67df4eb99453e855",
-      "motion_key": "qingtong_Take_049_Skeleton0",
-      "category": "backflip",
-      "source_fps": 50,
-      "source_frames": 359,
-      "frames_50hz": 359
-    }
-  ],
-  "artifacts": [
-    {
-      "path": "humanoidverse/data/robots/astro_p2/motions/high_dynamic/astro_high_dynamic_50hz.pkl",
-      "sha256": "a357c568e4b8e6b4369e113d8d65267672583253cbd5c200c460f50be6186ad7",
-      "bytes": 9235384
-    },
-    {
-      "path": "humanoidverse/data/robots/astro_p2/motions/high_dynamic/astro_high_dynamic_50hz_10s-clipped.pkl",
-      "sha256": "5690116b71893ca17ddabcdb9016986b74cfc9ab0827affbe2e99ebb534e6240",
-      "bytes": 9176361
+      "frames_50hz": 310,
+      "reason": "Removed from active training and inference datasets at user request; raw provenance retained outside active dataset selection."
     }
   ]
 }

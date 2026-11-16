@@ -6,9 +6,12 @@ These are source sampling weights, not ten percent of stored frames and not a
 separate ten percent for each subcategory. Existing within-source expert
 prioritization remains enabled.
 
-This group contains 20 selected Astro kungfu takes and the four previously
-evaluated Qingtong backflips (012, 015, 048, 049). All four are included, including
-the two that the previous fine-tuned policy did not track successfully.
+This group contains 20 selected Astro kungfu takes and two Qingtong sideflips
+(015, 049). Backflips 012 and 048 are excluded from both the full inference and
+clipped training PKLs. The builder explicitly excludes them as well. Original
+raw references remain archived for provenance; they are not read by training.
+The legacy retained motion metadata calls these takes backflip; the source
+manifest classification is corrected here without rewriting retained trajectories.
 
 Files in `raw/kungfu/` are the original selected PKLs. Their provenance sidecars
 in `raw/provenance/` identify the matching Astro retarget XML and output hashes.
@@ -25,7 +28,7 @@ Rebuild from the repository root with the project's Python environment:
 
 Kungfu trajectories are resampled from approximately 70 Hz to 50 Hz using linear
 interpolation for position/joints and SLERP for root rotation, without time
-scaling, frame duplication, or removing flight phases. The full dataset has 24
+scaling, frame duplication, or removing flight phases. The full dataset has 22
 named motions. The training twin uses the repository's non-overlapping 10 second
 clipper, preserving tails of at least one second. `manifest.json` records counts,
 source hashes, durations and generated artifact hashes. The builder validates
@@ -42,7 +45,7 @@ Validate without starting training:
 bash scripts/start_astro_high_dynamic_5090_8gpu.sh --dry-run
 ```
 
-This 24-motion group, its raw sources and provenance remain versioned. LaFAN
+This 22-motion group, its raw sources and provenance remain versioned. LaFAN
 remains external and is obtained through the checksum-verifying downloader.
 The original provenance JSON records the original build paths and hashes;
 rebuilding with the native tools updates the generated report to native paths.

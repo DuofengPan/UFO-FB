@@ -1,5 +1,5 @@
 # Source-level sampling masses, preserved during within-source prioritization.
-# High dynamic is one group: four Qingtong backflips + 20 retargeted kungfu takes.
+# High dynamic is one group: two Qingtong sideflips (015, 049) + 20 retargeted kungfu takes; backflips 012/048 excluded.
 robot_config: configs/robots/astro_p2_29dof.yaml
 datasets:
   - name: astro_lafan

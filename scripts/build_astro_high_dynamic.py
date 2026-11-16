@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Rebuild the versioned Astro kungfu + four-backflip UFO datasets on CPU."""
+"""Rebuild the versioned Astro kungfu + two-sideflip UFO datasets on CPU."""
 from __future__ import annotations
 
 import argparse
@@ -82,9 +82,12 @@ def main() -> None:
     full = {}
     sources = []
     kungfu = sorted((folder / 'raw/kungfu').glob('*.pkl'))
-    flips = sorted((folder / 'raw/qingtong').glob('*.qpos.csv'))
-    if len(kungfu) != 20 or len(flips) != 4:
-        raise ValueError(f'Expected 20 kungfu and four flip sources, got {len(kungfu)}, {len(flips)}')
+    excluded_flip_names = {'Take_012_Skeleton0.qpos.csv', 'Take_048_Skeleton0.qpos.csv'}
+    flips = sorted(p for p in (folder / 'raw/qingtong').glob('*.qpos.csv') if p.name not in excluded_flip_names)
+    if {p.name for p in flips} != {'Take_015_Skeleton0.qpos.csv', 'Take_049_Skeleton0.qpos.csv'}:
+        raise ValueError('Expected sideflip takes 015 and 049 only')
+    if len(kungfu) != 20 or len(flips) != 2:
+        raise ValueError(f'Expected 20 kungfu and two sideflip sources, got {len(kungfu)}, {len(flips)}')
     for path in kungfu:
         provenance = json.loads((folder / f'raw/provenance/{path.name}.json').read_text())
         if provenance['output']['sha256'] != sha256(path):
@@ -109,18 +112,18 @@ def main() -> None:
             rows = list(csv.DictReader(stream))
         if [int(r['Frame']) for r in rows] != list(range(len(rows))) or any(float(r['fps']) != 50 for r in rows):
             raise ValueError(f'Expected contiguous 50 Hz flip CSV: {path}')
-        data = load_motion_data_by_format('robot_state_csv', str(path), source_name='qingtong_backflip',
+        data = load_motion_data_by_format('robot_state_csv', str(path), source_name='qingtong_sideflip',
                                          fps=50, robot_spec=spec, columns=columns)
         if len(data) != 1:
             raise ValueError('One flip motion per CSV required')
         motion = next(iter(data.values()))
         key = 'qingtong_' + path.name.removesuffix('.qpos.csv')
         motion.update(motion_key=key, source='astro_high_dynamic')
-        motion['metadata'].update(category='backflip', source_file=str(path.relative_to(ROOT)),
+        motion['metadata'].update(category='sideflip', source_file=str(path.relative_to(ROOT)),
                                   source_sha256=sha256(path))
         full[key] = motion
         sources.append({'path': str(path.relative_to(ROOT)), 'sha256': sha256(path),
-                        'motion_key': key, 'category': 'backflip', 'source_fps': 50,
+                        'motion_key': key, 'category': 'sideflip', 'source_fps': 50,
                         'source_frames': len(rows), 'frames_50hz': len(rows)})
     for motion in full.values():
         validate_roundtrip(motion, spec)
@@ -137,11 +140,12 @@ def main() -> None:
             raise ValueError('Serialized dataset keys changed')
     report = {'schema': 'astro_high_dynamic.v1', 'robot': spec.name, 'fps': 50,
               'root_quat_order': 'xyzw', 'joint_names': layout['joint_names'],
-              'source_counts': {'kungfu': len(kungfu), 'backflip': len(flips)},
+              'source_counts': {'kungfu': len(kungfu), 'sideflip': len(flips)},
               'full_motions': len(full), 'training_clips': len(clipped),
               'full_duration_seconds': sum((len(m['pose_aa'])-1)/50 for m in full.values()),
               'training_frames': sum(len(m['pose_aa']) for m in clipped.values()),
               'sources': sources,
+              'excluded_sources': [{'path': str((folder / 'raw/qingtong' / name).relative_to(ROOT)), 'sha256': sha256(folder / 'raw/qingtong' / name), 'reason': 'backflip excluded from active datasets'} for name in sorted(excluded_flip_names)],
               'artifacts': [{'path': str(p.relative_to(ROOT)), 'sha256': sha256(p), 'bytes': p.stat().st_size} for p in outputs]}
     (folder / 'manifest.json').write_text(json.dumps(report, indent=2) + '\n')
     print(json.dumps({k:v for k,v in report.items() if k not in ('sources','joint_names')}, indent=2))
